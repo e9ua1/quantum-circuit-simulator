@@ -25,7 +25,7 @@ public class QuantumCircuitSimulator {
     private static final String GATE_CNOT = "CNOT";
     private static final String CONTINUE_YES = "Y";
     private static final String PROMPT_CONTINUE = "게이트를 더 추가하시겠습니까? (y/n):";
-    private static final String ERROR_UNSUPPORTED_GATE = "[ERROR] 지원하지 않는 게이트입니다.";
+    private static final String ERROR_UNSUPPORTED_GATE = "지원하지 않는 게이트입니다.";
 
     public void start() {
         int qubitCount = retry(InputView::readQubitCount);
