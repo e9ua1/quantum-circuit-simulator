@@ -36,6 +36,7 @@ public class QuantumCircuitSimulator {
 
     private List<CircuitStep> buildSteps(int qubitCount) {
         List<CircuitStep> steps = new ArrayList<>();
+        System.out.printf("(큐비트 인덱스: 0부터 %d까지 사용 가능)%n", qubitCount - 1);
 
         do {
             QuantumGate gate = retry(() -> readGate(qubitCount));
