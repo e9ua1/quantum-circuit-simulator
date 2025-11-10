@@ -59,16 +59,28 @@ public class QuantumState {
 
     public Probability getProbabilityOfOne(QubitIndex index) {
         validateIndex(index);
-        Result result = environment.runProgram(program);
+        if (program.getSteps().isEmpty()) {
+            return new Probability(0.0);
+        }
+        Result result = environment.runProgram(copyProgram());
         double probability = result.getQubits()[index.getValue()].getProbability();
         return new Probability(probability);
     }
 
     public MeasurementResult measure(QubitIndex index) {
         validateIndex(index);
-        Result result = environment.runProgram(program);
+        if (program.getSteps().isEmpty()) {
+            return MeasurementResult.ZERO;
+        }
+        Result result = environment.runProgram(copyProgram());
         int measured = result.getQubits()[index.getValue()].measure();
         return MeasurementResult.from(measured);
+    }
+
+    private Program copyProgram() {
+        Program copy = new Program(qubitCount);
+        program.getSteps().forEach(copy::addStep);
+        return copy;
     }
 
     public int getQubitCount() {
