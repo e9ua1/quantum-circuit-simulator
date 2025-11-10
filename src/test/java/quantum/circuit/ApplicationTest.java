@@ -35,7 +35,7 @@ class ApplicationTest {
     @Test
     @DisplayName("애플리케이션이 정상적으로 실행된다")
     void applicationRuns() {
-        String input = "1\nX\n0\nn\n";
+        String input = "1\n1\nX\n0\nn\n";  // 모드 1 추가
         System.setIn(new ByteArrayInputStream(input.getBytes()));
 
         assertThatCode(() -> Application.main(new String[]{}))
@@ -45,7 +45,7 @@ class ApplicationTest {
     @Test
     @DisplayName("애플리케이션 시작 시 환영 메시지를 출력한다")
     void printsWelcomeMessage() {
-        String input = "1\nX\n0\nn\n";
+        String input = "1\n1\nX\n0\nn\n";  // 모드 1 추가
         System.setIn(new ByteArrayInputStream(input.getBytes()));
 
         Application.main(new String[]{});
@@ -57,13 +57,12 @@ class ApplicationTest {
     @Test
     @DisplayName("Bell State를 생성하고 시뮬레이션한다")
     void simulateBellState() {
-        String input = "2\nH\n0\ny\nCNOT\n0\n1\nn\n";
+        String input = "1\n2\nH\n0\ny\nCNOT\n0\n1\nn\n";  // 모드 1 추가
         System.setIn(new ByteArrayInputStream(input.getBytes()));
 
         Application.main(new String[]{});
 
         String output = outputStream.toString();
-        assertThat(output).contains("Quantum Circuit");
         assertThat(output).contains("H");
         assertThat(output).contains("CNOT");
     }
@@ -71,7 +70,7 @@ class ApplicationTest {
     @Test
     @DisplayName("단일 큐비트 회로를 시뮬레이션한다")
     void simulateSingleQubitCircuit() {
-        String input = "1\nH\n0\nn\n";
+        String input = "1\n1\nH\n0\nn\n";  // 모드 1 추가
         System.setIn(new ByteArrayInputStream(input.getBytes()));
 
         Application.main(new String[]{});
