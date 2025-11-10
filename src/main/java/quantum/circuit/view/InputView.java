@@ -4,8 +4,8 @@ import camp.nextstep.edu.missionutils.Console;
 
 public class InputView {
 
-    private static final String ERROR_INVALID_NUMBER = "[ERROR] 숫자를 입력해주세요.";
-    private static final String ERROR_EMPTY_INPUT = "[ERROR] 입력값이 비어있습니다.";
+    private static final String ERROR_INVALID_NUMBER = "숫자를 입력해주세요.";
+    private static final String ERROR_EMPTY_INPUT = "입력값이 비어있습니다.";
     private static final String PROMPT_QUBIT_COUNT = "큐비트 개수를 입력하세요:";
     private static final String PROMPT_GATE_TYPE = "게이트 종류를 입력하세요 (X, H, Z, CNOT):";
     private static final String PROMPT_TARGET_QUBIT = "타겟 큐비트 인덱스를 입력하세요 (0부터 시작):";
