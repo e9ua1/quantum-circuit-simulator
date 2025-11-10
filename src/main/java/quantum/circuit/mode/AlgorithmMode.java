@@ -75,7 +75,7 @@ public class AlgorithmMode {
 
     private void printState(QuantumState state) {
         System.out.println();
-        System.out.println(StateVisualizer.visualize(state));
+        System.out.println(StateVisualizer.visualizeQubitProbabilities(state));
         OutputView.printSeparator();
     }
 
