@@ -33,12 +33,15 @@ class GateCompatibilityValidatorTest {
     }
 
     @Test
-    @DisplayName("CNOT 게이트의 제어와 타겟이 같으면 실패한다")
-    void cnotSameQubitFails() {
+    @DisplayName("한 Step에서 같은 큐비트에 여러 게이트가 적용되면 실패한다")
+    void sameQubitInOneStepFails() {
         CircuitValidator validator = new GateCompatibilityValidator();
         QuantumCircuit circuit = new QuantumCircuitBuilder()
                 .withQubits(2)
-                .addStep(new CircuitStep(List.of(new CNOTGate(new QubitIndex(0), new QubitIndex(0)))))
+                .addStep(new CircuitStep(List.of(
+                        new PauliXGate(new QubitIndex(0)),
+                        new HadamardGate(new QubitIndex(0))
+                )))
                 .build();
 
         ValidationResult result = validator.validate(circuit);
@@ -48,13 +51,15 @@ class GateCompatibilityValidatorTest {
     }
 
     @Test
-    @DisplayName("단일 큐비트 게이트만 있으면 통과한다")
-    void singleQubitGatesPass() {
+    @DisplayName("다른 큐비트에 게이트를 적용하면 통과한다")
+    void differentQubitsPass() {
         CircuitValidator validator = new GateCompatibilityValidator();
         QuantumCircuit circuit = new QuantumCircuitBuilder()
                 .withQubits(2)
-                .addStep(new CircuitStep(List.of(new PauliXGate(new QubitIndex(0)))))
-                .addStep(new CircuitStep(List.of(new HadamardGate(new QubitIndex(1)))))
+                .addStep(new CircuitStep(List.of(
+                        new PauliXGate(new QubitIndex(0)),
+                        new HadamardGate(new QubitIndex(1))
+                )))
                 .build();
 
         ValidationResult result = validator.validate(circuit);
@@ -86,13 +91,14 @@ class GateCompatibilityValidatorTest {
     }
 
     @Test
-    @DisplayName("여러 CNOT 게이트가 모두 유효하면 통과한다")
-    void multipleCNOTGatesPass() {
+    @DisplayName("단일 게이트만 있는 Step은 통과한다")
+    void singleGatePerStepPasses() {
         CircuitValidator validator = new GateCompatibilityValidator();
         QuantumCircuit circuit = new QuantumCircuitBuilder()
                 .withQubits(3)
+                .addStep(new CircuitStep(List.of(new HadamardGate(new QubitIndex(0)))))
                 .addStep(new CircuitStep(List.of(new CNOTGate(new QubitIndex(0), new QubitIndex(1)))))
-                .addStep(new CircuitStep(List.of(new CNOTGate(new QubitIndex(1), new QubitIndex(2)))))
+                .addStep(new CircuitStep(List.of(new PauliXGate(new QubitIndex(2)))))
                 .build();
 
         ValidationResult result = validator.validate(circuit);
@@ -101,13 +107,15 @@ class GateCompatibilityValidatorTest {
     }
 
     @Test
-    @DisplayName("여러 게이트 중 하나라도 호환되지 않으면 실패한다")
-    void failsIfAnyGateIncompatible() {
+    @DisplayName("CNOT와 단일 큐비트 게이트가 같은 큐비트를 사용하면 실패한다")
+    void cnotAndSingleGateOnSameQubitFails() {
         CircuitValidator validator = new GateCompatibilityValidator();
         QuantumCircuit circuit = new QuantumCircuitBuilder()
                 .withQubits(2)
-                .addStep(new CircuitStep(List.of(new HadamardGate(new QubitIndex(0)))))
-                .addStep(new CircuitStep(List.of(new CNOTGate(new QubitIndex(1), new QubitIndex(1)))))
+                .addStep(new CircuitStep(List.of(
+                        new CNOTGate(new QubitIndex(0), new QubitIndex(1)),
+                        new PauliXGate(new QubitIndex(0))
+                )))
                 .build();
 
         ValidationResult result = validator.validate(circuit);
