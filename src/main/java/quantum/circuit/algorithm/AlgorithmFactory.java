@@ -16,6 +16,7 @@ public class AlgorithmFactory {
             case "BELL_STATE" -> new BellStateAlgorithm();
             case "GHZ_STATE" -> new GHZStateAlgorithm();
             case "QFT" -> new QFTAlgorithm();
+            case "GROVER" -> new GroverAlgorithm();
             default -> throw new IllegalArgumentException(ERROR_UNSUPPORTED_ALGORITHM + algorithmName);
         };
     }
@@ -30,7 +31,8 @@ public class AlgorithmFactory {
         return List.of(
                 "BELL_STATE",
                 "GHZ_STATE",
-                "QFT"
+                "QFT",
+                "GROVER"
         );
     }
 }
