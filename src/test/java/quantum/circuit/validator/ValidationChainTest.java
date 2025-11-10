@@ -62,7 +62,10 @@ class ValidationChainTest {
         ));
         QuantumCircuit circuit = new QuantumCircuitBuilder()
                 .withQubits(2)
-                .addStep(new CircuitStep(List.of(new CNOTGate(new QubitIndex(0), new QubitIndex(0)))))
+                .addStep(new CircuitStep(List.of(
+                        new PauliXGate(new QubitIndex(0)),
+                        new HadamardGate(new QubitIndex(0))
+                )))
                 .build();
 
         ValidationResult result = chain.validate(circuit);
