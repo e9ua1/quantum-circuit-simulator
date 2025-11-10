@@ -5,12 +5,18 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.ByteArrayInputStream;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import camp.nextstep.edu.missionutils.Console;
 
 class InputViewTest {
+
+    @AfterEach
+    void tearDown() {
+        Console.close();
+    }
 
     @Test
     @DisplayName("큐비트 개수를 입력받는다")
@@ -21,7 +27,6 @@ class InputViewTest {
         int qubitCount = InputView.readQubitCount();
 
         assertThat(qubitCount).isEqualTo(2);
-        Console.close();
     }
 
     @Test
@@ -33,7 +38,6 @@ class InputViewTest {
         String gateType = InputView.readGateType();
 
         assertThat(gateType).isEqualTo("X");
-        Console.close();
     }
 
     @Test
@@ -45,7 +49,6 @@ class InputViewTest {
         int target = InputView.readTargetQubit();
 
         assertThat(target).isEqualTo(0);
-        Console.close();
     }
 
     @Test
@@ -57,7 +60,6 @@ class InputViewTest {
         int control = InputView.readControlQubit();
 
         assertThat(control).isEqualTo(0);
-        Console.close();
     }
 
     @Test
@@ -68,8 +70,7 @@ class InputViewTest {
 
         assertThatThrownBy(InputView::readQubitCount)
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("[ERROR]");
-        Console.close();
+                .hasMessageContaining("숫자");
     }
 
     @Test
@@ -78,9 +79,8 @@ class InputViewTest {
         String input = "\n";
         System.setIn(new ByteArrayInputStream(input.getBytes()));
 
-        assertThatThrownBy(InputView::readQubitCount)
+        assertThatThrownBy(InputView::readGateType)
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("[ERROR]");
-        Console.close();
+                .hasMessageContaining("비어있습니다");
     }
 }
