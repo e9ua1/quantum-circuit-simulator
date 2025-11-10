@@ -1,5 +1,7 @@
 package quantum.circuit;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.redfx.strange.Program;
@@ -9,8 +11,6 @@ import org.redfx.strange.gate.X;
 import org.redfx.strange.local.SimpleQuantumExecutionEnvironment;
 import org.redfx.strange.Qubit;
 import org.redfx.strange.Result;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 class StrangeLibraryTest {
 
