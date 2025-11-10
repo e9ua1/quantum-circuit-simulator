@@ -24,6 +24,11 @@ public class QuantumCircuitBuilder {
         return this;
     }
 
+    public QuantumCircuitBuilder addSteps(List<CircuitStep> steps) {
+        this.steps.addAll(steps);
+        return this;
+    }
+
     public QuantumCircuit build() {
         validateQubitCount();
         return new QuantumCircuit(qubitCount, steps);
