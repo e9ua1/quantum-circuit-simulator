@@ -17,6 +17,7 @@ public class AlgorithmFactory {
             case "GHZ_STATE" -> new GHZStateAlgorithm();
             case "QFT" -> new QFTAlgorithm();
             case "GROVER" -> new GroverAlgorithm();
+            case "DEUTSCH_JOZSA" -> new DeutschJozsaAlgorithm();
             default -> throw new IllegalArgumentException(ERROR_UNSUPPORTED_ALGORITHM + algorithmName);
         };
     }
@@ -32,7 +33,8 @@ public class AlgorithmFactory {
                 "BELL_STATE",
                 "GHZ_STATE",
                 "QFT",
-                "GROVER"
+                "GROVER",
+                "DEUTSCH_JOZSA"
         );
     }
 }
