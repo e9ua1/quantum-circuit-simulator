@@ -3,8 +3,10 @@ package quantum.circuit.domain.state;
 import org.redfx.strange.Program;
 import org.redfx.strange.Result;
 import org.redfx.strange.Step;
+import org.redfx.strange.gate.Cnot;
 import org.redfx.strange.gate.Hadamard;
 import org.redfx.strange.gate.X;
+import org.redfx.strange.gate.Z;
 import org.redfx.strange.local.SimpleQuantumExecutionEnvironment;
 
 import quantum.circuit.domain.circuit.QubitIndex;
@@ -48,6 +50,21 @@ public class QuantumState {
         validateIndex(target);
         Step step = new Step();
         step.addGate(new Hadamard(target.getValue()));
+        program.addStep(step);
+    }
+
+    public void applyZGate(QubitIndex target) {
+        validateIndex(target);
+        Step step = new Step();
+        step.addGate(new Z(target.getValue()));
+        program.addStep(step);
+    }
+
+    public void applyCNOTGate(QubitIndex control, QubitIndex target) {
+        validateIndex(control);
+        validateIndex(target);
+        Step step = new Step();
+        step.addGate(new Cnot(control.getValue(), target.getValue()));
         program.addStep(step);
     }
 
