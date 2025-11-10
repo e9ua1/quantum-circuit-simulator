@@ -15,6 +15,7 @@ public class AlgorithmFactory {
         return switch (upperName) {
             case "BELL_STATE" -> new BellStateAlgorithm();
             case "GHZ_STATE" -> new GHZStateAlgorithm();
+            case "QFT" -> new QFTAlgorithm();
             default -> throw new IllegalArgumentException(ERROR_UNSUPPORTED_ALGORITHM + algorithmName);
         };
     }
@@ -28,7 +29,8 @@ public class AlgorithmFactory {
     public List<String> getAvailableAlgorithms() {
         return List.of(
                 "BELL_STATE",
-                "GHZ_STATE"
+                "GHZ_STATE",
+                "QFT"
         );
     }
 }
