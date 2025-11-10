@@ -200,12 +200,114 @@ Entangled: Yes
 - [ ] 측정 결과를 출력한다
 - [ ] 에러 메시지를 출력한다
 
+## 실행 방법
+
+### 1. 프로젝트 클론 및 빌드
+
+```bash
+git clone https://github.com/your-username/quantum-circuit-simulator.git
+cd quantum-circuit-simulator
+./gradlew build
+```
+
+### 2. 애플리케이션 실행
+
+```bash
+./gradlew run
+```
+
+### 3. 테스트 실행
+
+```bash
+./gradlew test
+```
+
+### 4. 사용 예시
+
+#### 단일 큐비트 X 게이트
+```
+큐비트 개수를 입력하세요:
+1
+게이트 종류를 입력하세요 (X, H, Z, CNOT):
+X
+타겟 큐비트 인덱스를 입력하세요:
+0
+게이트를 더 추가하시겠습니까? (y/n):
+n
+
+===================================
+=== Quantum Circuit ===
+Quantum Circuit (1 qubit, 1 step)
+
+Q0: ─X─
+
+Step 1: X(Q0)
+
+=== Quantum State ===
+Qubit 0 → |0⟩: 0.0% |1⟩: 100.0%
+===================================
+```
+
+#### Bell State 생성 (얽힘 상태)
+```
+큐비트 개수를 입력하세요:
+2
+게이트 종류를 입력하세요 (X, H, Z, CNOT):
+H
+타겟 큐비트 인덱스를 입력하세요:
+0
+게이트를 더 추가하시겠습니까? (y/n):
+y
+게이트 종류를 입력하세요 (X, H, Z, CNOT):
+CNOT
+제어 큐비트 인덱스를 입력하세요:
+0
+타겟 큐비트 인덱스를 입력하세요:
+1
+게이트를 더 추가하시겠습니까? (y/n):
+n
+
+===================================
+=== Quantum Circuit ===
+Quantum Circuit (2 qubits, 2 steps)
+
+Q0: ─H─●─
+       │
+Q1: ───X─
+
+Step 1: H(Q0)
+Step 2: CNOT(Q0→Q1)
+
+=== Quantum State ===
+Qubit 0 → |0⟩: 50.0% |1⟩: 50.0%
+Qubit 1 → |0⟩: 50.0% |1⟩: 50.0%
+===================================
+```
+
+### 5. 지원하는 게이트
+
+| 게이트 | 기호 | 설명 | 사용법 |
+|--------|------|------|--------|
+| Pauli-X | X | 비트 반전 (NOT) | `X` → 타겟 큐비트 입력 |
+| Hadamard | H | 중첩 상태 생성 | `H` → 타겟 큐비트 입력 |
+| Pauli-Z | Z | 위상 변화 | `Z` → 타겟 큐비트 입력 |
+| CNOT | CNOT | 제어 NOT (얽힘 생성) | `CNOT` → 제어 큐비트, 타겟 큐비트 입력 |
+
+## 기술 스택
+
+- **언어**: Java 21
+- **빌드 도구**: Gradle 8.14
+- **테스트**: JUnit 5, AssertJ
+- **라이브러리**:
+  - Strange 0.1.3 (양자 컴퓨팅)
+  - mission-utils 1.2.0 (Console)
+
 ## 패키지 구조
 
 ```
 quantum.circuit
 ├── Application.java
-├── QuantumCircuitGame.java
+├── QuantumCircuitSimulator.java
 ├── domain
 │   ├── gate
 │   │   ├── QuantumGate.java (interface)
@@ -218,12 +320,10 @@ quantum.circuit
 │   │   ├── CircuitStep.java
 │   │   ├── QuantumCircuit.java
 │   │   └── QuantumCircuitBuilder.java
-│   ├── state
-│   │   ├── QuantumState.java
-│   │   ├── Probability.java
-│   │   └── MeasurementResult.java (enum)
-│   └── statistics
-│       └── MeasurementHistogram.java
+│   └── state
+│       ├── QuantumState.java
+│       ├── Probability.java
+│       └── MeasurementResult.java (enum)
 ├── visualizer
 │   ├── CircuitVisualizer.java
 │   └── StateVisualizer.java
