@@ -6,8 +6,8 @@ import quantum.circuit.domain.circuit.CircuitStep;
 import quantum.circuit.domain.circuit.QubitIndex;
 import quantum.circuit.domain.circuit.QuantumCircuitBuilder;
 import quantum.circuit.domain.gate.HadamardGate;
-import quantum.circuit.domain.gate.XGate;
-import quantum.circuit.domain.gate.ZGate;
+import quantum.circuit.domain.gate.PauliXGate;
+import quantum.circuit.domain.gate.PauliZGate;
 
 public class GroverAlgorithm extends QuantumAlgorithm {
 
@@ -26,7 +26,7 @@ public class GroverAlgorithm extends QuantumAlgorithm {
 
         // Step 2: Oracle (간소화 - Z 게이트로 위상 반전)
         builder.addStep(new CircuitStep(List.of(
-                new ZGate(new QubitIndex(0))
+                new PauliZGate(new QubitIndex(0))
         )));
 
         // Step 3: Diffusion operator (간소화)
@@ -36,8 +36,8 @@ public class GroverAlgorithm extends QuantumAlgorithm {
         )));
 
         builder.addStep(new CircuitStep(List.of(
-                new XGate(new QubitIndex(0)),
-                new XGate(new QubitIndex(1))
+                new PauliXGate(new QubitIndex(0)),
+                new PauliXGate(new QubitIndex(1))
         )));
 
         builder.addStep(new CircuitStep(List.of(
