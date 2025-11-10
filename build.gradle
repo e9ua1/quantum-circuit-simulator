@@ -7,22 +7,27 @@ group = 'quantum.circuit'
 version = '1.0-SNAPSHOT'
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
 }
 
 repositories {
     mavenCentral()
+    maven { url 'https://jitpack.io' }
 }
 
 dependencies {
     // Strange 양자 컴퓨팅 라이브러리
     implementation 'org.redfx:strange:0.1.3'
-    
+
+    // 우아한테크코스 미션 유틸리티 (Console)
+    implementation 'com.github.woowacourse-projects:mission-utils:1.2.0'
+
     // JUnit 5 (테스트)
     testImplementation 'org.junit.jupiter:junit-jupiter:5.9.3'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-    
+
     // AssertJ (테스트 가독성)
     testImplementation 'org.assertj:assertj-core:3.24.2'
 }
