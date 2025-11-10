@@ -162,7 +162,7 @@ public class OptimizationMode {
         while (true) {
             try {
                 return supplier.get();
-            } catch (IllegalArgumentException | NumberFormatException e) {
+            } catch (IllegalArgumentException e) {
                 OutputView.printErrorMessage(e.getMessage());
             }
         }
