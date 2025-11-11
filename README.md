@@ -5,7 +5,7 @@
 - **객체지향 설계**: 복잡한 양자역학 도메인을 명확한 책임과 협력 관계로 표현한다
 - **TDD 실천**: 클래스와 함수에 대한 단위 테스트를 통해 의도한 대로 정확하게 작동하는 영역을 확보한다
 - **Red-Green-Refactor**: TDD 사이클을 체화한다
-- **디자인 패턴 활용**: Strategy, Template Method, Chain of Responsibility, Observer, Factory, Composite 패턴을 실전에 적용한다
+- **디자인 패턴 활용**: Strategy, Template Method, Chain of Responsibility, Observer, Factory, Composite, Facade, Builder 패턴을 실전에 적용한다
 - **도메인 주도 설계**: 추상적인 양자역학 개념을 구체적인 도메인 객체로 구현한다
 
 ## 프로젝트 배경
@@ -25,11 +25,11 @@
 - 자유 모드: 기본 회로 구성
 - 알고리즘 모드: 유명 양자 알고리즘 구현 (Template Method)
 - 최적화 모드: 회로 최적화 및 분석 (Strategy + Chain of Responsibility)
-- 벤치마크 모드: 알고리즘 성능 비교 (Observer + Composite)
+- 벤치마크 모드: 알고리즘 성능 비교 (Observer)
 
 ## 모드 구성
 
-### 1. 자유 모드 (Free Mode) ✅
+### 1. 자유 모드 (Free Mode)
 사용자가 원하는 대로 양자 회로를 구성하고 실험할 수 있는 샌드박스 모드
 
 **기능:**
@@ -37,7 +37,7 @@
 - 게이트 조합 자유롭게 테스트
 - 실시간 상태 확인
 
-### 2. 알고리즘 라이브러리 모드 (Algorithm Library Mode) ✅
+### 2. 알고리즘 라이브러리 모드 (Algorithm Library Mode)
 대표적인 양자 알고리즘을 선택하여 실행하는 모드
 
 **구현 알고리즘:**
@@ -56,54 +56,54 @@ ParameterValidator   CircuitBuilder
 ExecutionEngine
 ```
 
-### 3. 최적화 모드 (Optimization Mode) ✅
+### 3. 최적화 모드 (Optimization Mode)
 사용자가 구성한 회로를 분석하고 최적화하는 모드
 
 **기능:**
 - 회로 최적화
-  - 중복 게이트 제거 (H-H, X-X 상쇄) ✅
-  - 게이트 융합 (연속 게이트 결합) - 기본 구조 완료
-  - Identity 게이트 제거 ✅
+  - 중복 게이트 제거 (H-H, X-X 상쇄)
+  - 게이트 융합 (연속 게이트 결합)
+  - Identity 게이트 제거
 
-- 회로 분석 ✅
+- 회로 분석
   - 회로 깊이(Depth) 계산
   - 게이트 개수 통계
   - 복잡도 분석
   - 얽힘 정도 측정
 
-- 회로 검증 (예정)
+- 회로 검증
   - 큐비트 범위 검증
   - 게이트 호환성 검증
+  - 깊이 제한 검증
   - 리소스 제한 검증
-  - 최적화 가능성 검사
 
 **협력 구조:**
 ```
-OptimizationPipeline → [RedundantGateRemover, IdentityGateRemover, GateFusionOptimizer] ✅
+OptimizationPipeline → [RedundantGateRemover, IdentityGateRemover, GateFusionOptimizer]
     ↓
-CircuitAnalyzer → [CircuitDepth, GateCount, Complexity, EntanglementDegree] ✅
+CircuitAnalyzer → [CircuitDepth, GateCount, Complexity, EntanglementDegree]
     ↓
-ValidationChain → [QubitRangeValidator, GateCompatibilityValidator] (예정)
+ValidationChain → [QubitRangeValidator, GateCompatibilityValidator, DepthLimitValidator, ResourceValidator]
     ↓
 OptimizationReport
 ```
 
-### 4. 벤치마크 모드 (Benchmark Mode) ✅
+### 4. 벤치마크 모드 (Benchmark Mode)
 여러 알고리즘 또는 최적화 전후를 비교하는 모드
 
 **기능:**
-- 알고리즘 성능 비교 ✅
-- 최적화 전후 비교 ✅
-- 실행 시간 측정 ✅
-- 리소스 사용량 분석 ✅
+- 알고리즘 성능 비교
+- 최적화 전후 비교
+- 실행 시간 측정
+- 리소스 사용량 분석
 
 **협력 구조:**
 ```
-BenchmarkRunner → PerformanceMonitor (Observer) ✅
+BenchmarkRunner → PerformanceMonitor (Observer)
     ↓                  ↓
-CircuitComparator   ResultCollector ✅
+CircuitComparator   ResultCollector
     ↓
-ComparisonReport / BenchmarkReport ✅
+ComparisonReport / BenchmarkReport
 ```
 
 ## 기능 요구사항
@@ -168,7 +168,6 @@ ComparisonReport / BenchmarkReport ✅
 #### 3.1 회로 최적화
 - **중복 게이트 제거**: 연속된 동일 게이트 상쇄 (H-H, X-X)
 - **게이트 융합**: 연속 회전 게이트를 하나로 결합
-- **깊이 최소화**: 병렬 실행 가능한 게이트 재배치
 - **Identity 게이트 제거**: 효과 없는 게이트 제거
 
 #### 3.2 최적화 파이프라인
@@ -185,8 +184,8 @@ ComparisonReport / BenchmarkReport ✅
 #### 3.4 회로 검증
 - **큐비트 범위**: 모든 게이트가 유효한 큐비트에 적용되는지 확인
 - **게이트 호환성**: 게이트 조합이 물리적으로 가능한지 확인
+- **깊이 제한**: 회로 깊이가 제한을 초과하지 않는지 확인
 - **리소스 제한**: 회로가 하드웨어 제약을 만족하는지 확인
-- **최적화 가능성**: 개선 가능한 부분 탐지
 
 #### 3.5 최적화 결과 리포트
 - 최적화 전후 회로 비교
@@ -208,7 +207,6 @@ ComparisonReport / BenchmarkReport ✅
 
 #### 4.3 실행 추적
 - 회로 실행 과정을 단계별로 추적한다 (Observer)
-- 각 게이트 적용 후 상태 변화를 기록한다
 - 성능 병목 지점을 식별한다
 
 #### 4.4 비교 리포트
@@ -241,6 +239,8 @@ Quantum Circuit Simulator
 1. 자유 모드 (Free Mode)
 2. 알고리즘 라이브러리 (Algorithm Library)
 3. 최적화 모드 (Optimization Mode)
+4. 벤치마크 모드 (Benchmark Mode)
+선택:
 > 1
 
 큐비트 개수를 입력하세요:
@@ -328,18 +328,15 @@ Q0: ─H─H─X─X─●─
 Q1: ─────────X─
 
 === 최적화 시작 ===
-[1/4] 중복 게이트 제거 중...
+[1/3] 중복 게이트 제거 중...
   - H-H 제거 (Q0)
   - X-X 제거 (Q0)
   게이트 수: 5 → 1
 
-[2/4] 게이트 융합 중...
+[2/3] 게이트 융합 중...
   변경 사항 없음
 
-[3/4] 깊이 최소화 중...
-  변경 사항 없음
-
-[4/4] Identity 게이트 제거 중...
+[3/3] Identity 게이트 제거 중...
   변경 사항 없음
 
 === 최적화 완료 ===
@@ -356,7 +353,6 @@ Q1: ─X─
 적용된 최적화:
 ✓ 중복 게이트 제거 (4개 제거)
 - 게이트 융합 (적용 불가)
-- 깊이 최소화 (적용 불가)
 - Identity 제거 (발견 없음)
 ===================================
 ```
@@ -364,103 +360,101 @@ Q1: ─X─
 ### 벤치마크 모드
 ```
 === 벤치마크 모드 ===
-1. 알고리즘 성능 비교
-2. 최적화 효과 측정
-선택:
-> 1
+비교할 알고리즘 개수를 입력하세요 (2-5):
+> 2
 
-비교할 알고리즘을 선택하세요 (쉼표로 구분):
-Bell State, GHZ State, QFT
+큐비트 개수를 입력하세요:
+> 2
 
-큐비트 개수: 3
+알고리즘 1 이름을 입력하세요:
+> QFT
+
+알고리즘 2 이름을 입력하세요:
+> GROVER
 
 === 벤치마크 실행 중 ===
-[1/3] Bell State 실행...
-[2/3] GHZ State 실행...
-[3/3] QFT 실행...
+[1/2] QFT 실행...
+[2/2] GROVER 실행...
 
 === 벤치마크 결과 ===
 ┌──────────────┬───────┬──────┬────────┐
 │ 알고리즘     │ 게이트│ 깊이 │ 시간   │
 ├──────────────┼───────┼──────┼────────┤
-│ Bell State   │   2   │  2   │  40μs  │
-│ GHZ State    │   3   │  3   │  60μs  │
-│ QFT          │   6   │  4   │ 120μs  │
+│ QFT          │   3   │  3   │  60μs  │
+│ GROVER       │   5   │  4   │  80μs  │
 └──────────────┴───────┴──────┴────────┘
 
-권장: Bell State (가장 효율적)
+가장 빠른 회로: QFT
+가장 효율적인 회로: QFT
 ===================================
 ```
 
-## 구현할 기능 목록
+## 구현 완료 현황
 
-### Phase 1: 기본 도메인 (완료)
-- [x] QubitIndex
-- [x] Probability
-- [x] QuantumGate 인터페이스
-- [x] 단일 큐비트 게이트 (X, H, Z)
-- [x] 다중 큐비트 게이트 (CNOT)
-- [x] CircuitStep
-- [x] QuantumCircuit
-- [x] QuantumCircuitBuilder
-- [x] QuantumState
-- [x] MeasurementResult
-- [x] CircuitVisualizer
-- [x] StateVisualizer
-- [x] InputView / OutputView
-- [x] QuantumCircuitSimulator
+### Phase 1: 기본 도메인
+- QubitIndex
+- Probability
+- QuantumGate 인터페이스
+- 단일 큐비트 게이트 (X, H, Z)
+- 다중 큐비트 게이트 (CNOT)
+- CircuitStep
+- QuantumCircuit
+- QuantumCircuitBuilder
+- QuantumState
+- MeasurementResult
+- CircuitVisualizer
+- StateVisualizer
+- InputView / OutputView
+- QuantumCircuitSimulator
 
-### Phase 2: 알고리즘 라이브러리 (완료 ✅)
-- [x] QuantumAlgorithm (abstract, Template Method)
-- [x] AlgorithmFactory
-- [x] BellStateAlgorithm
-- [x] GHZStateAlgorithm
-- [x] QFTAlgorithm
-- [x] GroverAlgorithm
-- [x] DeutschJozsaAlgorithm
-- [x] AlgorithmMode (모드 통합)
+### Phase 2: 알고리즘 라이브러리
+- QuantumAlgorithm (abstract, Template Method)
+- AlgorithmFactory
+- BellStateAlgorithm
+- GHZStateAlgorithm
+- QFTAlgorithm
+- GroverAlgorithm
+- DeutschJozsaAlgorithm
+- AlgorithmMode
 
-### Phase 3: 최적화 시스템 (완료 ✅)
-- [x] CircuitOptimizer (interface, Strategy)
-- [x] OptimizationPipeline (Composite + Chain of Responsibility)
-- [x] RedundantGateRemover
-- [x] GateFusionOptimizer (기본 구조, 추후 확장)
-- [x] IdentityGateRemover
-- [x] OptimizationMode (모드 통합)
-- [x] Application에 모드 3번 추가
+### Phase 3: 최적화 시스템
+- CircuitOptimizer (interface, Strategy)
+- OptimizationPipeline (Composite + Chain of Responsibility)
+- RedundantGateRemover
+- GateFusionOptimizer
+- IdentityGateRemover
+- OptimizationMode
 
-### Phase 4: 분석 시스템 (완료 ✅)
-- [x] CircuitAnalyzer (Facade)
-- [x] CircuitDepth
-- [x] GateCount
-- [x] CircuitComplexity
-- [x] EntanglementDegree
-- [x] AnalysisReport
+### Phase 4: 분석 시스템
+- CircuitAnalyzer (Facade)
+- CircuitDepth
+- GateCount
+- CircuitComplexity
+- EntanglementDegree
+- AnalysisReport
 
-### Phase 5: 검증 시스템 (완료 ✅)
-- [x] CircuitValidator (interface, Chain of Responsibility)
-- [x] ValidationChain
-- [x] QubitRangeValidator
-- [x] GateCompatibilityValidator
-- [x] DepthLimitValidator
-- [x] ResourceValidator
-- [x] ValidationResult
-- [x] ValidationReport
+### Phase 5: 검증 시스템
+- CircuitValidator (interface, Chain of Responsibility)
+- ValidationChain
+- QubitRangeValidator
+- GateCompatibilityValidator
+- DepthLimitValidator
+- ResourceValidator
+- ValidationResult
+- ValidationReport
 
-### Phase 6: 비교 및 벤치마크 (완료 ✅)
-- [x] CircuitComparator
-- [x] ComparisonReport
-- [x] BenchmarkRunner (Observer)
-- [x] PerformanceMonitor (Observer)
-- [x] PerformanceMetrics
-- [x] ResultCollector
-- [x] BenchmarkReport
+### Phase 6: 비교 및 벤치마크
+- CircuitComparator
+- ComparisonReport
+- BenchmarkRunner (Observer)
+- PerformanceMonitor (Observer)
+- PerformanceMetrics
+- ResultCollector
+- BenchmarkReport
 
-### Phase 7: 통합 및 UI (진행 중 ⏳)
-- [x] AlgorithmMode
-- [x] OptimizationMode
-- [ ] BenchmarkMode
-- [x] Application (모드 1, 2, 3 완료)
+### Phase 7: 통합 및 UI
+- BenchmarkMode
+- Application (4가지 모드 완전 통합)
 
 ## 실행 방법
 
@@ -497,81 +491,83 @@ cd quantum-circuit-simulator
 
 ```
 quantum.circuit
-├── Application.java ✅
-├── QuantumCircuitSimulator.java ✅
-├── mode ✅
-│   ├── AlgorithmMode.java ✅
-│   └── OptimizationMode.java ✅
-├── algorithm ✅
-│   ├── QuantumAlgorithm.java (abstract, Template Method) ✅
-│   ├── AlgorithmFactory.java (Factory) ✅
-│   ├── BellStateAlgorithm.java ✅
-│   ├── GHZStateAlgorithm.java ✅
-│   ├── QFTAlgorithm.java ✅
-│   ├── GroverAlgorithm.java ✅
-│   └── DeutschJozsaAlgorithm.java ✅
-├── optimizer ✅
-│   ├── CircuitOptimizer.java (interface, Strategy) ✅
-│   ├── OptimizationPipeline.java (Composite + Chain of Responsibility) ✅
-│   ├── RedundantGateRemover.java ✅
-│   ├── GateFusionOptimizer.java ✅
-│   └── IdentityGateRemover.java ✅
-├── analyzer ✅
-│   ├── CircuitAnalyzer.java (Facade) ✅
-│   ├── CircuitDepth.java ✅
-│   ├── GateCount.java ✅
-│   ├── CircuitComplexity.java ✅
-│   ├── EntanglementDegree.java ✅
-│   └── AnalysisReport.java ✅
-├── validator ✅
-│   ├── CircuitValidator.java (interface, Chain of Responsibility) ✅
-│   ├── ValidationChain.java ✅
-│   ├── QubitRangeValidator.java ✅
-│   ├── GateCompatibilityValidator.java ✅
-│   ├── DepthLimitValidator.java 
-│   ├── ResourceValidator.java 
-│   ├── ValidationResult.java ✅
-│   └── ValidationReport.java 
-├── benchmark ✅
-│   ├── CircuitComparator.java ✅
-│   ├── ComparisonReport.java ✅
-│   ├── BenchmarkRunner.java (Observer) ✅
-│   ├── PerformanceMonitor.java (Observer) ✅
-│   ├── PerformanceMetrics.java ✅
-│   ├── ResultCollector.java ✅
-│   └── BenchmarkReport.java ✅
-├── domain ✅
-│   ├── gate ✅
-│   │   ├── QuantumGate.java (interface) ✅
-│   │   ├── PauliXGate.java ✅
-│   │   ├── HadamardGate.java ✅
-│   │   ├── PauliZGate.java ✅
-│   │   └── CNOTGate.java ✅
-│   ├── circuit ✅
-│   │   ├── QubitIndex.java ✅
-│   │   ├── CircuitStep.java ✅
-│   │   ├── QuantumCircuit.java ✅
-│   │   └── QuantumCircuitBuilder.java (Builder) ✅
-│   └── state ✅
-│       ├── QuantumState.java ✅
-│       ├── Probability.java ✅
-│       └── MeasurementResult.java (enum) ✅
-├── visualizer ✅
-│   ├── CircuitVisualizer.java ✅
-│   └── StateVisualizer.java ✅
-└── view ✅
-    ├── InputView.java ✅
-    └── OutputView.java ✅
+├── Application.java
+├── QuantumCircuitSimulator.java
+├── mode
+│   ├── AlgorithmMode.java
+│   ├── OptimizationMode.java
+│   └── BenchmarkMode.java
+├── algorithm
+│   ├── QuantumAlgorithm.java (abstract, Template Method)
+│   ├── AlgorithmFactory.java (Factory)
+│   ├── BellStateAlgorithm.java
+│   ├── GHZStateAlgorithm.java
+│   ├── QFTAlgorithm.java
+│   ├── GroverAlgorithm.java
+│   └── DeutschJozsaAlgorithm.java
+├── optimizer
+│   ├── CircuitOptimizer.java (interface, Strategy)
+│   ├── OptimizationPipeline.java (Composite + Chain of Responsibility)
+│   ├── RedundantGateRemover.java
+│   ├── GateFusionOptimizer.java
+│   └── IdentityGateRemover.java
+├── analyzer
+│   ├── CircuitAnalyzer.java (Facade)
+│   ├── CircuitDepth.java
+│   ├── GateCount.java
+│   ├── CircuitComplexity.java
+│   ├── EntanglementDegree.java
+│   └── AnalysisReport.java
+├── validator
+│   ├── CircuitValidator.java (interface, Chain of Responsibility)
+│   ├── ValidationChain.java
+│   ├── QubitRangeValidator.java
+│   ├── GateCompatibilityValidator.java
+│   ├── DepthLimitValidator.java
+│   ├── ResourceValidator.java
+│   ├── ValidationResult.java
+│   └── ValidationReport.java
+├── benchmark
+│   ├── CircuitComparator.java
+│   ├── ComparisonReport.java
+│   ├── BenchmarkRunner.java (Observer)
+│   ├── PerformanceMonitor.java (Observer)
+│   ├── PerformanceMetrics.java
+│   ├── ResultCollector.java
+│   └── BenchmarkReport.java
+├── domain
+│   ├── gate
+│   │   ├── QuantumGate.java (interface)
+│   │   ├── PauliXGate.java
+│   │   ├── HadamardGate.java
+│   │   ├── PauliZGate.java
+│   │   └── CNOTGate.java
+│   ├── circuit
+│   │   ├── QubitIndex.java
+│   │   ├── CircuitStep.java
+│   │   ├── QuantumCircuit.java
+│   │   └── QuantumCircuitBuilder.java (Builder)
+│   └── state
+│       ├── QuantumState.java
+│       ├── Probability.java
+│       └── MeasurementResult.java (enum)
+├── visualizer
+│   ├── CircuitVisualizer.java
+│   └── StateVisualizer.java
+└── view
+    ├── InputView.java
+    └── OutputView.java
 ```
 
 ## 디자인 패턴 활용
 
-### 1. Strategy Pattern
+### 1. Builder Pattern
 ```java
-interface CircuitOptimizer {
-    QuantumCircuit optimize(QuantumCircuit circuit);
+class QuantumCircuitBuilder {
+    public QuantumCircuitBuilder withQubits(int count);
+    public QuantumCircuitBuilder addStep(CircuitStep step);
+    public QuantumCircuit build();
 }
-// 다양한 최적화 전략 구현
 ```
 
 ### 2. Template Method Pattern
@@ -584,28 +580,27 @@ abstract class QuantumAlgorithm {
 }
 ```
 
-### 3. Chain of Responsibility
+### 3. Factory Pattern
+```java
+class AlgorithmFactory {
+    public QuantumAlgorithm create(String algorithmName);
+}
+```
+
+### 4. Strategy Pattern
+```java
+interface CircuitOptimizer {
+    QuantumCircuit optimize(QuantumCircuit circuit);
+}
+// 다양한 최적화 전략 구현
+```
+
+### 5. Chain of Responsibility
 ```java
 interface CircuitValidator {
     ValidationResult validate(QuantumCircuit circuit);
 }
 // ValidationChain으로 연결
-```
-
-### 4. Observer Pattern
-```java
-interface PerformanceMonitor {
-    void onBenchmarkStart(String circuitName);
-    void onBenchmarkComplete(String circuitName, PerformanceMetrics metrics);
-}
-// BenchmarkRunner가 모니터들에게 이벤트 통지
-```
-
-### 5. Factory Pattern
-```java
-class AlgorithmFactory {
-    public QuantumAlgorithm create(String algorithmName);
-}
 ```
 
 ### 6. Composite Pattern
@@ -624,13 +619,13 @@ class CircuitAnalyzer {
 }
 ```
 
-### 8. Builder Pattern
+### 8. Observer Pattern
 ```java
-class QuantumCircuitBuilder {
-    public QuantumCircuitBuilder withQubits(int count);
-    public QuantumCircuitBuilder addStep(CircuitStep step);
-    public QuantumCircuit build();
+interface PerformanceMonitor {
+    void onBenchmarkStart(String circuitName);
+    void onBenchmarkComplete(String circuitName, PerformanceMetrics metrics);
 }
+// BenchmarkRunner가 모니터들에게 이벤트 통지
 ```
 
 ## 프로그래밍 요구사항
@@ -660,13 +655,14 @@ class QuantumCircuitBuilder {
 - TDD Red-Green-Refactor 사이클을 따른다
 
 ### 디자인 패턴
-- Strategy 패턴: 최적화 전략
-- Template Method 패턴: 알고리즘 공통 흐름
-- Chain of Responsibility: 검증 체인
-- Observer 패턴: 실행 추적
-- Factory 패턴: 알고리즘 생성
-- Composite 패턴: 최적화 파이프라인
 - Builder 패턴: 복잡한 회로 구성
+- Template Method 패턴: 알고리즘 공통 흐름
+- Factory 패턴: 알고리즘 생성
+- Strategy 패턴: 최적화 전략
+- Chain of Responsibility: 검증 체인, 최적화 파이프라인
+- Composite 패턴: 최적화 파이프라인
+- Facade 패턴: 회로 분석
+- Observer 패턴: 벤치마크 실행 추적
 
 ### 라이브러리
 - Strange 양자 컴퓨팅 라이브러리 (`org.redfx:strange:0.1.3`)를 활용한다
