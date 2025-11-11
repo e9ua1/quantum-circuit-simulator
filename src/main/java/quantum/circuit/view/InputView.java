@@ -11,9 +11,23 @@ public class InputView {
     private static final String PROMPT_TARGET_QUBIT = "타겟 큐비트 인덱스를 입력하세요 (0부터 시작):";
     private static final String PROMPT_CONTROL_QUBIT = "제어 큐비트 인덱스를 입력하세요 (0부터 시작):";
 
+    public static int readMode() {
+        return parseInteger(Console.readLine());
+    }
+
     public static int readQubitCount() {
         System.out.println(PROMPT_QUBIT_COUNT);
         return parseInteger(Console.readLine());
+    }
+
+    public static int readInt() {
+        return parseInteger(Console.readLine());
+    }
+
+    public static String readAlgorithmName() {
+        String input = Console.readLine();
+        validateNotEmpty(input);
+        return input.trim();
     }
 
     public static String readGateType() {
