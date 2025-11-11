@@ -3,6 +3,7 @@ package quantum.circuit;
 import java.util.function.Supplier;
 
 import quantum.circuit.mode.AlgorithmMode;
+import quantum.circuit.mode.BenchmarkMode;
 import quantum.circuit.mode.OptimizationMode;
 import quantum.circuit.view.OutputView;
 
@@ -18,12 +19,14 @@ public class Application {
             1. 자유 모드 (Free Mode)
             2. 알고리즘 라이브러리 (Algorithm Library)
             3. 최적화 모드 (Optimization Mode)
+            4. 벤치마크 모드 (Benchmark Mode)
             """;
     private static final String PROMPT_MODE = "선택:";
     private static final String ERROR_INVALID_MODE = "올바른 모드를 선택해주세요.";
     private static final int FREE_MODE = 1;
     private static final int ALGORITHM_MODE = 2;
     private static final int OPTIMIZATION_MODE = 3;
+    private static final int BENCHMARK_MODE = 4;
 
     public static void main(String[] args) {
         System.out.println(WELCOME_MESSAGE);
@@ -52,7 +55,7 @@ public class Application {
     }
 
     private static void validateMode(int mode) {
-        if (mode != FREE_MODE && mode != ALGORITHM_MODE && mode != OPTIMIZATION_MODE) {
+        if (mode != FREE_MODE && mode != ALGORITHM_MODE && mode != OPTIMIZATION_MODE && mode != BENCHMARK_MODE) {
             throw new IllegalArgumentException(ERROR_INVALID_MODE);
         }
     }
@@ -66,6 +69,9 @@ public class Application {
         }
         if (mode == OPTIMIZATION_MODE) {
             new OptimizationMode().start();
+        }
+        if (mode == BENCHMARK_MODE) {
+            new BenchmarkMode().run();
         }
     }
 
