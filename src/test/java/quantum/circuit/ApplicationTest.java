@@ -94,10 +94,13 @@ class ApplicationTest {
     @Test
     @DisplayName("벤치마크 모드를 선택할 수 있다")
     void selectBenchmarkMode() {
-        String input = "4\n2\nGrover\nDeutsch-Jozsa\n2\n";
+        String input = "4\n2\n2\nQFT\nGROVER\n";
         System.setIn(new ByteArrayInputStream(input.getBytes()));
 
         assertThatCode(() -> Application.main(new String[]{}))
                 .doesNotThrowAnyException();
+
+        String output = outputStream.toString();
+        assertThat(output).contains("Benchmark Mode");
     }
 }
