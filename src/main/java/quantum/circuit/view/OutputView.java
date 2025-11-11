@@ -14,6 +14,16 @@ public class OutputView {
     private static final String STATE_HEADER = "=== Quantum State ===";
     private static final String MEASUREMENT_HEADER = "=== Measurement Result ===";
 
+    public static void printHeader(String title) {
+        System.out.println(SEPARATOR);
+        System.out.println(title);
+        System.out.println(SEPARATOR);
+    }
+
+    public static void printMessage(String message) {
+        System.out.println(message);
+    }
+
     public static void printCircuit(QuantumCircuit circuit) {
         System.out.println(CIRCUIT_HEADER);
         System.out.println(CircuitVisualizer.generateSummary(circuit));
