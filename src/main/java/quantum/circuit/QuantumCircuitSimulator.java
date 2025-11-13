@@ -8,24 +8,18 @@ import quantum.circuit.domain.circuit.QubitIndex;
 import quantum.circuit.domain.circuit.QuantumCircuit;
 import quantum.circuit.domain.circuit.QuantumCircuitBuilder;
 import quantum.circuit.domain.gate.CNOTGate;
-import quantum.circuit.domain.gate.HadamardGate;
-import quantum.circuit.domain.gate.PauliXGate;
-import quantum.circuit.domain.gate.PauliZGate;
 import quantum.circuit.domain.gate.QuantumGate;
 import quantum.circuit.domain.state.QuantumState;
+import quantum.circuit.factory.SingleQubitGateFactory;
 import quantum.circuit.util.InputRetryHandler;
 import quantum.circuit.view.InputView;
 import quantum.circuit.view.OutputView;
 
 public class QuantumCircuitSimulator {
 
-    private static final String GATE_X = "X";
-    private static final String GATE_H = "H";
-    private static final String GATE_Z = "Z";
     private static final String GATE_CNOT = "CNOT";
     private static final String CONTINUE_YES = "Y";
     private static final String PROMPT_CONTINUE = "게이트를 더 추가하시겠습니까? (y/n):";
-    private static final String ERROR_UNSUPPORTED_GATE = "지원하지 않는 게이트입니다.";
 
     public void start() {
         int qubitCount = InputRetryHandler.retry(InputView::readQubitCount);
@@ -52,7 +46,7 @@ public class QuantumCircuitSimulator {
         if (GATE_CNOT.equals(gateType)) {
             return createCNOTGate(qubitCount);
         }
-        return createSingleQubitGate(gateType, qubitCount);
+        return createSingleQubitGate(gateType);
     }
 
     private QuantumGate createCNOTGate(int qubitCount) {
@@ -61,20 +55,10 @@ public class QuantumCircuitSimulator {
         return new CNOTGate(new QubitIndex(control), new QubitIndex(target));
     }
 
-    private QuantumGate createSingleQubitGate(String gateType, int qubitCount) {
+    private QuantumGate createSingleQubitGate(String gateType) {
         int target = InputRetryHandler.retry(InputView::readTargetQubit);
         QubitIndex targetIndex = new QubitIndex(target);
-
-        if (GATE_X.equals(gateType)) {
-            return new PauliXGate(targetIndex);
-        }
-        if (GATE_H.equals(gateType)) {
-            return new HadamardGate(targetIndex);
-        }
-        if (GATE_Z.equals(gateType)) {
-            return new PauliZGate(targetIndex);
-        }
-        throw new IllegalArgumentException(ERROR_UNSUPPORTED_GATE);
+        return SingleQubitGateFactory.create(gateType, targetIndex);
     }
 
     private boolean shouldContinue() {

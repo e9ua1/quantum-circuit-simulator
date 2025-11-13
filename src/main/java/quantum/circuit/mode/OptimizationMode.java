@@ -8,10 +8,8 @@ import quantum.circuit.domain.circuit.QubitIndex;
 import quantum.circuit.domain.circuit.QuantumCircuit;
 import quantum.circuit.domain.circuit.QuantumCircuitBuilder;
 import quantum.circuit.domain.gate.CNOTGate;
-import quantum.circuit.domain.gate.HadamardGate;
-import quantum.circuit.domain.gate.PauliXGate;
-import quantum.circuit.domain.gate.PauliZGate;
 import quantum.circuit.domain.gate.QuantumGate;
+import quantum.circuit.factory.SingleQubitGateFactory;
 import quantum.circuit.optimizer.CircuitOptimizer;
 import quantum.circuit.optimizer.IdentityGateRemover;
 import quantum.circuit.optimizer.OptimizationPipeline;
@@ -27,9 +25,6 @@ public class OptimizationMode {
             === 최적화 모드 ===
             회로를 입력하면 자동으로 최적화를 수행합니다.
             """;
-    private static final String GATE_X = "X";
-    private static final String GATE_H = "H";
-    private static final String GATE_Z = "Z";
     private static final String GATE_CNOT = "CNOT";
     private static final String CONTINUE_YES = "Y";
     private static final String PROMPT_QUBIT_COUNT = "큐비트 개수를 입력하세요:";
@@ -37,7 +32,6 @@ public class OptimizationMode {
     private static final String PROMPT_TARGET_QUBIT = "타겟 큐비트 인덱스를 입력하세요 (0부터 시작):";
     private static final String PROMPT_CONTROL_QUBIT = "제어 큐비트 인덱스를 입력하세요 (0부터 시작):";
     private static final String PROMPT_CONTINUE = "게이트를 더 추가하시겠습니까? (y/n):";
-    private static final String ERROR_UNSUPPORTED_GATE = "지원하지 않는 게이트입니다.";
     private static final String BEFORE_OPTIMIZATION = "\n=== 최적화 전 회로 ===";
     private static final String AFTER_OPTIMIZATION = "\n=== 최적화 후 회로 ===";
     private static final String OPTIMIZATION_RESULT_FORMAT = "\n최적화 결과: %d Step → %d Step";
@@ -101,17 +95,7 @@ public class OptimizationMode {
     private QuantumGate createSingleQubitGate(String gateType) {
         int target = InputRetryHandler.retry(this::readTargetQubit);
         QubitIndex targetIndex = new QubitIndex(target);
-
-        if (GATE_X.equals(gateType)) {
-            return new PauliXGate(targetIndex);
-        }
-        if (GATE_H.equals(gateType)) {
-            return new HadamardGate(targetIndex);
-        }
-        if (GATE_Z.equals(gateType)) {
-            return new PauliZGate(targetIndex);
-        }
-        throw new IllegalArgumentException(ERROR_UNSUPPORTED_GATE);
+        return SingleQubitGateFactory.create(gateType, targetIndex);
     }
 
     private boolean shouldContinue() {
