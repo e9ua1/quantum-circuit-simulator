@@ -1,6 +1,7 @@
 package quantum.circuit.domain.gate;
 
 import java.util.Objects;
+import java.util.Set;
 
 import quantum.circuit.domain.circuit.QubitIndex;
 import quantum.circuit.domain.state.QuantumState;
@@ -41,5 +42,10 @@ public class HadamardGate implements QuantumGate {
 
     public QubitIndex getTarget() {
         return target;
+    }
+
+    @Override
+    public Set<QubitIndex> getAffectedQubits() {
+        return Set.of(target);
     }
 }

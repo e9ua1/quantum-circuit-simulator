@@ -1,5 +1,8 @@
 package quantum.circuit.domain.gate;
 
+import java.util.Set;
+
+import quantum.circuit.domain.circuit.QubitIndex;
 import quantum.circuit.domain.state.QuantumState;
 
 public interface QuantumGate {
@@ -9,4 +12,6 @@ public interface QuantumGate {
     int getQubitCount();
 
     String getName();
+
+    Set<QubitIndex> getAffectedQubits();
 }
