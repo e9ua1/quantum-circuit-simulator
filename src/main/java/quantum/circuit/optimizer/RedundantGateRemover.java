@@ -40,12 +40,12 @@ public class RedundantGateRemover implements CircuitOptimizer {
     }
 
     private boolean isRedundantPair(CircuitStep step1, CircuitStep step2) {
-        if (step1.getGateCount() != 1 || step2.getGateCount() != 1) {
+        if (!step1.isSingleGateStep() || !step2.isSingleGateStep()) {
             return false;
         }
 
-        QuantumGate gate1 = step1.getGates().get(0);
-        QuantumGate gate2 = step2.getGates().get(0);
+        QuantumGate gate1 = step1.getSingleGate();
+        QuantumGate gate2 = step2.getSingleGate();
 
         return isSameGate(gate1, gate2);
     }

@@ -78,4 +78,41 @@ class CircuitStepTest {
         assertThatThrownBy(() -> retrievedGates.add(new HadamardGate(new QubitIndex(1))))
                 .isInstanceOf(UnsupportedOperationException.class);
     }
+
+    @Test
+    @DisplayName("단일 게이트 Step인지 확인한다")
+    void isSingleGateStep() {
+        CircuitStep singleStep = new CircuitStep(List.of(new PauliXGate(new QubitIndex(0))));
+        CircuitStep multiStep = new CircuitStep(List.of(
+                new PauliXGate(new QubitIndex(0)),
+                new HadamardGate(new QubitIndex(1))
+        ));
+
+        assertThat(singleStep.isSingleGateStep()).isTrue();
+        assertThat(multiStep.isSingleGateStep()).isFalse();
+    }
+
+    @Test
+    @DisplayName("단일 게이트를 반환한다")
+    void getSingleGate() {
+        QuantumGate gate = new PauliXGate(new QubitIndex(0));
+        CircuitStep step = new CircuitStep(List.of(gate));
+
+        QuantumGate retrievedGate = step.getSingleGate();
+
+        assertThat(retrievedGate).isEqualTo(gate);
+    }
+
+    @Test
+    @DisplayName("여러 게이트가 있는 Step에서 getSingleGate를 호출하면 예외가 발생한다")
+    void getSingleGateThrowsExceptionForMultiGateStep() {
+        CircuitStep step = new CircuitStep(List.of(
+                new PauliXGate(new QubitIndex(0)),
+                new HadamardGate(new QubitIndex(1))
+        ));
+
+        assertThatThrownBy(step::getSingleGate)
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("[ERROR]");
+    }
 }
