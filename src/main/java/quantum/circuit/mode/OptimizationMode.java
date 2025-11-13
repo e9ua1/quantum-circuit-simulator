@@ -2,7 +2,6 @@ package quantum.circuit.mode;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
 
 import quantum.circuit.domain.circuit.CircuitStep;
 import quantum.circuit.domain.circuit.QubitIndex;
@@ -17,6 +16,7 @@ import quantum.circuit.optimizer.CircuitOptimizer;
 import quantum.circuit.optimizer.IdentityGateRemover;
 import quantum.circuit.optimizer.OptimizationPipeline;
 import quantum.circuit.optimizer.RedundantGateRemover;
+import quantum.circuit.util.InputRetryHandler;
 import quantum.circuit.view.OutputView;
 import quantum.circuit.visualizer.CircuitVisualizer;
 
@@ -45,7 +45,7 @@ public class OptimizationMode {
     public void start() {
         System.out.println(MODE_HEADER);
 
-        int qubitCount = retry(this::readQubitCount);
+        int qubitCount = InputRetryHandler.retry(this::readQubitCount);
         List<CircuitStep> steps = buildSteps(qubitCount);
         QuantumCircuit circuit = buildCircuit(qubitCount, steps);
 
@@ -63,7 +63,7 @@ public class OptimizationMode {
         System.out.printf("(큐비트 인덱스: 0부터 %d까지 사용 가능)%n", qubitCount - 1);
 
         do {
-            QuantumGate gate = retry(() -> readGate(qubitCount));
+            QuantumGate gate = InputRetryHandler.retry(() -> readGate(qubitCount));
             steps.add(new CircuitStep(List.of(gate)));
         } while (shouldContinue());
 
@@ -81,8 +81,8 @@ public class OptimizationMode {
     }
 
     private QuantumGate createCNOTGate() {
-        int control = retry(this::readControlQubit);
-        int target = retry(this::readTargetQubit);
+        int control = InputRetryHandler.retry(this::readControlQubit);
+        int target = InputRetryHandler.retry(this::readTargetQubit);
         return new CNOTGate(new QubitIndex(control), new QubitIndex(target));
     }
 
@@ -99,7 +99,7 @@ public class OptimizationMode {
     }
 
     private QuantumGate createSingleQubitGate(String gateType) {
-        int target = retry(this::readTargetQubit);
+        int target = InputRetryHandler.retry(this::readTargetQubit);
         QubitIndex targetIndex = new QubitIndex(target);
 
         if (GATE_X.equals(gateType)) {
@@ -116,7 +116,7 @@ public class OptimizationMode {
 
     private boolean shouldContinue() {
         System.out.println(PROMPT_CONTINUE);
-        String response = retry(() -> camp.nextstep.edu.missionutils.Console.readLine());
+        String response = InputRetryHandler.retry(() -> camp.nextstep.edu.missionutils.Console.readLine());
         return CONTINUE_YES.equalsIgnoreCase(response.strip());
     }
 
@@ -156,15 +156,5 @@ public class OptimizationMode {
         System.out.printf(OPTIMIZATION_RESULT_FORMAT + "%n",
                 original.getStepCount(),
                 optimized.getStepCount());
-    }
-
-    private <T> T retry(Supplier<T> supplier) {
-        while (true) {
-            try {
-                return supplier.get();
-            } catch (IllegalArgumentException e) {
-                OutputView.printErrorMessage(e.getMessage());
-            }
-        }
     }
 }

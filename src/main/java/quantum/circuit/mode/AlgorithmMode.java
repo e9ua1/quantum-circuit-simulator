@@ -1,11 +1,10 @@
 package quantum.circuit.mode;
 
-import java.util.function.Supplier;
-
 import quantum.circuit.algorithm.AlgorithmFactory;
 import quantum.circuit.algorithm.QuantumAlgorithm;
 import quantum.circuit.domain.circuit.QuantumCircuit;
 import quantum.circuit.domain.state.QuantumState;
+import quantum.circuit.util.InputRetryHandler;
 import quantum.circuit.view.OutputView;
 import quantum.circuit.visualizer.CircuitVisualizer;
 import quantum.circuit.visualizer.StateVisualizer;
@@ -52,7 +51,7 @@ public class AlgorithmMode {
     }
 
     private QuantumAlgorithm selectAlgorithm() {
-        return retry(() -> {
+        return InputRetryHandler.retry(() -> {
             System.out.println(PROMPT_ALGORITHM);
             String algorithmName = camp.nextstep.edu.missionutils.Console.readLine();
             return algorithmFactory.create(algorithmName);
@@ -83,15 +82,5 @@ public class AlgorithmMode {
         System.out.println();
         System.out.println(StateVisualizer.visualizeQubitProbabilities(state));
         OutputView.printSeparator();
-    }
-
-    private <T> T retry(Supplier<T> supplier) {
-        while (true) {
-            try {
-                return supplier.get();
-            } catch (IllegalArgumentException e) {
-                OutputView.printErrorMessage(e.getMessage());
-            }
-        }
     }
 }

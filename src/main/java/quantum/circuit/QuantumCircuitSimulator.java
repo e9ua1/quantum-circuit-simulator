@@ -2,7 +2,6 @@ package quantum.circuit;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
 
 import quantum.circuit.domain.circuit.CircuitStep;
 import quantum.circuit.domain.circuit.QubitIndex;
@@ -14,6 +13,7 @@ import quantum.circuit.domain.gate.PauliXGate;
 import quantum.circuit.domain.gate.PauliZGate;
 import quantum.circuit.domain.gate.QuantumGate;
 import quantum.circuit.domain.state.QuantumState;
+import quantum.circuit.util.InputRetryHandler;
 import quantum.circuit.view.InputView;
 import quantum.circuit.view.OutputView;
 
@@ -28,7 +28,7 @@ public class QuantumCircuitSimulator {
     private static final String ERROR_UNSUPPORTED_GATE = "지원하지 않는 게이트입니다.";
 
     public void start() {
-        int qubitCount = retry(InputView::readQubitCount);
+        int qubitCount = InputRetryHandler.retry(InputView::readQubitCount);
         List<CircuitStep> steps = buildSteps(qubitCount);
         QuantumCircuit circuit = buildCircuit(qubitCount, steps);
         executeAndDisplay(circuit);
@@ -39,7 +39,7 @@ public class QuantumCircuitSimulator {
         System.out.printf("(큐비트 인덱스: 0부터 %d까지 사용 가능)%n", qubitCount - 1);
 
         do {
-            QuantumGate gate = retry(() -> readGate(qubitCount));
+            QuantumGate gate = InputRetryHandler.retry(() -> readGate(qubitCount));
             steps.add(new CircuitStep(List.of(gate)));
         } while (shouldContinue());
 
@@ -56,13 +56,13 @@ public class QuantumCircuitSimulator {
     }
 
     private QuantumGate createCNOTGate(int qubitCount) {
-        int control = retry(InputView::readControlQubit);
-        int target = retry(InputView::readTargetQubit);
+        int control = InputRetryHandler.retry(InputView::readControlQubit);
+        int target = InputRetryHandler.retry(InputView::readTargetQubit);
         return new CNOTGate(new QubitIndex(control), new QubitIndex(target));
     }
 
     private QuantumGate createSingleQubitGate(String gateType, int qubitCount) {
-        int target = retry(InputView::readTargetQubit);
+        int target = InputRetryHandler.retry(InputView::readTargetQubit);
         QubitIndex targetIndex = new QubitIndex(target);
 
         if (GATE_X.equals(gateType)) {
@@ -79,7 +79,7 @@ public class QuantumCircuitSimulator {
 
     private boolean shouldContinue() {
         System.out.println(PROMPT_CONTINUE);
-        String response = retry(() -> camp.nextstep.edu.missionutils.Console.readLine());
+        String response = InputRetryHandler.retry(() -> camp.nextstep.edu.missionutils.Console.readLine());
         return CONTINUE_YES.equalsIgnoreCase(response.trim());
     }
 
@@ -98,15 +98,5 @@ public class QuantumCircuitSimulator {
         QuantumState state = circuit.execute();
         OutputView.printState(state);
         OutputView.printSeparator();
-    }
-
-    private <T> T retry(Supplier<T> supplier) {
-        while (true) {
-            try {
-                return supplier.get();
-            } catch (IllegalArgumentException e) {
-                OutputView.printErrorMessage(e.getMessage());
-            }
-        }
     }
 }
