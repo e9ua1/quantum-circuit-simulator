@@ -16,8 +16,7 @@ public class InputView {
     }
 
     public static int readQubitCount() {
-        System.out.println(PROMPT_QUBIT_COUNT);
-        return parseInteger(Console.readLine());
+        return readIntegerWithPrompt(PROMPT_QUBIT_COUNT);
     }
 
     public static int readInt() {
@@ -31,20 +30,27 @@ public class InputView {
     }
 
     public static String readGateType() {
-        System.out.println(PROMPT_GATE_TYPE);
-        String input = Console.readLine();
-        validateNotEmpty(input);
-        return input.trim().toUpperCase();
+        return readStringWithPrompt(PROMPT_GATE_TYPE).toUpperCase();
     }
 
     public static int readTargetQubit() {
-        System.out.println(PROMPT_TARGET_QUBIT);
-        return parseInteger(Console.readLine());
+        return readIntegerWithPrompt(PROMPT_TARGET_QUBIT);
     }
 
     public static int readControlQubit() {
-        System.out.println(PROMPT_CONTROL_QUBIT);
+        return readIntegerWithPrompt(PROMPT_CONTROL_QUBIT);
+    }
+
+    private static int readIntegerWithPrompt(String prompt) {
+        System.out.println(prompt);
         return parseInteger(Console.readLine());
+    }
+
+    private static String readStringWithPrompt(String prompt) {
+        System.out.println(prompt);
+        String input = Console.readLine();
+        validateNotEmpty(input);
+        return input.trim();
     }
 
     private static int parseInteger(String input) {
