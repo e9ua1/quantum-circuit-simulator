@@ -23,11 +23,7 @@ public class ComparisonReport {
     }
 
     public double getGateReduction() {
-        int originalCount = getOriginalGateCount();
-        if (originalCount == 0) {
-            return 0.0;
-        }
-        return (double) (originalCount - getOptimizedGateCount()) / originalCount * 100;
+        return calculateReduction(getOriginalGateCount(), getOptimizedGateCount());
     }
 
     public int getOriginalDepth() {
@@ -39,10 +35,13 @@ public class ComparisonReport {
     }
 
     public double getDepthReduction() {
-        int originalDepth = getOriginalDepth();
-        if (originalDepth == 0) {
+        return calculateReduction(getOriginalDepth(), getOptimizedDepth());
+    }
+
+    private double calculateReduction(int original, int optimized) {
+        if (original == 0) {
             return 0.0;
         }
-        return (double) (originalDepth - getOptimizedDepth()) / originalDepth * 100;
+        return (double) (original - optimized) / original * 100;
     }
 }
