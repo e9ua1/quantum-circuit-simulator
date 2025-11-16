@@ -1,11 +1,9 @@
 package quantum.circuit;
 
-import java.util.function.Supplier;
-
 import quantum.circuit.mode.AlgorithmMode;
 import quantum.circuit.mode.BenchmarkMode;
 import quantum.circuit.mode.OptimizationMode;
-import quantum.circuit.view.OutputView;
+import quantum.circuit.util.InputRetryHandler;
 
 public class Application {
 
@@ -37,7 +35,7 @@ public class Application {
     }
 
     private static int selectMode() {
-        return retry(() -> {
+        return InputRetryHandler.retry(() -> {
             System.out.println(PROMPT_MODE);
             String input = camp.nextstep.edu.missionutils.Console.readLine();
             return parseMode(input);
@@ -72,16 +70,6 @@ public class Application {
         }
         if (mode == BENCHMARK_MODE) {
             new BenchmarkMode().run();
-        }
-    }
-
-    private static <T> T retry(Supplier<T> supplier) {
-        while (true) {
-            try {
-                return supplier.get();
-            } catch (IllegalArgumentException e) {
-                OutputView.printErrorMessage(e.getMessage());
-            }
         }
     }
 }
