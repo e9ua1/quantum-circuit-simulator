@@ -8,6 +8,7 @@ public class GateFusionOptimizer implements CircuitOptimizer {
 
     @Override
     public QuantumCircuit optimize(QuantumCircuit circuit) {
+        // TODO: 게이트 융합 최적화 구현
         return circuit;
     }
 
