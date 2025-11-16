@@ -152,4 +152,75 @@ class ValidationChainTest {
 
         assertThat(result.isValid()).isFalse();
     }
+
+    @Test
+    @DisplayName("validateAll은 모든 검증기를 실행한다")
+    void validateAllRunsAllValidators() {
+        ValidationChain chain = new ValidationChain(List.of(
+                new QubitRangeValidator(),
+                new GateCompatibilityValidator()
+        ));
+        QuantumCircuit circuit = new QuantumCircuitBuilder()
+                .withQubits(2)
+                .addStep(new CircuitStep(List.of(new HadamardGate(new QubitIndex(0)))))
+                .build();
+
+        ValidationReport report = chain.validateAll(circuit);
+
+        assertThat(report.isAllValid()).isTrue();
+        assertThat(report.getValidationCount()).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("validateAll은 모든 에러를 수집한다")
+    void validateAllCollectsAllErrors() {
+        ValidationChain chain = new ValidationChain(List.of(
+                new QubitRangeValidator(),
+                new ResourceValidator(1)
+        ));
+        QuantumCircuit circuit = new QuantumCircuitBuilder()
+                .withQubits(2)
+                .addStep(new CircuitStep(List.of(new PauliXGate(new QubitIndex(5)))))
+                .build();
+
+        ValidationReport report = chain.validateAll(circuit);
+
+        assertThat(report.isAllValid()).isFalse();
+        assertThat(report.getFailureCount()).isEqualTo(2);
+        assertThat(report.getErrors()).hasSize(2);
+    }
+
+    @Test
+    @DisplayName("validateAll은 일부 실패해도 모든 검증을 실행한다")
+    void validateAllContinuesAfterFailure() {
+        ValidationChain chain = new ValidationChain(List.of(
+                new QubitRangeValidator(),
+                new GateCompatibilityValidator(),
+                new ResourceValidator(10)
+        ));
+        QuantumCircuit circuit = new QuantumCircuitBuilder()
+                .withQubits(2)
+                .addStep(new CircuitStep(List.of(new PauliXGate(new QubitIndex(10)))))
+                .build();
+
+        ValidationReport report = chain.validateAll(circuit);
+
+        assertThat(report.getValidationCount()).isEqualTo(3);
+        assertThat(report.getFailureCount()).isEqualTo(1);
+        assertThat(report.getSuccessCount()).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("validateAll로 빈 검증기 리스트는 모두 통과한다")
+    void validateAllWithEmptyList() {
+        ValidationChain chain = new ValidationChain(List.of());
+        QuantumCircuit circuit = new QuantumCircuitBuilder()
+                .withQubits(1)
+                .build();
+
+        ValidationReport report = chain.validateAll(circuit);
+
+        assertThat(report.isAllValid()).isTrue();
+        assertThat(report.getValidationCount()).isEqualTo(0);
+    }
 }

@@ -1,5 +1,6 @@
 package quantum.circuit.validator;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import quantum.circuit.domain.circuit.QuantumCircuit;
@@ -20,6 +21,17 @@ public class ValidationChain {
             }
         }
         return ValidationResult.success();
+    }
+
+    public ValidationReport validateAll(QuantumCircuit circuit) {
+        List<ValidationResult> results = new ArrayList<>();
+
+        for (CircuitValidator validator : validators) {
+            ValidationResult result = validator.validate(circuit);
+            results.add(result);
+        }
+
+        return new ValidationReport(results);
     }
 
     public int getValidatorCount() {
