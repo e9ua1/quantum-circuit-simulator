@@ -57,7 +57,7 @@ class CircuitStepBuilderTest {
     @Test
     @DisplayName("잘못된 입력 후 재입력으로 Step을 생성한다")
     void buildStepsWithRetry() {
-        String input = "INVALID\nH\n0\nn\n";
+        String input = "INVALID\n0\nH\n0\nn\n";
         System.setIn(new ByteArrayInputStream(input.getBytes()));
 
         List<CircuitStep> steps = CircuitStepBuilder.buildSteps(2);
