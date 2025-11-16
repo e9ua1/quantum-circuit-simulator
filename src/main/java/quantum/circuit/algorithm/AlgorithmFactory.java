@@ -1,25 +1,17 @@
 package quantum.circuit.algorithm;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class AlgorithmFactory {
 
     private static final String ERROR_NULL_OR_EMPTY = "알고리즘 이름은 null이거나 비어있을 수 없습니다.";
-    private static final String ERROR_UNSUPPORTED_ALGORITHM = "지원하지 않는 알고리즘입니다: ";
 
     public QuantumAlgorithm create(String algorithmName) {
         validateAlgorithmName(algorithmName);
-
-        String upperName = algorithmName.toUpperCase();
-
-        return switch (upperName) {
-            case "BELL_STATE" -> new BellStateAlgorithm();
-            case "GHZ_STATE" -> new GHZStateAlgorithm();
-            case "QFT" -> new QFTAlgorithm();
-            case "GROVER" -> new GroverAlgorithm();
-            case "DEUTSCH_JOZSA" -> new DeutschJozsaAlgorithm();
-            default -> throw new IllegalArgumentException(ERROR_UNSUPPORTED_ALGORITHM + algorithmName);
-        };
+        AlgorithmType type = AlgorithmType.from(algorithmName);
+        return type.create();
     }
 
     private void validateAlgorithmName(String algorithmName) {
@@ -29,12 +21,12 @@ public class AlgorithmFactory {
     }
 
     public List<String> getAvailableAlgorithms() {
-        return List.of(
-                "BELL_STATE",
-                "GHZ_STATE",
-                "QFT",
-                "GROVER",
-                "DEUTSCH_JOZSA"
-        );
+        return Arrays.stream(AlgorithmType.values())
+                .map(Enum::name)
+                .collect(Collectors.toList());
+    }
+
+    public List<AlgorithmType> getAlgorithmTypes() {
+        return Arrays.asList(AlgorithmType.values());
     }
 }
