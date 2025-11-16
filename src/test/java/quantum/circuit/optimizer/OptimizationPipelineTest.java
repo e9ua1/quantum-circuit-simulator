@@ -1,6 +1,7 @@
 package quantum.circuit.optimizer;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.List;
 
@@ -156,5 +157,13 @@ class OptimizationPipelineTest {
         QuantumCircuit optimized = pipeline.optimize(circuit);
 
         assertThat(optimized.getSteps()).isEmpty();
+    }
+
+    @Test
+    @DisplayName("null 최적화기 리스트로 생성 시 예외가 발생한다")
+    void throwExceptionForNullOptimizerList() {
+        assertThatThrownBy(() -> new OptimizationPipeline(null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("null");
     }
 }
