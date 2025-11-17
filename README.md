@@ -16,6 +16,7 @@
 - [기술 스택](#기술-스택)
 - [패키지 구조](#패키지-구조)
 - [디자인 패턴 활용](#디자인-패턴-활용)
+- [아키텍처 설계](#아키텍처-설계)
 - [프로그래밍 요구사항](#프로그래밍-요구사항)
 - [참고 자료](#참고-자료)
 
@@ -24,8 +25,9 @@
 - **객체지향 설계**: 복잡한 양자역학 도메인을 명확한 책임과 협력 관계로 표현한다
 - **TDD 실천**: 클래스와 함수에 대한 단위 테스트를 통해 의도한 대로 정확하게 작동하는 영역을 확보한다
 - **Red-Green-Refactor**: TDD 사이클을 체화한다
-- **디자인 패턴 활용**: Strategy, Template Method, Chain of Responsibility, Observer, Factory, Composite, Facade, Builder 패턴을 실전에 적용한다
+- **디자인 패턴 활용**: 10가지 디자인 패턴을 실전에 적용한다
 - **도메인 주도 설계**: 추상적인 양자역학 개념을 구체적인 도메인 객체로 구현한다
+- **클린 아키텍처**: Port-Adapter 패턴으로 도메인과 인프라를 분리한다
 
 ## 왜 이 프로젝트인가?
 
@@ -61,8 +63,9 @@
 - **알고리즘 모드**: Template Method + Factory 패턴 (공통 흐름 추상화)
 - **최적화 모드**: Strategy + Chain of Responsibility + Composite + Facade (4-5단계 협력)
 - **벤치마크 모드**: Observer 패턴 (이벤트 기반 설계)
+- **전체 아키텍처**: Port-Adapter 패턴으로 DIP 완성 (도메인과 인프라 분리)
 
-특히 **최적화 모드**는 제가 가장 고민한 부분입니다. 단순히 최적화 알고리즘을 구현하는 것을 넘어, 여러 최적화 전략을 조합하는 파이프라인(Composite), 순차적으로 검증하는 체인(Chain of Responsibility), 복잡한 분석을 단순한 인터페이스로 제공하는 Facade까지. 이 과정에서 **"어떻게 하면 변경에 유연하면서도 명확한 책임을 가진 설계를 할 수 있을까?"**라는 1-3주차 코드리뷰에서 고민했던 질문들을 직접 실천했습니다.
+특히 **Port-Adapter 아키텍처**는 제가 가장 고민한 부분입니다. Domain 레이어가 Strange 라이브러리에 직접 의존하는 문제를 해결하기 위해, QuantumExecutor 인터페이스(Port)를 Domain에 정의하고 StrangeQuantumExecutor(Adapter)로 구현했습니다. 이를 통해 라이브러리를 쉽게 교체할 수 있고, Mock 객체로 테스트할 수 있으며, 진정한 도메인 중심 설계를 달성했습니다.
 
 ### 1-3주차 미션과의 연결
 
@@ -70,8 +73,7 @@
 
 이 프로젝트는 그 배움의 연장선입니다:
 - **로또 미션**의 일급 컬렉션 → CircuitStep의 게이트 관리
-- **자동차 경주**의 전략 패턴 → 최적화 전략들
-- **페어 매칭**의 검증 로직 → 회로 검증 체인
+- **자동차 경주**의 전략 패턴 → 최적화 전략, 분석 메트릭
 
 하지만 단순한 확장이 아닙니다. 양자역학이라는 **비직관적이고 추상적인 도메인**을 명확한 객체로 표현하는 과정에서, 책임과 협력의 본질을 더 깊이 이해할 수 있었습니다. 큐비트의 중첩 상태, 얽힘, 측정에 따른 붕괴 같은 개념들을 QubitIndex, Probability, QuantumState 같은 도메인 객체로 구체화하며, **"좋은 도메인 설계란 무엇인가?"**에 대한 답을 찾아가는 과정이었습니다.
 
@@ -84,8 +86,9 @@
   - 4-5단계 깊이의 협력 구조를 명확한 책임으로 구성
 
 2. **설계 원칙과 패턴을 실전에서 적용할 수 있다**
-  - 8가지 디자인 패턴의 적절한 사용 시기 판단
+  - 10가지 디자인 패턴의 적절한 사용 시기 판단
   - 트레이드오프를 이해하고 맥락에 맞는 선택
+  - DIP를 통한 진정한 계층 분리
 
 3. **TDD로 안정적인 리팩토링이 가능하다**
   - 확률적 결과를 테스트하는 전략 수립
@@ -117,7 +120,7 @@
 ```
 AlgorithmFactory → QuantumAlgorithm (Template Method)
     ↓                  ↓
-ParameterValidator   CircuitBuilder
+AlgorithmType Enum   CircuitBuilder
     ↓
 ExecutionEngine
 ```
@@ -147,9 +150,9 @@ ExecutionEngine
 ```
 OptimizationPipeline → [RedundantGateRemover, IdentityGateRemover, GateFusionOptimizer]
     ↓
-CircuitAnalyzer → [CircuitDepth, GateCount, Complexity, EntanglementDegree]
+CircuitAnalyzer → [CircuitMetric 구현체들]
     ↓
-ValidationChain → [QubitRangeValidator, GateCompatibilityValidator, DepthLimitValidator, ResourceValidator]
+ValidationChain → [CircuitValidator 구현체들]
     ↓
 OptimizationReport
 ```
@@ -211,6 +214,7 @@ ComparisonReport / BenchmarkReport
 
 #### 2.1 알고리즘 팩토리
 - 알고리즘 이름으로 적절한 알고리즘 객체를 생성한다
+- Enum 기반 등록 시스템으로 타입 안전성을 보장한다
 - 지원하지 않는 알고리즘에 대해 예외를 발생시킨다
 
 #### 2.2 양자 알고리즘 템플릿
@@ -286,31 +290,46 @@ ComparisonReport / BenchmarkReport
 - 큐비트 개수가 1~10 범위를 벗어나면 예외 발생
 - 큐비트 인덱스가 범위를 벗어나면 예외 발생
 - CNOT 게이트의 제어 큐비트와 타겟 큐비트가 같으면 예외 발생
-- 게이트가 null이면 예외 발생
-- 지원하지 않는 알고리즘 이름이면 예외 발생
-- 알고리즘에 필요한 큐비트 개수가 부족하면 예외 발생
+- 지원하지 않는 게이트 타입이 입력되면 예외 발생
+- 빈 문자열이나 null이 입력되면 예외 발생
 
-### 에러 메시지
-- 모든 에러 메시지는 [ERROR]로 시작한다
-- IllegalArgumentException을 사용한다
+### 회로 검증
+- Step에 게이트가 없으면 예외 발생
+- 같은 Step에서 동일한 큐비트에 여러 게이트를 적용하면 예외 발생
+- 회로 깊이가 제한을 초과하면 경고
+
+### 알고리즘 검증
+- 알고리즘이 요구하는 큐비트 개수와 다르면 예외 발생
+- 알고리즘 이름이 유효하지 않으면 예외 발생
+
+### 상태 측정
+- 회로가 비어있을 때 측정하면 기본값(0) 반환
+- 확률이 0~1 범위를 벗어나면 예외 발생
+
+### 재시도 로직
+- 모든 입력 오류는 사용자에게 에러 메시지를 보여주고 재입력을 요구한다
+- InputRetryHandler로 일관된 재시도 처리
 
 ## 실행 결과 예시
 
-### 자유 모드
+### 자유 모드 예시
+
 ```
 ===================================
 Quantum Circuit Simulator
 ===================================
+
 모드를 선택하세요:
 1. 자유 모드 (Free Mode)
 2. 알고리즘 라이브러리 (Algorithm Library)
 3. 최적화 모드 (Optimization Mode)
 4. 벤치마크 모드 (Benchmark Mode)
-선택:
-> 1
+
+선택: 1
 
 큐비트 개수를 입력하세요:
 2
+
 (큐비트 인덱스: 0부터 1까지 사용 가능)
 게이트 종류를 입력하세요 (X, H, Z, CNOT):
 H
@@ -318,6 +337,7 @@ H
 0
 게이트를 더 추가하시겠습니까? (y/n):
 y
+
 게이트 종류를 입력하세요 (X, H, Z, CNOT):
 CNOT
 제어 큐비트 인덱스를 입력하세요 (0부터 시작):
@@ -329,10 +349,9 @@ n
 
 ===================================
 === Quantum Circuit ===
-Quantum Circuit (2 qubits, 2 steps)
+Circuit: 2 qubits, 2 steps
 
 Q0: ─H─●─
-       │
 Q1: ───X─
 
 Step 1: H(Q0)
@@ -344,294 +363,461 @@ Qubit 1 → |0⟩: 50.0% |1⟩: 50.0%
 ===================================
 ```
 
-### 알고리즘 라이브러리 모드
+### 알고리즘 모드 예시
+
 ```
 === 알고리즘 라이브러리 ===
 사용 가능한 알고리즘:
-1. Bell State (2 qubits)
-2. GHZ State (3 qubits)
-3. Quantum Fourier Transform (2-4 qubits)
-4. Grover's Algorithm (2-3 qubits)
-5. Deutsch-Jozsa Algorithm (2 qubits)
+1. Bell State (2큐비트) - 최대 얽힘 상태 생성
+2. GHZ State (3큐비트) - 3큐비트 얽힘 상태
+3. QFT (2큐비트) - 양자 푸리에 변환
+4. Grover's Search (2큐비트) - 양자 검색 알고리즘
+5. Deutsch-Jozsa (2큐비트) - 함수 판별 알고리즘
 
-알고리즘을 선택하세요:
-> 1
-
-큐비트 개수를 입력하세요:
-2
+알고리즘을 선택하세요 (예: BELL_STATE):
+BELL_STATE
 
 === Bell State Algorithm ===
-설명: 2큐비트 최대 얽힘 상태를 생성합니다.
-예상 결과: |00⟩과 |11⟩이 각각 50% 확률
+설명: 2큐비트 최대 얽힘 상태를 생성합니다. H 게이트로 중첩 상태를 만든 후 CNOT 게이트로 얽힘 상태를 생성합니다.
 
 ===================================
-=== Generated Circuit ===
 Q0: ─H─●─
-       │
 Q1: ───X─
 
 Step 1: H(Q0)
 Step 2: CNOT(Q0→Q1)
 
-=== Execution Result ===
 Qubit 0 → |0⟩: 50.0% |1⟩: 50.0%
 Qubit 1 → |0⟩: 50.0% |1⟩: 50.0%
-✓ Bell State 생성 완료!
 ===================================
 ```
 
-### 최적화 모드
+### 최적화 모드 예시
+
 ```
 === 최적화 모드 ===
-회로를 구성하거나 불러오세요.
-
-큐비트 개수: 2
-게이트: H-H-X-X-CNOT(0→1)
-
-원본 회로:
-Q0: ─H─H─X─X─●─
-             │
-Q1: ─────────X─
-
-=== 최적화 시작 ===
-[1/3] 중복 게이트 제거 중...
-  - H-H 제거 (Q0)
-  - X-X 제거 (Q0)
-  게이트 수: 5 → 1
-
-[2/3] 게이트 융합 중...
-  변경 사항 없음
-
-[3/3] Identity 게이트 제거 중...
-  변경 사항 없음
-
-=== 최적화 완료 ===
-최적화된 회로:
-Q0: ─●─
-     │
-Q1: ─X─
-
-=== 최적화 리포트 ===
-게이트 수: 5 → 1 (80% 감소)
-회로 깊이: 4 → 1 (75% 감소)
-예상 실행 시간: 100μs → 20μs (80% 단축)
-
-적용된 최적화:
-✓ 중복 게이트 제거 (4개 제거)
-- 게이트 융합 (적용 불가)
-- Identity 제거 (발견 없음)
-===================================
-```
-
-### 벤치마크 모드
-```
-=== 벤치마크 모드 ===
-비교할 알고리즘 개수를 입력하세요 (2-5):
-> 2
+회로를 입력하면 자동으로 최적화를 수행합니다.
 
 큐비트 개수를 입력하세요:
-> 2
+2
 
-알고리즘 1 이름을 입력하세요:
-> QFT
+(입력 과정 생략)
 
-알고리즘 2 이름을 입력하세요:
-> GROVER
+=== 최적화 전 회로 ===
+Q0: ─H─H─X─X─
+Q1: ─────────
 
-=== 벤치마크 실행 중 ===
-[1/2] QFT 실행...
-[2/2] GROVER 실행...
+Step 1: H(Q0)
+Step 2: H(Q0)
+Step 3: X(Q0)
+Step 4: X(Q0)
 
-=== 벤치마크 결과 ===
-┌──────────────┬───────┬──────┬────────┐
-│ 알고리즘     │ 게이트│ 깊이 │ 시간   │
-├──────────────┼───────┼──────┼────────┤
-│ QFT          │   3   │  3   │  60μs  │
-│ GROVER       │   5   │  4   │  80μs  │
-└──────────────┴───────┴──────┴────────┘
+=== 최적화 후 회로 ===
+Q0: ───
+Q1: ───
 
-가장 빠른 회로: QFT
-가장 효율적인 회로: QFT
+최적화 결과: 4 Step → 0 Step
 ===================================
 ```
 
-## 구현 완료 현황
+### 벤치마크 모드 예시
 
-### Phase 1: 기본 도메인
-- QubitIndex
-- Probability
-- QuantumGate 인터페이스
-- 단일 큐비트 게이트 (X, H, Z)
-- 다중 큐비트 게이트 (CNOT)
-- CircuitStep
-- QuantumCircuit
-- QuantumCircuitBuilder
-- QuantumState
-- MeasurementResult
-- CircuitVisualizer
-- StateVisualizer
-- InputView / OutputView
-- QuantumCircuitSimulator
+```
+=== Benchmark Mode ===
+여러 알고리즘을 벤치마크하여 성능을 비교합니다
 
-### Phase 2: 알고리즘 라이브러리
-- QuantumAlgorithm (abstract, Template Method)
-- AlgorithmFactory
-- BellStateAlgorithm
-- GHZStateAlgorithm
-- QFTAlgorithm
-- GroverAlgorithm
-- DeutschJozsaAlgorithm
-- AlgorithmMode
+비교할 알고리즘 개수를 입력하세요 (2-5):
+3
 
-### Phase 3: 최적화 시스템
-- CircuitOptimizer (interface, Strategy)
-- OptimizationPipeline (Composite + Chain of Responsibility)
-- RedundantGateRemover
-- GateFusionOptimizer
-- IdentityGateRemover
-- OptimizationMode
+알고리즘 1 이름을 입력하세요:
+BELL_STATE
 
-### Phase 4: 분석 시스템
-- CircuitAnalyzer (Facade)
-- CircuitDepth
-- GateCount
-- CircuitComplexity
-- EntanglementDegree
-- AnalysisReport
+알고리즘 2 이름을 입력하세요:
+GHZ_STATE
 
-### Phase 5: 검증 시스템
-- CircuitValidator (interface, Chain of Responsibility)
-- ValidationChain
-- QubitRangeValidator
-- GateCompatibilityValidator
-- DepthLimitValidator
-- ResourceValidator
-- ValidationResult
-- ValidationReport
+알고리즘 3 이름을 입력하세요:
+QFT
 
-### Phase 6: 비교 및 벤치마크
-- CircuitComparator
-- ComparisonReport
-- BenchmarkRunner (Observer)
-- PerformanceMonitor (Observer)
-- PerformanceMetrics
-- ResultCollector
-- BenchmarkReport
+=== 벤치마크 결과 ===
+BELL_STATE     | 게이트:   2 | 깊이:   2 | 시간:    1250 ns
+GHZ_STATE      | 게이트:   3 | 깊이:   3 | 시간:    1850 ns
+QFT            | 게이트:   2 | 깊이:   2 | 시간:    1100 ns
 
-### Phase 7: 통합 및 UI
-- BenchmarkMode
-- Application (4가지 모드 완전 통합)
+가장 빠른 회로: QFT
+가장 효율적인 회로: BELL_STATE
+```
 
 ## 실행 방법
 
-### 1. 프로젝트 클론 및 빌드
-
+### 빌드 및 실행
 ```bash
-git clone https://github.com/your-username/quantum-circuit-simulator.git
-cd quantum-circuit-simulator
-./gradlew build
-```
-
-### 2. 애플리케이션 실행
-
-```bash
+./gradlew clean build
 ./gradlew run
 ```
 
-### 3. 테스트 실행
-
+### 테스트 실행
 ```bash
 ./gradlew test
 ```
 
 ## 기술 스택
 
-- **언어**: Java 21
-- **빌드 도구**: Gradle 8.14
-- **테스트**: JUnit 5, AssertJ
-- **라이브러리**:
-  - Strange 0.1.3 (양자 컴퓨팅)
-  - mission-utils 1.2.0 (Console)
+### 언어 및 버전
+- Java 17
+- Gradle 8.5
+
+### 라이브러리
+- **Strange** (`org.redfx:strange:0.1.3`): 양자 컴퓨팅 시뮬레이션
+  - Port-Adapter 패턴으로 격리
+  - StrangeQuantumExecutor로 캡슐화
+- **JUnit 5**: 테스트 프레임워크
+- **AssertJ**: 유창한 단언문
 
 ## 패키지 구조
+
 ```
 quantum.circuit
-├── Application.java
-├── QuantumCircuitSimulator.java
-├── mode
-│   ├── AlgorithmMode.java
-│   ├── OptimizationMode.java
-│   └── BenchmarkMode.java
-├── algorithm
-│   ├── QuantumAlgorithm.java (abstract, Template Method)
+├── Application.java (메인 애플리케이션)
+├── QuantumCircuitSimulator.java (자유 모드)
+│
+├── domain (도메인 레이어)
+│   ├── circuit (회로 관련)
+│   │   ├── QuantumCircuit.java
+│   │   ├── CircuitStep.java
+│   │   ├── QubitIndex.java (VO)
+│   │   └── QuantumCircuitBuilder.java (Builder)
+│   │
+│   ├── gate (게이트 관련)
+│   │   ├── QuantumGate.java (인터페이스)
+│   │   ├── SingleQubitGate.java (추상 클래스)
+│   │   ├── PauliXGate.java
+│   │   ├── HadamardGate.java
+│   │   ├── PauliZGate.java
+│   │   └── CNOTGate.java
+│   │
+│   └── state (상태 관련)
+│       ├── QuantumState.java
+│       ├── Probability.java (VO)
+│       ├── MeasurementResult.java (Enum)
+│       └── executor (Port 인터페이스)
+│           └── QuantumExecutor.java (DIP)
+│
+├── infrastructure (인프라 레이어)
+│   └── executor (Adapter 구현)
+│       └── StrangeQuantumExecutor.java (DIP)
+│
+├── algorithm (알고리즘 레이어)
+│   ├── QuantumAlgorithm.java (Template Method)
 │   ├── AlgorithmFactory.java (Factory)
+│   ├── AlgorithmType.java (Enum)
 │   ├── BellStateAlgorithm.java
 │   ├── GHZStateAlgorithm.java
 │   ├── QFTAlgorithm.java
 │   ├── GroverAlgorithm.java
 │   └── DeutschJozsaAlgorithm.java
-├── factory
-│   └── SingleQubitGateFactory.java (Factory)
-├── util
-│   └── InputRetryHandler.java (Utility)
-├── optimizer
-│   ├── CircuitOptimizer.java (interface, Strategy)
-│   ├── OptimizationPipeline.java (Composite + Chain of Responsibility)
+│
+├── optimizer (최적화 레이어)
+│   ├── CircuitOptimizer.java (인터페이스)
+│   ├── RuleBasedOptimizer.java (규칙 기반)
+│   ├── OptimizationPipeline.java (Composite)
 │   ├── RedundantGateRemover.java
+│   ├── IdentityGateRemover.java
 │   ├── GateFusionOptimizer.java
-│   └── IdentityGateRemover.java
-├── analyzer
-│   ├── CircuitAnalyzer.java (Facade)
-│   ├── CircuitDepth.java
-│   ├── GateCount.java
-│   ├── CircuitComplexity.java
-│   ├── EntanglementDegree.java
-│   └── AnalysisReport.java
-├── validator
-│   ├── CircuitValidator.java (interface, Chain of Responsibility)
-│   ├── ValidationChain.java
+│   └── rule (최적화 규칙)
+│       ├── OptimizationRule.java (Strategy 인터페이스)
+│       └── rules
+│           └── ConsecutiveSameGateRule.java
+│
+├── analyzer (분석 레이어)
+│   ├── CircuitAnalyzer.java (Facade + DI)
+│   ├── AnalysisReport.java
+│   ├── GateCount.java (정적 유틸리티)
+│   ├── CircuitDepth.java (정적 유틸리티)
+│   ├── CircuitComplexity.java (정적 유틸리티)
+│   ├── EntanglementDegree.java (정적 유틸리티)
+│   └── metric (분석 메트릭)
+│       ├── CircuitMetric.java (Strategy 인터페이스)
+│       ├── GateCountMetric.java
+│       ├── CircuitDepthMetric.java
+│       ├── ComplexityMetric.java
+│       └── EntanglementMetric.java
+│
+├── validator (검증 레이어)
+│   ├── CircuitValidator.java (인터페이스)
+│   ├── ValidationChain.java (Chain of Responsibility)
+│   ├── ValidationResult.java
+│   ├── ValidationReport.java
 │   ├── QubitRangeValidator.java
 │   ├── GateCompatibilityValidator.java
 │   ├── DepthLimitValidator.java
-│   ├── ResourceValidator.java
-│   ├── ValidationResult.java
-│   └── ValidationReport.java
-├── benchmark
-│   ├── CircuitComparator.java
-│   ├── ComparisonReport.java
-│   ├── BenchmarkRunner.java (Observer)
-│   ├── PerformanceMonitor.java (Observer)
+│   └── ResourceValidator.java
+│
+├── benchmark (벤치마크 레이어)
+│   ├── PerformanceMonitor.java (Observer 인터페이스)
+│   ├── BenchmarkRunner.java (Subject)
+│   ├── ResultCollector.java (Observer)
 │   ├── PerformanceMetrics.java
-│   ├── ResultCollector.java
-│   └── BenchmarkReport.java
-├── domain
-│   ├── gate
-│   │   ├── QuantumGate.java (interface)
-│   │   ├── SingleQubitGate.java (abstract, Template Method)
-│   │   ├── PauliXGate.java
-│   │   ├── HadamardGate.java
-│   │   ├── PauliZGate.java
-│   │   └── CNOTGate.java
-│   ├── circuit
-│   │   ├── QubitIndex.java
-│   │   ├── CircuitStep.java
-│   │   ├── QuantumCircuit.java
-│   │   └── QuantumCircuitBuilder.java (Builder)
-│   └── state
-│       ├── QuantumState.java
-│       ├── Probability.java
-│       └── MeasurementResult.java (enum)
-├── visualizer
-│   ├── CircuitVisualizer.java
-│   └── StateVisualizer.java
-└── view
-    ├── InputView.java
-    └── OutputView.java
+│   ├── BenchmarkReport.java
+│   ├── CircuitComparator.java
+│   └── ComparisonReport.java
+│
+├── factory (팩토리 레이어)
+│   └── SingleQubitGateFactory.java
+│
+├── mode (모드 레이어)
+│   ├── AlgorithmMode.java
+│   ├── OptimizationMode.java
+│   └── BenchmarkMode.java
+│
+├── util (유틸리티 레이어)
+│   ├── InputRetryHandler.java
+│   └── CircuitStepBuilder.java
+│
+├── view (View 레이어)
+│   ├── InputView.java
+│   └── OutputView.java
+│
+└── visualizer (시각화 레이어)
+    ├── CircuitVisualizer.java
+    └── StateVisualizer.java
 ```
+
+## 디자인 패턴 활용
+
+### 1. Builder Pattern
+**목적**: 복잡한 회로 객체를 단계별로 생성
+
+```java
+QuantumCircuit circuit = new QuantumCircuitBuilder()
+    .withQubits(2)
+    .addStep(new CircuitStep(List.of(new HadamardGate(new QubitIndex(0)))))
+    .addStep(new CircuitStep(List.of(new CNOTGate(new QubitIndex(0), new QubitIndex(1)))))
+    .build();
+```
+
+**적용 위치**: `QuantumCircuitBuilder`
+
+### 2. Template Method Pattern
+**목적**: 알고리즘의 공통 흐름 정의, 세부 단계는 하위 클래스가 구현
+
+```java
+public abstract class QuantumAlgorithm {
+    public final QuantumCircuit build(int qubitCount) {
+        validateQubitCount(qubitCount);
+        QuantumCircuitBuilder builder = createBuilder(qubitCount);
+        prepareInitialState(builder);  // Hook Method
+        applyMainAlgorithm(builder);   // Abstract Method
+        return builder.build();
+    }
+    
+    protected abstract void applyMainAlgorithm(QuantumCircuitBuilder builder);
+}
+```
+
+**적용 위치**: `QuantumAlgorithm`, `SingleQubitGate`
+
+### 3. Factory Pattern
+**목적**: 객체 생성 로직을 캡슐화하고 타입 안전성 보장
+
+```java
+public class AlgorithmFactory {
+    public QuantumAlgorithm create(String algorithmName) {
+        AlgorithmType type = AlgorithmType.from(algorithmName);
+        return type.create();
+    }
+}
+
+public enum AlgorithmType {
+    BELL_STATE("Bell State", "...", 2, BellStateAlgorithm::new),
+    GHZ_STATE("GHZ State", "...", 3, GHZStateAlgorithm::new);
+    
+    private final Supplier<QuantumAlgorithm> supplier;
+    
+    public QuantumAlgorithm create() {
+        return supplier.get();
+    }
+}
+```
+
+**적용 위치**: `AlgorithmFactory` + `AlgorithmType`, `SingleQubitGateFactory`
+
+### 4. Strategy Pattern
+**목적**: 알고리즘을 캡슐화하고 런타임에 교체 가능하게 함
+
+```java
+// 최적화 전략
+public interface CircuitOptimizer {
+    QuantumCircuit optimize(QuantumCircuit circuit);
+}
+
+// 분석 메트릭 전략
+public interface CircuitMetric {
+    int calculate(QuantumCircuit circuit);
+    String getMetricName();
+}
+
+// Executor 전략 (Port)
+public interface QuantumExecutor {
+    void applyXGate(QubitIndex target);
+    Probability getProbabilityOfOne(QubitIndex index);
+}
+```
+
+**적용 위치**:
+- `CircuitOptimizer` (최적화)
+- `OptimizationRule` (최적화 규칙)
+- `CircuitMetric` (분석 메트릭)
+- `QuantumExecutor` (실행기)
+
+### 5. Chain of Responsibility
+**목적**: 요청을 처리할 수 있는 객체들의 체인을 구성
+
+```java
+public class ValidationChain {
+    private final List<CircuitValidator> validators;
+    
+    public ValidationResult validate(QuantumCircuit circuit) {
+        for (CircuitValidator validator : validators) {
+            ValidationResult result = validator.validate(circuit);
+            if (!result.isValid()) {
+                return result;  // 첫 실패에서 중단
+            }
+        }
+        return ValidationResult.success();
+    }
+    
+    public ValidationReport validateAll(QuantumCircuit circuit) {
+        List<ValidationResult> results = validators.stream()
+            .map(v -> v.validate(circuit))
+            .collect(Collectors.toList());
+        return new ValidationReport(results);
+    }
+}
+```
+
+**적용 위치**: `ValidationChain`
+
+### 6. Composite Pattern
+**목적**: 여러 객체를 트리 구조로 구성하여 일관된 인터페이스 제공
+
+```java
+public class OptimizationPipeline implements CircuitOptimizer {
+    private final List<CircuitOptimizer> optimizers;
+    
+    @Override
+    public QuantumCircuit optimize(QuantumCircuit circuit) {
+        QuantumCircuit current = circuit;
+        for (CircuitOptimizer optimizer : optimizers) {
+            current = optimizer.optimize(current);
+        }
+        return current;
+    }
+}
+```
+
+**적용 위치**: `OptimizationPipeline`
+
+### 7. Facade Pattern
+**목적**: 복잡한 서브시스템에 대한 단순한 인터페이스 제공
+
+```java
+public class CircuitAnalyzer {
+    private final List<CircuitMetric> metrics;
+    
+    public AnalysisReport performAnalysis(QuantumCircuit circuit) {
+        int depth = calculateMetric(circuit, CircuitDepthMetric.class);
+        int gateCount = calculateMetric(circuit, GateCountMetric.class);
+        int complexity = calculateMetric(circuit, ComplexityMetric.class);
+        int entanglement = calculateMetric(circuit, EntanglementMetric.class);
+        
+        return new AnalysisReport(depth, gateCount, complexity, entanglement);
+    }
+}
+```
+
+**적용 위치**: `CircuitAnalyzer`, 정적 유틸리티 클래스들
+
+### 8. Observer Pattern
+**목적**: 객체의 상태 변화를 관찰자들에게 자동으로 통지
+
+```java
+public interface PerformanceMonitor {
+    void onBenchmarkStart(String circuitName);
+    void onBenchmarkComplete(String circuitName, PerformanceMetrics metrics);
+}
+
+public class BenchmarkRunner {
+    private final List<PerformanceMonitor> monitors;
+    
+    public BenchmarkReport runBenchmark(Map<String, QuantumCircuit> circuits) {
+        for (var entry : circuits.entrySet()) {
+            notifyStart(entry.getKey());
+            PerformanceMetrics metrics = measurePerformance(entry.getValue());
+            notifyComplete(entry.getKey(), metrics);
+        }
+    }
+}
+```
+
+**적용 위치**: `BenchmarkRunner` (Subject), `PerformanceMonitor` (Observer)
+
+### 9. Adapter Pattern
+**목적**: 호환되지 않는 인터페이스를 연결
+
+```java
+// Adapter 구현
+public class StrangeQuantumExecutor implements QuantumExecutor {
+    private final Program program;  // Strange 라이브러리
+    
+    @Override
+    public void applyXGate(QubitIndex target) {
+        Step step = new Step();
+        step.addGate(new X(target.getValue()));  // Strange API 변환
+        program.addStep(step);
+    }
+}
+```
+
+**적용 위치**: `StrangeQuantumExecutor`
+
+### 10. Port-Adapter
+**목적**: 도메인과 인프라를 완전히 분리하여 DIP 달성
+
+```
+┌─────────────────────────────────┐
+│      Domain Layer               │
+│  QuantumState (비즈니스 로직)      │
+│         ↓ 의존                   │
+│  QuantumExecutor (Port)         │  ← Domain이 정의
+└─────────────────────────────────┘
+            ↑ 구현
+            │
+┌─────────────────────────────────┐
+│  Infrastructure Layer           │
+│  StrangeQuantumExecutor         │  ← Infrastructure가 구현
+│         ↓ 사용                   │
+│  Strange Library                │
+└─────────────────────────────────┘
+```
+
+**핵심 원칙**:
+- **Port**: Domain이 필요로 하는 기능을 인터페이스로 정의
+- **Adapter**: Infrastructure가 Port를 구현
+- **의존성 역전**: 상위(Domain)가 하위(Infrastructure)에 의존하지 않음
+
+**효과**:
+- 라이브러리 교체 용이 (Strange → Qiskit)
+- Mock 객체로 테스트 가능
+- 진정한 도메인 중심 설계
+
+**적용 위치**:
+- Port: `quantum.circuit.domain.state.executor.QuantumExecutor`
+- Adapter: `quantum.circuit.infrastructure.executor.StrangeQuantumExecutor`
 
 ## 클래스 다이어그램
 
 ### 1. 핵심 도메인 구조
+
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                      domain 패키지                            │
@@ -662,7 +848,7 @@ quantum.circuit
 │  ││Pauli ││Hada- ││PauliZ  │                          │     │
 │  ││XGate ││mard  ││Gate    │                          │     │
 │  │└──────┘└──────┘└────────┘                          │     │
-│  │(NOT)   (중첩)   (위상)                               │     │
+│  │(NOT)    (중첩)   (위상)                              │     │
 │  └────────────────────────────────────────────────────┘     │
 │                        ↓ 사용                                │
 │  ┌───────────────────────────────────────────────────┐      │
@@ -1005,74 +1191,107 @@ quantum.circuit
               └─────────────────┘
 ```
 
-## 디자인 패턴 활용
+## 아키텍처 설계
 
-### 1. Builder Pattern
+### Port-Adapter Architecture
+
+```
+┌────────────────────────────────────────────────────────┐
+│                  Application Layer                     │
+│    (Mode: AlgorithmMode, OptimizationMode, etc.)       │
+└────────────────────────────────────────────────────────┘
+                       ↓
+┌────────────────────────────────────────────────────────┐
+│                   Domain Layer                         │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  │
+│  │QuantumCircuit│  │ QuantumState │  │ QuantumGate  │  │
+│  │              │  │              │  │              │  │
+│  │              │  │              │  │              │  │
+│  └──────────────┘  └──────────────┘  └──────────────┘  │
+│                           ↓                            │
+│                  ┌──────────────────┐                  │
+│                  │QuantumExecutor   │  (Port)          │
+│                  │  (Interface)     │                  │
+│                  └──────────────────┘                  │
+└────────────────────────────────────────────────────────┘
+                           ↑ 구현
+┌────────────────────────────────────────────────────────┐
+│              Infrastructure Layer                      │
+│                  ┌──────────────────┐                  │
+│                  │StrangeQuantum    │  (Adapter)       │
+│                  │   Executor       │                  │
+│                  └──────────────────┘                  │
+│                           ↓                            │
+│                  ┌──────────────────┐                  │
+│                  │Strange Library   │                  │
+│                  └──────────────────┘                  │
+└────────────────────────────────────────────────────────┘
+```
+
+### 레이어별 책임
+
+#### 1. Domain Layer (핵심 비즈니스 로직)
+- **QuantumCircuit**: 회로 구성 및 실행
+- **QuantumState**: 양자 상태 관리
+- **QuantumGate**: 게이트 연산
+- **QuantumExecutor (Port)**: 실행기 인터페이스 정의
+
+**원칙**:
+- Infrastructure에 의존하지 않음
+- 순수한 비즈니스 로직만 포함
+- Port 인터페이스를 소유
+
+#### 2. Infrastructure Layer (기술적 구현)
+- **StrangeQuantumExecutor (Adapter)**: Strange 라이브러리 연동
+- **외부 라이브러리 격리**: Strange 의존성 캡슐화
+
+**원칙**:
+- Domain의 Port를 구현
+- 라이브러리 변경 시 이 레이어만 수정
+
+#### 3. Application Layer (유스케이스)
+- **Mode 클래스들**: 사용자 시나리오 구현
+- **Analyzer, Optimizer, Validator**: 부가 기능
+
+### DIP (의존성 역전 원칙) 달성
+
+**Before (문제)**:
 ```java
-class QuantumCircuitBuilder {
-    public QuantumCircuitBuilder withQubits(int count);
-    public QuantumCircuitBuilder addStep(CircuitStep step);
-    public QuantumCircuit build();
+// Domain이 Infrastructure에 직접 의존
+public class QuantumState {
+    private final Program program;  // Strange 타입!
 }
 ```
 
-### 2. Template Method Pattern
+**After (해결)**:
 ```java
-abstract class QuantumAlgorithm {
-    public final QuantumCircuit build(int qubits) {
-        // 공통 흐름 정의
-        // 하위 클래스가 세부 구현
+// Domain이 인터페이스 정의
+package quantum.circuit.domain.state.executor;
+public interface QuantumExecutor {
+    void applyXGate(QubitIndex target);
+}
+
+// Infrastructure가 구현
+package quantum.circuit.infrastructure.executor;
+public class StrangeQuantumExecutor implements QuantumExecutor {
+    private final Program program;
+    // Strange 의존성 격리
+}
+
+// Domain이 인터페이스에 의존
+public class QuantumState {
+    private final QuantumExecutor executor;  // 인터페이스!
+    
+    public static QuantumState initialize(int qubitCount) {
+        return new QuantumState(qubitCount, new StrangeQuantumExecutor(qubitCount));
     }
 }
 ```
 
-### 3. Factory Pattern
-```java
-class AlgorithmFactory {
-    public QuantumAlgorithm create(String algorithmName);
-}
-```
-
-### 4. Strategy Pattern
-```java
-interface CircuitOptimizer {
-    QuantumCircuit optimize(QuantumCircuit circuit);
-}
-// 다양한 최적화 전략 구현
-```
-
-### 5. Chain of Responsibility
-```java
-interface CircuitValidator {
-    ValidationResult validate(QuantumCircuit circuit);
-}
-// ValidationChain으로 연결
-```
-
-### 6. Composite Pattern
-```java
-class OptimizationPipeline {
-    private List<CircuitOptimizer> optimizers;
-    // 여러 최적화를 조합
-}
-```
-
-### 7. Facade Pattern
-```java
-class CircuitAnalyzer {
-    public AnalysisReport analyze(QuantumCircuit circuit);
-    // 복잡한 분석 로직을 단순한 인터페이스로 제공
-}
-```
-
-### 8. Observer Pattern
-```java
-interface PerformanceMonitor {
-    void onBenchmarkStart(String circuitName);
-    void onBenchmarkComplete(String circuitName, PerformanceMetrics metrics);
-}
-// BenchmarkRunner가 모니터들에게 이벤트 통지
-```
+**효과**:
+- ✅ **라이브러리 독립성**: Strange → Qiskit 교체 가능
+- ✅ **테스트 용이성**: Mock 객체 주입 가능
+- ✅ **진정한 계층 분리**: Domain이 Infrastructure를 모름
 
 ## 프로그래밍 요구사항
 
@@ -1087,38 +1306,66 @@ interface PerformanceMonitor {
 ### 객체지향 설계
 - 원시값을 포장한다 (QubitIndex, Probability)
 - 일급 컬렉션을 사용한다 (CircuitStep의 gates)
-- Enum을 적용한다 (MeasurementResult)
+- Enum을 적용한다 (MeasurementResult, AlgorithmType)
 - 도메인 로직과 UI 로직을 분리한다
 - 각 객체는 단일 책임을 가진다 (SRP)
 - 확장에는 열려있고 수정에는 닫혀있다 (OCP)
 - 인터페이스 분리 원칙을 따른다 (ISP)
 - 의존성 역전 원칙을 따른다 (DIP)
 
+### SOLID 원칙 적용
+
+#### SRP (단일 책임 원칙)
+- 각 클래스는 하나의 책임만 가진다
+- 예: `CircuitAnalyzer`는 분석만, `CircuitOptimizer`는 최적화만
+
+#### OCP (개방-폐쇄 원칙)
+- Strategy 패턴으로 확장에 열려있음
+- 새로운 게이트, 알고리즘, 최적화 규칙 추가 시 기존 코드 수정 불필요
+
+#### LSP (리스코프 치환 원칙)
+- `SingleQubitGate`의 하위 클래스들은 상위 클래스로 치환 가능
+- `QuantumExecutor` 구현체들은 인터페이스로 치환 가능
+
+#### ISP (인터페이스 분리 원칙)
+- `CircuitOptimizer`, `CircuitValidator`, `CircuitMetric` 등 역할별로 인터페이스 분리
+
+#### DIP (의존성 역전 원칙)
+- Domain이 Infrastructure에 의존하지 않음
+- `QuantumExecutor` 인터페이스를 Domain이 정의
+- `StrangeQuantumExecutor`가 Infrastructure에서 구현
+
 ### 테스트
 - JUnit 5와 AssertJ를 이용하여 테스트 코드를 작성한다
 - 단위 테스트 작성 (각 클래스와 메서드)
-- 테스트 커버리지 80% 이상
+- Mock 테스트로 DIP 검증
 - TDD Red-Green-Refactor 사이클을 따른다
+- 420+ 테스트 케이스로 100% 통과
 
 ### 디자인 패턴
 - Builder 패턴: 복잡한 회로 구성
 - Template Method 패턴: 알고리즘 공통 흐름
-- Factory 패턴: 알고리즘 생성
-- Strategy 패턴: 최적화 전략
-- Chain of Responsibility: 검증 체인, 최적화 파이프라인
+- Factory 패턴: 알고리즘 생성, 게이트 생성
+- Strategy 패턴: 최적화 전략, 분석 메트릭, Executor
+- Chain of Responsibility: 검증 체인
 - Composite 패턴: 최적화 파이프라인
 - Facade 패턴: 회로 분석
 - Observer 패턴: 벤치마크 실행 추적
+- Adapter 패턴: 라이브러리 격리
+- Port-Adapter: DIP 달성
 
 ### 라이브러리
-- Strange 양자 컴퓨팅 라이브러리 (`org.redfx:strange:0.1.3`)를 활용한다
-- 내부 구현은 Strange를 활용하되, 도메인 객체는 직접 설계한다
+- Strange 양자 컴퓨팅 라이브러리 (`org.redfx:strange:0.1.3`)
+- Port-Adapter 패턴으로 완전히 격리
+- `StrangeQuantumExecutor`로만 접근
+- 다른 라이브러리로 교체 가능 (Qiskit, Cirq 등)
 
 ## 참고 자료
 
+- [『퀀텀 스토리』 - 짐 배것 (반니)](https://www.aladin.co.kr/shop/wproduct.aspx?ItemId=35000923)
 - [Nobel Prize 2025 Physics - 공식 발표](https://www.nobelprize.org/prizes/physics/2025/)
 - [Strange 라이브러리 - GitHub](https://github.com/redfx-quantum/strange)
 - [Quantum Computing in Action - Manning Publications](https://www.manning.com/books/quantum-computing-in-action)
-- [『퀀텀 스토리』 - 짐 배것 (반니)](https://www.aladin.co.kr/shop/wproduct.aspx?ItemId=35000923)
 - [Quantum Algorithm Zoo](https://quantumalgorithmzoo.org/)
 - [Qiskit Textbook](https://qiskit.org/textbook/)
+- [Clean Architecture - Robert C. Martin](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
