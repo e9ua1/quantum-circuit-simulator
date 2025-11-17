@@ -1,14 +1,13 @@
 package quantum.circuit.analyzer;
 
+import quantum.circuit.analyzer.metric.EntanglementMetric;
 import quantum.circuit.domain.circuit.QuantumCircuit;
-import quantum.circuit.domain.gate.CNOTGate;
 
 public class EntanglementDegree {
 
+    private static final EntanglementMetric METRIC = new EntanglementMetric();
+
     public static int calculate(QuantumCircuit circuit) {
-        return (int) circuit.getSteps().stream()
-                .flatMap(step -> step.getGates().stream())
-                .filter(gate -> gate instanceof CNOTGate)
-                .count();
+        return METRIC.calculate(circuit);
     }
 }
