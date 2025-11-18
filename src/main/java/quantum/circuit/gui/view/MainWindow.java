@@ -15,8 +15,8 @@ import quantum.circuit.algorithm.AlgorithmType;
 import quantum.circuit.domain.circuit.QuantumCircuit;
 import quantum.circuit.domain.state.QuantumState;
 import quantum.circuit.gui.controller.CircuitController;
+import quantum.circuit.gui.controller.StepController;
 import quantum.circuit.gui.renderer.CircuitCanvas;
-import quantum.circuit.gui.renderer.CircuitRenderer;
 
 import java.util.Optional;
 
@@ -29,27 +29,65 @@ public class MainWindow {
     private static final double PADDING = 20.0;
 
     private final BorderPane root;
+    private final BorderPane centerPane;
     private final ScrollPane circuitCanvasArea;
+    private final StepControlPanel stepControlPanel;
     private final StateInfoPanel stateInfoPanel;
-    private final CircuitRenderer renderer;
+    private final CircuitCanvas renderer;  // CircuitRenderer 대신 CircuitCanvas 사용
 
-    private CircuitController controller;
+    private CircuitController circuitController;
+    private StepController stepController;
+    private QuantumCircuit circuit;  // 현재 회로 저장
 
     public MainWindow() {
         this.root = new BorderPane();
+        this.centerPane = new BorderPane();
         this.circuitCanvasArea = createCircuitCanvasArea();
+        this.stepControlPanel = new StepControlPanel();
         this.stateInfoPanel = new StateInfoPanel();
         this.renderer = new CircuitCanvas();
 
         setupLayout();
         applyStyles();
+        setupStepControl();
     }
 
     private void setupLayout() {
         root.setTop(createHeader());
         root.setLeft(createModeSelectionPanel());
-        root.setCenter(circuitCanvasArea);
+
+        // 중앙 영역 = 회로 캔버스 + 하단 단계 제어
+        centerPane.setCenter(circuitCanvasArea);
+        centerPane.setBottom(stepControlPanel.getRoot());
+        root.setCenter(centerPane);
+
         root.setRight(stateInfoPanel.getRoot());
+    }
+
+    private void setupStepControl() {
+        stepControlPanel.setOnNextStep(() -> {
+            if (stepController != null) {
+                stepController.nextStep();
+            }
+        });
+
+        stepControlPanel.setOnPreviousStep(() -> {
+            if (stepController != null) {
+                stepController.previousStep();
+            }
+        });
+
+        stepControlPanel.setOnReset(() -> {
+            if (stepController != null) {
+                stepController.reset();
+            }
+        });
+
+        stepControlPanel.setOnRunToEnd(() -> {
+            if (stepController != null) {
+                stepController.runToEnd();
+            }
+        });
     }
 
     private VBox createHeader() {
@@ -76,7 +114,6 @@ public class MainWindow {
         Button optimizationModeButton = createModeButton("최적화 모드", "optimizationModeButton");
         Button benchmarkModeButton = createModeButton("벤치마크 모드", "benchmarkModeButton");
 
-        // 이벤트 핸들러 설정
         freeModeButton.setOnAction(e -> handleFreeMode());
         algorithmModeButton.setOnAction(e -> handleAlgorithmMode());
         optimizationModeButton.setOnAction(e -> handleOptimizationMode());
@@ -156,13 +193,12 @@ public class MainWindow {
         root.setStyle("-fx-background-color: #f5f6fa;");
     }
 
-    // 이벤트 핸들러들
     private void handleFreeMode() {
         showNotImplementedAlert("자유 모드");
     }
 
     private void handleAlgorithmMode() {
-        if (controller == null) {
+        if (circuitController == null) {
             showErrorAlert("컨트롤러가 설정되지 않았습니다.");
             return;
         }
@@ -171,7 +207,7 @@ public class MainWindow {
         Optional<AlgorithmType> selected = dialog.show();
 
         selected.ifPresent(algorithmType -> {
-            controller.loadAlgorithm(algorithmType);
+            circuitController.loadAlgorithm(algorithmType);
         });
     }
 
@@ -199,18 +235,52 @@ public class MainWindow {
         alert.showAndWait();
     }
 
-    // Public 메서드들
     public void setCircuit(QuantumCircuit circuit) {
+        this.circuit = circuit;  // 회로 저장
+
+        // 초기 렌더링 (하이라이팅 없음)
         Pane circuitPane = renderer.render(circuit);
         circuitCanvasArea.setContent(circuitPane);
 
-        // 회로 실행 후 상태 업데이트
-        QuantumState state = circuit.execute();
-        stateInfoPanel.updateState(state);
+        // StepController에 회로 로드
+        if (stepController != null) {
+            stepController.loadCircuit(circuit);
+        } else {
+            // StepController가 없으면 끝까지 실행 (기존 동작)
+            QuantumState state = circuit.execute();
+            stateInfoPanel.updateState(state);
+        }
     }
 
-    public void setController(CircuitController controller) {
-        this.controller = controller;
+    /**
+     * 상태만 업데이트 (단계별 실행용)
+     * 게이트 하이라이팅과 함께 회로를 다시 렌더링합니다.
+     *
+     * @param state 현재 상태
+     * @param currentStep 현재 단계
+     */
+    public void updateStateOnly(QuantumState state, int currentStep) {
+        // 회로를 currentStep과 함께 다시 렌더링 (하이라이팅 적용)
+        if (circuit != null) {
+            Pane circuitPane = renderer.render(circuit, currentStep);
+            circuitCanvasArea.setContent(circuitPane);
+        }
+
+        // 상태 정보 패널 업데이트
+        stateInfoPanel.updateState(state);
+
+        // 단계 정보 업데이트
+        if (stepController != null) {
+            stepControlPanel.updateStepInfo(currentStep, stepController.getTotalSteps());
+        }
+    }
+
+    public void setCircuitController(CircuitController controller) {
+        this.circuitController = controller;
+    }
+
+    public void setStepController(StepController controller) {
+        this.stepController = controller;
     }
 
     public BorderPane getRoot() {
