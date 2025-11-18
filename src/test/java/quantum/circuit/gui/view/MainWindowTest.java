@@ -44,34 +44,6 @@ class MainWindowTest {
     }
 
     @Test
-    @DisplayName("getCircuitCanvasArea 메서드가 ScrollPane을 반환한다")
-    void getCircuitCanvasArea_메서드가_ScrollPane을_반환한다() throws Exception {
-        // given
-        Class<?> clazz = MainWindow.class;
-
-        // when
-        Method method = clazz.getDeclaredMethod("getCircuitCanvasArea");
-
-        // then
-        assertThat(method).isNotNull();
-        assertThat(method.getReturnType().getSimpleName()).isEqualTo("ScrollPane");
-    }
-
-    @Test
-    @DisplayName("getStateInfoPanel 메서드가 StateInfoPanel을 반환한다")
-    void getStateInfoPanel_메서드가_StateInfoPanel을_반환한다() throws Exception {
-        // given
-        Class<?> clazz = MainWindow.class;
-
-        // when
-        Method method = clazz.getDeclaredMethod("getStateInfoPanel");
-
-        // then
-        assertThat(method).isNotNull();
-        assertThat(method.getReturnType().getSimpleName()).isEqualTo("StateInfoPanel");
-    }
-
-    @Test
     @DisplayName("setCircuit 메서드가 존재한다")
     void setCircuit_메서드가_존재한다() throws Exception {
         // given
@@ -86,13 +58,41 @@ class MainWindowTest {
     }
 
     @Test
-    @DisplayName("setController 메서드가 존재한다")
-    void setController_메서드가_존재한다() throws Exception {
+    @DisplayName("updateStateOnly 메서드가 존재한다")
+    void updateStateOnly_메서드가_존재한다() throws Exception {
         // given
         Class<?> clazz = MainWindow.class;
 
         // when
-        Method method = clazz.getDeclaredMethod("setController", quantum.circuit.gui.controller.CircuitController.class);
+        Method method = clazz.getDeclaredMethod("updateStateOnly", quantum.circuit.domain.state.QuantumState.class, int.class);
+
+        // then
+        assertThat(method).isNotNull();
+        assertThat(method.getReturnType()).isEqualTo(void.class);
+    }
+
+    @Test
+    @DisplayName("setCircuitController 메서드가 존재한다")
+    void setCircuitController_메서드가_존재한다() throws Exception {
+        // given
+        Class<?> clazz = MainWindow.class;
+
+        // when
+        Method method = clazz.getDeclaredMethod("setCircuitController", quantum.circuit.gui.controller.CircuitController.class);
+
+        // then
+        assertThat(method).isNotNull();
+        assertThat(method.getReturnType()).isEqualTo(void.class);
+    }
+
+    @Test
+    @DisplayName("setStepController 메서드가 존재한다")
+    void setStepController_메서드가_존재한다() throws Exception {
+        // given
+        Class<?> clazz = MainWindow.class;
+
+        // when
+        Method method = clazz.getDeclaredMethod("setStepController", quantum.circuit.gui.controller.StepController.class);
 
         // then
         assertThat(method).isNotNull();

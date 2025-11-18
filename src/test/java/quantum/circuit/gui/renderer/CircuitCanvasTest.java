@@ -1,34 +1,34 @@
 package quantum.circuit.gui.renderer;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import quantum.circuit.domain.circuit.QuantumCircuit;
+
+import java.lang.reflect.Method;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@DisplayName("CircuitCanvas 테스트")
 class CircuitCanvasTest {
 
     @Test
+    @DisplayName("CircuitCanvas 클래스가 존재한다")
     void CircuitCanvas_클래스가_존재한다() {
-        // given & when
-        Class<?> clazz = CircuitCanvas.class;
-
-        // then
-        assertThat(clazz).isNotNull();
+        // given & when & then
+        assertThat(CircuitCanvas.class).isNotNull();
     }
 
     @Test
-    void CircuitCanvas는_CircuitRenderer를_구현한다() {
-        // given & when
+    @DisplayName("render 메서드가 QuantumCircuit과 currentStep을 받는다")
+    void render_메서드가_QuantumCircuit과_currentStep을_받는다() throws Exception {
+        // given
         Class<?> clazz = CircuitCanvas.class;
 
-        // then
-        assertThat(CircuitRenderer.class.isAssignableFrom(clazz)).isTrue();
-    }
-
-    @Test
-    void render_메서드가_존재한다() throws Exception {
-        // given & when
-        var method = CircuitCanvas.class.getDeclaredMethod("render", QuantumCircuit.class);
+        // when
+        Method method = clazz.getDeclaredMethod(
+                "render",
+                quantum.circuit.domain.circuit.QuantumCircuit.class,
+                int.class
+        );
 
         // then
         assertThat(method).isNotNull();
@@ -36,12 +36,19 @@ class CircuitCanvasTest {
     }
 
     @Test
-    void public_기본_생성자를_가진다() throws Exception {
-        // given & when
-        var constructor = CircuitCanvas.class.getDeclaredConstructor();
+    @DisplayName("기존 render 메서드도 여전히 존재한다")
+    void 기존_render_메서드도_여전히_존재한다() throws Exception {
+        // given
+        Class<?> clazz = CircuitCanvas.class;
+
+        // when
+        Method method = clazz.getDeclaredMethod(
+                "render",
+                quantum.circuit.domain.circuit.QuantumCircuit.class
+        );
 
         // then
-        assertThat(constructor).isNotNull();
-        assertThat(java.lang.reflect.Modifier.isPublic(constructor.getModifiers())).isTrue();
+        assertThat(method).isNotNull();
+        assertThat(method.getReturnType().getSimpleName()).isEqualTo("Pane");
     }
 }
