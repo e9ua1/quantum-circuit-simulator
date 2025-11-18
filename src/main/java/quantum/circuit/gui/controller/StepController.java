@@ -31,6 +31,7 @@ public class StepController {
     public void loadCircuit(QuantumCircuit circuit) {
         this.circuit = circuit;
         this.currentStep = 0;
+        // totalSteps = 전체 게이트 수
         this.totalSteps = circuit.getSteps().size();
 
         // 회로를 한 번만 실행하여 최종 상태 저장
@@ -88,7 +89,7 @@ public class StepController {
     /**
      * 전체 단계 수를 반환합니다.
      *
-     * @return 전체 단계 수 (초기 상태 제외)
+     * @return 전체 단계 수 (게이트 개수)
      */
     public int getTotalSteps() {
         return totalSteps;
@@ -102,11 +103,9 @@ public class StepController {
             return;
         }
 
-        // currentStep이 totalSteps이면 최종 상태 표시
-        // 아니면 초기 상태 또는 중간 상태 표시 (단순화: 항상 최종 상태 표시)
-        QuantumState displayState = (currentStep == totalSteps)
-            ? finalState
-            : finalState;  // 단순화: 모든 단계에서 최종 상태 표시
+        // 단순화 버전: 모든 단계에서 최종 상태 표시
+        // (실제로는 단계별 상태를 계산해야 하지만, 도메인 수정 없이는 불가능)
+        QuantumState displayState = finalState;
 
         // MainWindow에 상태와 현재 단계 전달
         mainWindow.updateStateOnly(displayState, currentStep);

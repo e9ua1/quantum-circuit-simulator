@@ -42,7 +42,7 @@ public class CircuitCanvas implements CircuitRenderer {
      * 회로를 렌더링하며 현재 단계의 게이트를 하이라이팅합니다.
      *
      * @param circuit 렌더링할 회로
-     * @param currentStep 현재 실행 단계 (0 = 초기, 1+ = 각 단계)
+     * @param currentStep 현재 실행 단계 (0 = 초기, 1 = gate 0 실행됨, ...)
      * @return 렌더링된 Pane
      */
     public Pane render(QuantumCircuit circuit, int currentStep) {
@@ -104,20 +104,28 @@ public class CircuitCanvas implements CircuitRenderer {
         }
     }
 
+    /**
+     * 게이트의 하이라이팅 상태를 결정합니다.
+     *
+     * @param gateStep 게이트의 단계 인덱스 (0부터 시작)
+     * @param currentStep 현재 실행 단계 (0 = 초기, 1 = gate 0 실행됨, ...)
+     * @return 하이라이팅 상태
+     */
     private GateHighlightState getHighlightState(int gateStep, int currentStep) {
         if (currentStep < 0) {
             return GateHighlightState.NORMAL;  // 하이라이팅 없음
         }
 
-        // gateStep은 0부터 시작, currentStep도 0부터 시작
-        // currentStep 0 = 초기 상태 (아무것도 실행 안 됨)
-        // currentStep 1 = 첫 번째 게이트(step 0) 실행됨
-        // currentStep 2 = 두 번째 게이트(step 1)까지 실행됨
+        // gateStep: 0, 1, 2, ... (게이트 인덱스)
+        // currentStep: 0, 1, 2, ... (실행 단계)
+        //   - 0: 아무것도 실행 안 됨
+        //   - 1: gate 0 실행됨 (CURRENT)
+        //   - 2: gate 0 실행됨 (EXECUTED), gate 1 실행됨 (CURRENT)
 
-        if (gateStep < currentStep) {
+        if (gateStep + 1 < currentStep) {
             return GateHighlightState.EXECUTED;  // 이미 실행됨
-        } else if (gateStep == currentStep) {
-            return GateHighlightState.CURRENT;   // 현재 실행 중
+        } else if (gateStep + 1 == currentStep) {
+            return GateHighlightState.CURRENT;   // 방금 실행됨 (현재)
         } else {
             return GateHighlightState.PENDING;   // 아직 실행 안 됨
         }
@@ -187,9 +195,8 @@ public class CircuitCanvas implements CircuitRenderer {
     private Color getGateColor(GateHighlightState state) {
         switch (state) {
             case EXECUTED:
-                return GATE_COLOR;  // 실행된 게이트는 원래 색상
             case CURRENT:
-                return GATE_COLOR;  // 현재 게이트도 원래 색상
+                return GATE_COLOR;  // 원래 파란색
             case PENDING:
                 return Color.rgb(189, 195, 199);  // 회색
             default:
@@ -200,9 +207,8 @@ public class CircuitCanvas implements CircuitRenderer {
     private Color getCNOTColor(GateHighlightState state) {
         switch (state) {
             case EXECUTED:
-                return CNOT_COLOR;  // 실행된 CNOT은 원래 색상
             case CURRENT:
-                return CNOT_COLOR;  // 현재 CNOT도 원래 색상
+                return CNOT_COLOR;  // 원래 빨간색
             case PENDING:
                 return Color.rgb(189, 195, 199);  // 회색
             default:

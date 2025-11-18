@@ -35,6 +35,9 @@ public class StepControlPanel {
 
         setupLayout();
         applyStyles();
+
+        // 초기에는 모든 버튼 비활성화
+        updateStepInfo(0, 0);
     }
 
     private void setupLayout() {
@@ -55,34 +58,38 @@ public class StepControlPanel {
         button.setPrefSize(BUTTON_SIZE, BUTTON_SIZE);
         button.setStyle(
                 "-fx-background-color: #3498db; " +
-                "-fx-text-fill: white; " +
-                "-fx-font-size: 18px; " +
-                "-fx-font-weight: bold; " +
-                "-fx-background-radius: 5; " +
-                "-fx-cursor: hand;"
+                        "-fx-text-fill: white; " +
+                        "-fx-font-size: 18px; " +
+                        "-fx-font-weight: bold; " +
+                        "-fx-background-radius: 5; " +
+                        "-fx-cursor: hand;"
         );
 
-        button.setOnMouseEntered(e ->
+        button.setOnMouseEntered(e -> {
+            if (!button.isDisabled()) {
                 button.setStyle(
                         "-fx-background-color: #2980b9; " +
-                        "-fx-text-fill: white; " +
-                        "-fx-font-size: 18px; " +
-                        "-fx-font-weight: bold; " +
-                        "-fx-background-radius: 5; " +
-                        "-fx-cursor: hand;"
-                )
-        );
+                                "-fx-text-fill: white; " +
+                                "-fx-font-size: 18px; " +
+                                "-fx-font-weight: bold; " +
+                                "-fx-background-radius: 5; " +
+                                "-fx-cursor: hand;"
+                );
+            }
+        });
 
-        button.setOnMouseExited(e ->
+        button.setOnMouseExited(e -> {
+            if (!button.isDisabled()) {
                 button.setStyle(
                         "-fx-background-color: #3498db; " +
-                        "-fx-text-fill: white; " +
-                        "-fx-font-size: 18px; " +
-                        "-fx-font-weight: bold; " +
-                        "-fx-background-radius: 5; " +
-                        "-fx-cursor: hand;"
-                )
-        );
+                                "-fx-text-fill: white; " +
+                                "-fx-font-size: 18px; " +
+                                "-fx-font-weight: bold; " +
+                                "-fx-background-radius: 5; " +
+                                "-fx-cursor: hand;"
+                );
+            }
+        });
 
         return button;
     }
@@ -131,17 +138,33 @@ public class StepControlPanel {
     /**
      * 현재 단계 정보 업데이트
      *
-     * @param currentStep 현재 단계 (0부터 시작)
-     * @param totalSteps 전체 단계 수
+     * currentStep: 0 ~ totalSteps (총 totalSteps + 1개 상태)
+     * - 0: 초기 상태
+     * - 1 ~ totalSteps: 각 게이트 실행 후
+     *
+     * @param currentStep 현재 단계 (0 = 초기 상태)
+     * @param totalSteps 전체 게이트 수
      */
     public void updateStepInfo(int currentStep, int totalSteps) {
+        // UI 표시: "Step X / Y"
         stepLabel.setText(String.format("Step %d / %d", currentStep, totalSteps));
 
         // 버튼 활성화/비활성화
-        resetButton.setDisable(currentStep == 0);
-        previousButton.setDisable(currentStep == 0);
-        nextButton.setDisable(currentStep >= totalSteps);
-        runToEndButton.setDisable(currentStep >= totalSteps);
+        boolean isAtStart = (currentStep == 0);
+        boolean isAtEnd = (currentStep == totalSteps);
+        boolean hasSteps = (totalSteps > 0);
+
+        // ⏮ 처음으로: 초기 상태가 아닐 때만
+        resetButton.setDisable(!hasSteps || isAtStart);
+
+        // ◀ 이전: 초기 상태가 아닐 때만
+        previousButton.setDisable(!hasSteps || isAtStart);
+
+        // ▶ 다음: 마지막 상태가 아닐 때만
+        nextButton.setDisable(!hasSteps || isAtEnd);
+
+        // ⏭ 끝까지: 마지막 상태가 아닐 때만
+        runToEndButton.setDisable(!hasSteps || isAtEnd);
     }
 
     public HBox getRoot() {
