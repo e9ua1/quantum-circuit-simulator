@@ -38,9 +38,25 @@ class CircuitEditorTest {
         Class<?> clazz = CircuitEditor.class;
 
         // when
-        Method method = clazz.getDeclaredMethod("addGate", 
-                String.class, 
-                int.class, 
+        Method method = clazz.getDeclaredMethod("addGate",
+                String.class,
+                int.class,
+                int.class);
+
+        // then
+        assertThat(method).isNotNull();
+        assertThat(method.getReturnType()).isEqualTo(void.class);
+    }
+
+    @Test
+    @DisplayName("removeGate 메서드가 존재한다")
+    void removeGate_메서드가_존재한다() throws Exception {
+        // given
+        Class<?> clazz = CircuitEditor.class;
+
+        // when
+        Method method = clazz.getDeclaredMethod("removeGate",
+                int.class,
                 int.class);
 
         // then
@@ -74,5 +90,61 @@ class CircuitEditorTest {
         // then
         assertThat(method).isNotNull();
         assertThat(method.getReturnType()).isEqualTo(void.class);
+    }
+
+    @Test
+    @DisplayName("undo 메서드가 존재한다")
+    void undo_메서드가_존재한다() throws Exception {
+        // given
+        Class<?> clazz = CircuitEditor.class;
+
+        // when
+        Method method = clazz.getDeclaredMethod("undo");
+
+        // then
+        assertThat(method).isNotNull();
+        assertThat(method.getReturnType()).isEqualTo(void.class);
+    }
+
+    @Test
+    @DisplayName("redo 메서드가 존재한다")
+    void redo_메서드가_존재한다() throws Exception {
+        // given
+        Class<?> clazz = CircuitEditor.class;
+
+        // when
+        Method method = clazz.getDeclaredMethod("redo");
+
+        // then
+        assertThat(method).isNotNull();
+        assertThat(method.getReturnType()).isEqualTo(void.class);
+    }
+
+    @Test
+    @DisplayName("canUndo 메서드가 boolean을 반환한다")
+    void canUndo_메서드가_boolean을_반환한다() throws Exception {
+        // given
+        Class<?> clazz = CircuitEditor.class;
+
+        // when
+        Method method = clazz.getDeclaredMethod("canUndo");
+
+        // then
+        assertThat(method).isNotNull();
+        assertThat(method.getReturnType()).isEqualTo(boolean.class);
+    }
+
+    @Test
+    @DisplayName("canRedo 메서드가 boolean을 반환한다")
+    void canRedo_메서드가_boolean을_반환한다() throws Exception {
+        // given
+        Class<?> clazz = CircuitEditor.class;
+
+        // when
+        Method method = clazz.getDeclaredMethod("canRedo");
+
+        // then
+        assertThat(method).isNotNull();
+        assertThat(method.getReturnType()).isEqualTo(boolean.class);
     }
 }

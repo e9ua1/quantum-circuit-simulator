@@ -50,11 +50,25 @@ class FreeModeWindowTest {
         Class<?> clazz = FreeModeWindow.class;
 
         // when
-        Method method = clazz.getDeclaredMethod("setCircuitEditor", 
+        Method method = clazz.getDeclaredMethod("setCircuitEditor",
                 quantum.circuit.gui.controller.CircuitEditor.class);
 
         // then
         assertThat(method).isNotNull();
         assertThat(method.getReturnType()).isEqualTo(void.class);
+    }
+
+    @Test
+    @DisplayName("getMainWindow 메서드가 MainWindow를 반환한다")
+    void getMainWindow_메서드가_MainWindow를_반환한다() throws Exception {
+        // given
+        Class<?> clazz = FreeModeWindow.class;
+
+        // when
+        Method method = clazz.getDeclaredMethod("getMainWindow");
+
+        // then
+        assertThat(method).isNotNull();
+        assertThat(method.getReturnType().getSimpleName()).isEqualTo("MainWindow");
     }
 }
