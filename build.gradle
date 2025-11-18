@@ -58,10 +58,16 @@ tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
 }
 
-// GUI 실행 태스크
+// GUI 실행 태스크 - JavaFX 모듈 명시적 추가
 task runGui(type: JavaExec) {
     group = 'application'
     description = 'Run the JavaFX GUI application'
-    classpath = sourceSets.main.runtimeClasspath
     mainClass = 'quantum.circuit.gui.GuiApplication'
+    classpath = sourceSets.main.runtimeClasspath
+
+    // JavaFX 모듈 명시적 추가
+    jvmArgs = [
+            '--module-path', configurations.runtimeClasspath.asPath,
+            '--add-modules', 'javafx.controls,javafx.fxml,javafx.graphics'
+    ]
 }

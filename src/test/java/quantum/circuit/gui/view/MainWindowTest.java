@@ -42,7 +42,18 @@ class MainWindowTest {
 
         // then
         assertThat(method).isNotNull();
-        assertThat(method.getReturnType().getSimpleName()).isEqualTo("Pane");
+        assertThat(method.getReturnType().getSimpleName()).isEqualTo("ScrollPane");
+    }
+
+    @Test
+    void MainWindow는_setCircuit_메서드를_가진다() throws Exception {
+        // given & when
+        var method = MainWindow.class.getDeclaredMethod("setCircuit",
+                Class.forName("quantum.circuit.domain.circuit.QuantumCircuit"));
+
+        // then
+        assertThat(method).isNotNull();
+        assertThat(method.getReturnType()).isEqualTo(void.class);
     }
 
     @Test

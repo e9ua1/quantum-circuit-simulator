@@ -4,11 +4,15 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import quantum.circuit.domain.circuit.QuantumCircuit;
+import quantum.circuit.gui.renderer.CircuitCanvas;
+import quantum.circuit.gui.renderer.CircuitRenderer;
 
 public class MainWindow {
 
@@ -19,13 +23,15 @@ public class MainWindow {
     private static final double PADDING = 20.0;
 
     private final BorderPane root;
-    private final Pane circuitCanvasArea;
+    private final ScrollPane circuitCanvasArea;
     private final Pane stateInfoPanel;
+    private final CircuitRenderer renderer;
 
     public MainWindow() {
         this.root = new BorderPane();
         this.circuitCanvasArea = createCircuitCanvasArea();
         this.stateInfoPanel = createStateInfoPanel();
+        this.renderer = new CircuitCanvas();
 
         setupLayout();
         applyStyles();
@@ -84,46 +90,52 @@ public class MainWindow {
         button.setPrefHeight(BUTTON_HEIGHT);
         button.setStyle(
                 "-fx-background-color: #3498db; " +
-                "-fx-text-fill: white; " +
-                "-fx-font-size: 14px; " +
-                "-fx-background-radius: 5; " +
-                "-fx-cursor: hand;"
+                        "-fx-text-fill: white; " +
+                        "-fx-font-size: 14px; " +
+                        "-fx-background-radius: 5; " +
+                        "-fx-cursor: hand;"
         );
 
         button.setOnMouseEntered(e ->
                 button.setStyle(
                         "-fx-background-color: #2980b9; " +
-                        "-fx-text-fill: white; " +
-                        "-fx-font-size: 14px; " +
-                        "-fx-background-radius: 5; " +
-                        "-fx-cursor: hand;"
+                                "-fx-text-fill: white; " +
+                                "-fx-font-size: 14px; " +
+                                "-fx-background-radius: 5; " +
+                                "-fx-cursor: hand;"
                 )
         );
         button.setOnMouseExited(e ->
                 button.setStyle(
                         "-fx-background-color: #3498db; " +
-                        "-fx-text-fill: white; " +
-                        "-fx-font-size: 14px; " +
-                        "-fx-background-radius: 5; " +
-                        "-fx-cursor: hand;"
+                                "-fx-text-fill: white; " +
+                                "-fx-font-size: 14px; " +
+                                "-fx-background-radius: 5; " +
+                                "-fx-cursor: hand;"
                 )
         );
 
         return button;
     }
 
-    private Pane createCircuitCanvasArea() {
-        VBox canvasArea = new VBox();
-        canvasArea.setId("circuitCanvasArea");
-        canvasArea.setAlignment(Pos.CENTER);
-        canvasArea.setStyle("-fx-background-color: white; -fx-border-color: #bdc3c7;");
+    private ScrollPane createCircuitCanvasArea() {
+        VBox placeholder = new VBox();
+        placeholder.setAlignment(Pos.CENTER);
+        placeholder.setStyle("-fx-background-color: white;");
 
-        Label placeholder = new Label("양자 회로가 여기에 표시됩니다");
-        placeholder.setFont(Font.font("System", 16));
-        placeholder.setStyle("-fx-text-fill: #95a5a6;");
+        Label placeholderLabel = new Label("양자 회로가 여기에 표시됩니다");
+        placeholderLabel.setFont(Font.font("System", 16));
+        placeholderLabel.setStyle("-fx-text-fill: #95a5a6;");
 
-        canvasArea.getChildren().add(placeholder);
-        return canvasArea;
+        placeholder.getChildren().add(placeholderLabel);
+
+        ScrollPane scrollPane = new ScrollPane(placeholder);
+        scrollPane.setId("circuitCanvasArea");
+        scrollPane.setFitToWidth(true);
+        scrollPane.setFitToHeight(true);
+        scrollPane.setStyle("-fx-background-color: white; -fx-border-color: #bdc3c7;");
+
+        return scrollPane;
     }
 
     private Pane createStateInfoPanel() {
@@ -149,11 +161,16 @@ public class MainWindow {
         root.setStyle("-fx-background-color: #f5f6fa;");
     }
 
+    public void setCircuit(QuantumCircuit circuit) {
+        Pane circuitPane = renderer.render(circuit);
+        circuitCanvasArea.setContent(circuitPane);
+    }
+
     public BorderPane getRoot() {
         return root;
     }
 
-    public Pane getCircuitCanvasArea() {
+    public ScrollPane getCircuitCanvasArea() {
         return circuitCanvasArea;
     }
 
