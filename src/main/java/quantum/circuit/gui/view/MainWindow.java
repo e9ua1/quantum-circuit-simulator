@@ -36,7 +36,7 @@ public class MainWindow {
     private final ScrollPane circuitCanvasArea;
     private final StepControlPanel stepControlPanel;
     private final StateInfoPanel stateInfoPanel;
-    private final CircuitCanvas renderer;
+    private CircuitCanvas renderer;  // 변경 가능하도록 final 제거
 
     private CircuitController circuitController;
     private StepController stepController;
@@ -48,7 +48,7 @@ public class MainWindow {
         this.circuitCanvasArea = createCircuitCanvasArea();
         this.stepControlPanel = new StepControlPanel();
         this.stateInfoPanel = new StateInfoPanel();
-        this.renderer = new CircuitCanvas();
+        this.renderer = new CircuitCanvas();  // 기본값
 
         setupLayout();
         applyStyles();
@@ -196,11 +196,14 @@ public class MainWindow {
     }
 
     private void handleFreeMode() {
-        // 새 창에서 자유 모드 열기
         Stage freeModeStage = new Stage();
         freeModeStage.setTitle("자유 모드 - 회로 편집기");
 
         FreeModeWindow freeModeWindow = new FreeModeWindow();
+
+        // InteractiveCircuitCanvas를 MainWindow에 주입
+        freeModeWindow.getMainWindow().setRenderer(freeModeWindow.getInteractiveCanvas());
+
         CircuitEditor circuitEditor = new CircuitEditor(freeModeWindow.getMainWindow());
         freeModeWindow.setCircuitEditor(circuitEditor);
 
@@ -296,6 +299,10 @@ public class MainWindow {
 
     public void setStepController(StepController controller) {
         this.stepController = controller;
+    }
+
+    public void setRenderer(CircuitCanvas newRenderer) {
+        this.renderer = newRenderer;
     }
 
     public BorderPane getRoot() {

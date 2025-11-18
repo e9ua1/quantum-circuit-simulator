@@ -3,28 +3,26 @@ package quantum.circuit.gui.view;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.input.TransferMode;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
+import javafx.scene.layout.*;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import quantum.circuit.domain.circuit.QuantumCircuit;
 import quantum.circuit.gui.controller.CircuitEditor;
+import quantum.circuit.gui.renderer.InteractiveCircuitCanvas;
 
 /**
  * 자유 모드 윈도우
- * 게이트 팔레트 + 정확한 드래그 앤 드롭 회로 편집
+ * 게이트 추가/삭제, 언두/리두 지원
  */
 public class FreeModeWindow {
 
     private static final String TITLE_TEXT = "⚛️ 자유 모드 - 회로 편집기";
     private static final double SPACING = 10.0;
     private static final double PADDING = 20.0;
-
-    // CircuitCanvas 좌표 시스템 (CircuitCanvas와 동일하게 유지)
     private static final double QUBIT_LINE_Y_SPACING = 80.0;
     private static final double GATE_X_SPACING = 100.0;
     private static final double LEFT_MARGIN = 50.0;
@@ -35,8 +33,11 @@ public class FreeModeWindow {
     private final MainWindow mainWindow;
     private final VBox centerPane;
     private final Label instructionLabel;
-    private final HBox controlPanel;
-    private final Pane dropOverlay;
+    private final HBox toolBar;
+    private final InteractiveCircuitCanvas interactiveCanvas;
+
+    private Button undoButton;
+    private Button redoButton;
 
     private CircuitEditor circuitEditor;
     private String currentDraggedGate;
@@ -47,22 +48,22 @@ public class FreeModeWindow {
         this.mainWindow = new MainWindow();
         this.centerPane = new VBox(SPACING);
         this.instructionLabel = createInstructionLabel();
-        this.controlPanel = createControlPanel();
-        this.dropOverlay = new Pane();
+        this.toolBar = createToolBar();
+        this.interactiveCanvas = new InteractiveCircuitCanvas();
 
         setupLayout();
         setupDragAndDrop();
+        setupKeyboardShortcuts();
     }
 
     private void setupLayout() {
         root.setTop(createHeader());
         root.setLeft(gatePalette.getRoot());
 
-        // 중앙 영역
         centerPane.setPadding(new Insets(PADDING));
         centerPane.getChildren().addAll(
                 instructionLabel,
-                controlPanel,
+                toolBar,
                 mainWindow.getRoot()
         );
         root.setCenter(centerPane);
@@ -85,8 +86,10 @@ public class FreeModeWindow {
 
     private Label createInstructionLabel() {
         Label label = new Label(
-                "💡 사용법: 좌측의 게이트를 드래그하여 회로에 추가하세요. " +
-                        "큐비트 라인(Q0, Q1, ...)과 단계(세로 그리드)를 선택할 수 있습니다."
+                "💡 사용법: " +
+                        "좌측 게이트를 드래그하여 추가, " +
+                        "게이트 클릭하여 삭제, " +
+                        "Ctrl+Z/Y로 언두/리두"
         );
         label.setWrapText(true);
         label.setFont(Font.font("System", 14));
@@ -99,18 +102,52 @@ public class FreeModeWindow {
         return label;
     }
 
-    private HBox createControlPanel() {
-        Label qubitLabel = new Label("큐비트 수:");
+    private HBox createToolBar() {
+        // 큐비트 수 조절
+        Label qubitLabel = new Label("큐비트:");
         qubitLabel.setFont(Font.font("System", FontWeight.BOLD, 14));
 
         Spinner<Integer> qubitSpinner = new Spinner<>(2, 5, 3);
-        qubitSpinner.setPrefWidth(80);
+        qubitSpinner.setPrefWidth(70);
         qubitSpinner.valueProperty().addListener((obs, oldVal, newVal) -> {
             if (circuitEditor != null) {
                 circuitEditor.setQubitCount(newVal);
             }
         });
 
+        // 언두 버튼
+        undoButton = new Button("↶ 언두");
+        undoButton.setStyle(
+                "-fx-background-color: #95a5a6; " +
+                        "-fx-text-fill: white; " +
+                        "-fx-font-weight: bold; " +
+                        "-fx-cursor: hand;"
+        );
+        undoButton.setDisable(true);
+        undoButton.setOnAction(e -> {
+            if (circuitEditor != null) {
+                circuitEditor.undo();
+                updateUndoRedoButtons();
+            }
+        });
+
+        // 리두 버튼
+        redoButton = new Button("↷ 리두");
+        redoButton.setStyle(
+                "-fx-background-color: #95a5a6; " +
+                        "-fx-text-fill: white; " +
+                        "-fx-font-weight: bold; " +
+                        "-fx-cursor: hand;"
+        );
+        redoButton.setDisable(true);
+        redoButton.setOnAction(e -> {
+            if (circuitEditor != null) {
+                circuitEditor.redo();
+                updateUndoRedoButtons();
+            }
+        });
+
+        // 초기화 버튼
         Button clearButton = new Button("🗑️ 초기화");
         clearButton.setStyle(
                 "-fx-background-color: #e74c3c; " +
@@ -121,39 +158,36 @@ public class FreeModeWindow {
         clearButton.setOnAction(e -> {
             if (circuitEditor != null) {
                 circuitEditor.clearCircuit();
+                updateUndoRedoButtons();
             }
         });
 
-        HBox panel = new HBox(SPACING);
-        panel.setAlignment(Pos.CENTER_LEFT);
-        panel.setPadding(new Insets(SPACING, 0, SPACING, 0));
-        panel.getChildren().addAll(qubitLabel, qubitSpinner, clearButton);
+        HBox toolbar = new HBox(SPACING);
+        toolbar.setAlignment(Pos.CENTER_LEFT);
+        toolbar.setPadding(new Insets(SPACING, 0, SPACING, 0));
+        toolbar.getChildren().addAll(
+                qubitLabel, qubitSpinner,
+                new Separator(javafx.geometry.Orientation.VERTICAL),
+                undoButton, redoButton,
+                new Separator(javafx.geometry.Orientation.VERTICAL),
+                clearButton
+        );
 
-        return panel;
+        return toolbar;
     }
 
     private void setupDragAndDrop() {
-        // 게이트 팔레트의 드래그 이벤트 처리
         gatePalette.setOnGateDragDetected((gateName, event) -> {
             currentDraggedGate = gateName;
         });
 
-        // MainWindow의 circuitCanvasArea에 드롭 영역 설정
         ScrollPane canvasArea = mainWindow.getCircuitCanvasArea();
 
         canvasArea.setOnDragOver(event -> {
             if (event.getGestureSource() != canvasArea &&
                     event.getDragboard().hasString()) {
                 event.acceptTransferModes(TransferMode.COPY);
-
-                // 드롭 위치 시각적 표시 (선택사항)
-                showDropIndicator(event.getX(), event.getY());
             }
-            event.consume();
-        });
-
-        canvasArea.setOnDragExited(event -> {
-            hideDropIndicator();
             event.consume();
         });
 
@@ -162,109 +196,89 @@ public class FreeModeWindow {
             if (event.getDragboard().hasString()) {
                 String gateName = event.getDragboard().getString();
 
-                // 드롭 위치로부터 큐비트와 단계 계산
                 double x = event.getX();
                 double y = event.getY();
 
                 int qubitIndex = calculateQubitIndex(y);
                 int stepIndex = calculateStepIndex(x);
 
-                // 유효성 검사
                 if (circuitEditor != null &&
                         qubitIndex >= 0 && qubitIndex < circuitEditor.getQubitCount() &&
                         stepIndex >= 0) {
 
                     circuitEditor.addGate(gateName, qubitIndex, stepIndex);
+                    updateUndoRedoButtons();
                     success = true;
-
-                    System.out.println(String.format(
-                            "게이트 추가: %s → Q%d, Step %d (위치: %.1f, %.1f)",
-                            gateName, qubitIndex, stepIndex, x, y
-                    ));
                 }
             }
 
-            hideDropIndicator();
             event.setDropCompleted(success);
             event.consume();
         });
+
+        // InteractiveCircuitCanvas에 게이트 클릭 핸들러 설정
+        interactiveCanvas.setOnGateClicked((qubitIndex, stepIndex) -> {
+            if (circuitEditor != null) {
+                circuitEditor.removeGate(qubitIndex, stepIndex);
+                updateUndoRedoButtons();
+            }
+        });
     }
 
-    /**
-     * Y 좌표로부터 큐비트 인덱스를 계산합니다.
-     *
-     * @param y 마우스 Y 좌표
-     * @return 큐비트 인덱스 (0부터 시작)
-     */
+    private void setupKeyboardShortcuts() {
+        // Ctrl+Z: 언두
+        KeyCombination undoCombo = new KeyCodeCombination(KeyCode.Z, KeyCombination.CONTROL_DOWN);
+        root.setOnKeyPressed(event -> {
+            if (undoCombo.match(event)) {
+                if (circuitEditor != null && circuitEditor.canUndo()) {
+                    circuitEditor.undo();
+                    updateUndoRedoButtons();
+                }
+            }
+        });
+
+        // Ctrl+Y: 리두
+        KeyCombination redoCombo = new KeyCodeCombination(KeyCode.Y, KeyCombination.CONTROL_DOWN);
+        root.setOnKeyPressed(event -> {
+            if (redoCombo.match(event)) {
+                if (circuitEditor != null && circuitEditor.canRedo()) {
+                    circuitEditor.redo();
+                    updateUndoRedoButtons();
+                }
+            }
+        });
+    }
+
+    private void updateUndoRedoButtons() {
+        if (circuitEditor != null) {
+            undoButton.setDisable(!circuitEditor.canUndo());
+            redoButton.setDisable(!circuitEditor.canRedo());
+        }
+    }
+
     private int calculateQubitIndex(double y) {
-        // CircuitCanvas의 좌표 시스템:
-        // qubitY = TOP_MARGIN + qubit * QUBIT_LINE_Y_SPACING
-
-        // 역계산:
-        // qubit = (y - TOP_MARGIN) / QUBIT_LINE_Y_SPACING
-
         double relativeY = y - TOP_MARGIN;
-        if (relativeY < 0) {
-            return 0;  // 상단 여백
-        }
-
-        // 가장 가까운 큐비트 라인으로 스냅
-        int qubitIndex = (int) Math.round(relativeY / QUBIT_LINE_Y_SPACING);
-
-        return qubitIndex;
+        if (relativeY < 0) return 0;
+        return (int) Math.round(relativeY / QUBIT_LINE_Y_SPACING);
     }
 
-    /**
-     * X 좌표로부터 단계 인덱스를 계산합니다.
-     *
-     * @param x 마우스 X 좌표
-     * @return 단계 인덱스 (0부터 시작)
-     */
     private int calculateStepIndex(double x) {
-        // CircuitCanvas의 좌표 시스템:
-        // stepX = LEFT_MARGIN + (step + 1) * GATE_X_SPACING
-
-        // 역계산:
-        // step = (x - LEFT_MARGIN) / GATE_X_SPACING - 1
-
         double relativeX = x - LEFT_MARGIN;
-        if (relativeX < 0) {
-            return 0;  // 좌측 여백
-        }
-
-        // 게이트는 GATE_X_SPACING 간격으로 배치
-        // step 0: x = LEFT_MARGIN + GATE_X_SPACING
-        // step 1: x = LEFT_MARGIN + 2 * GATE_X_SPACING
-
-        int stepIndex = (int) Math.floor(relativeX / GATE_X_SPACING);
-
-        return stepIndex;
-    }
-
-    /**
-     * 드롭 위치에 시각적 인디케이터를 표시합니다.
-     *
-     * @param x 마우스 X 좌표
-     * @param y 마우스 Y 좌표
-     */
-    private void showDropIndicator(double x, double y) {
-        // 선택사항: 드롭 위치에 반투명 사각형 표시
-        // 현재는 구현하지 않음 (CircuitCanvas 위에 오버레이 필요)
-    }
-
-    /**
-     * 드롭 인디케이터를 숨깁니다.
-     */
-    private void hideDropIndicator() {
-        // 선택사항
+        if (relativeX < 0) return 0;
+        return (int) Math.floor(relativeX / GATE_X_SPACING);
     }
 
     public void setCircuitEditor(CircuitEditor editor) {
         this.circuitEditor = editor;
+        updateUndoRedoButtons();
     }
 
     public MainWindow getMainWindow() {
         return mainWindow;
+    }
+
+    public InteractiveCircuitCanvas getInteractiveCanvas() {
+        return interactiveCanvas;
     }
 
     public BorderPane getRoot() {
