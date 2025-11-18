@@ -2,6 +2,7 @@ package quantum.circuit.gui.view;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -11,10 +12,12 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import javafx.stage.Stage;
 import quantum.circuit.algorithm.AlgorithmType;
 import quantum.circuit.domain.circuit.QuantumCircuit;
 import quantum.circuit.domain.state.QuantumState;
 import quantum.circuit.gui.controller.CircuitController;
+import quantum.circuit.gui.controller.CircuitEditor;
 import quantum.circuit.gui.controller.StepController;
 import quantum.circuit.gui.renderer.CircuitCanvas;
 
@@ -33,11 +36,11 @@ public class MainWindow {
     private final ScrollPane circuitCanvasArea;
     private final StepControlPanel stepControlPanel;
     private final StateInfoPanel stateInfoPanel;
-    private final CircuitCanvas renderer;  // CircuitRenderer 대신 CircuitCanvas 사용
+    private final CircuitCanvas renderer;
 
     private CircuitController circuitController;
     private StepController stepController;
-    private QuantumCircuit circuit;  // 현재 회로 저장
+    private QuantumCircuit circuit;
 
     public MainWindow() {
         this.root = new BorderPane();
@@ -56,7 +59,6 @@ public class MainWindow {
         root.setTop(createHeader());
         root.setLeft(createModeSelectionPanel());
 
-        // 중앙 영역 = 회로 캔버스 + 하단 단계 제어
         centerPane.setCenter(circuitCanvasArea);
         centerPane.setBottom(stepControlPanel.getRoot());
         root.setCenter(centerPane);
@@ -194,7 +196,17 @@ public class MainWindow {
     }
 
     private void handleFreeMode() {
-        showNotImplementedAlert("자유 모드");
+        // 새 창에서 자유 모드 열기
+        Stage freeModeStage = new Stage();
+        freeModeStage.setTitle("자유 모드 - 회로 편집기");
+
+        FreeModeWindow freeModeWindow = new FreeModeWindow();
+        CircuitEditor circuitEditor = new CircuitEditor(freeModeWindow.getMainWindow());
+        freeModeWindow.setCircuitEditor(circuitEditor);
+
+        Scene scene = new Scene(freeModeWindow.getRoot(), 1200, 800);
+        freeModeStage.setScene(scene);
+        freeModeStage.show();
     }
 
     private void handleAlgorithmMode() {
@@ -236,40 +248,43 @@ public class MainWindow {
     }
 
     public void setCircuit(QuantumCircuit circuit) {
-        this.circuit = circuit;  // 회로 저장
+        this.circuit = circuit;
 
-        // 초기 렌더링 (하이라이팅 없음)
         Pane circuitPane = renderer.render(circuit);
         circuitCanvasArea.setContent(circuitPane);
 
-        // StepController에 회로 로드
         if (stepController != null) {
             stepController.loadCircuit(circuit);
         } else {
-            // StepController가 없으면 끝까지 실행 (기존 동작)
             QuantumState state = circuit.execute();
             stateInfoPanel.updateState(state);
         }
     }
 
-    /**
-     * 상태만 업데이트 (단계별 실행용)
-     * 게이트 하이라이팅과 함께 회로를 다시 렌더링합니다.
-     *
-     * @param state 현재 상태
-     * @param currentStep 현재 단계
-     */
+    public void clearCircuit() {
+        this.circuit = null;
+
+        // 플레이스홀더 복원
+        VBox placeholder = new VBox();
+        placeholder.setAlignment(Pos.CENTER);
+        placeholder.setStyle("-fx-background-color: white;");
+
+        Label placeholderLabel = new Label("게이트를 드래그하여 회로를 만드세요");
+        placeholderLabel.setFont(Font.font("System", 16));
+        placeholderLabel.setStyle("-fx-text-fill: #95a5a6;");
+
+        placeholder.getChildren().add(placeholderLabel);
+        circuitCanvasArea.setContent(placeholder);
+    }
+
     public void updateStateOnly(QuantumState state, int currentStep) {
-        // 회로를 currentStep과 함께 다시 렌더링 (하이라이팅 적용)
         if (circuit != null) {
             Pane circuitPane = renderer.render(circuit, currentStep);
             circuitCanvasArea.setContent(circuitPane);
         }
 
-        // 상태 정보 패널 업데이트
         stateInfoPanel.updateState(state);
 
-        // 단계 정보 업데이트
         if (stepController != null) {
             stepControlPanel.updateStepInfo(currentStep, stepController.getTotalSteps());
         }
