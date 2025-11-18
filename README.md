@@ -449,6 +449,12 @@ QFT            | 게이트:   2 | 깊이:   2 | 시간:    1100 ns
 
 ## 실행 방법
 
+### 저장소 클론
+```bash
+git clone https://github.com/e9ua1/quantum-circuit-simulator.git
+cd quantum-circuit-simulator
+```
+
 ### 빌드 및 실행
 ```bash
 ./gradlew clean build
@@ -1340,7 +1346,6 @@ public class QuantumState {
 - 단위 테스트 작성 (각 클래스와 메서드)
 - Mock 테스트로 DIP 검증
 - TDD Red-Green-Refactor 사이클을 따른다
-- 420+ 테스트 케이스로 100% 통과
 
 ### 디자인 패턴
 - Builder 패턴: 복잡한 회로 구성
