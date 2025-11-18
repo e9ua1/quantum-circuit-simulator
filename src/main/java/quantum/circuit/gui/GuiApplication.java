@@ -6,6 +6,7 @@ import javafx.stage.Stage;
 import quantum.circuit.algorithm.AlgorithmFactory;
 import quantum.circuit.algorithm.QuantumAlgorithm;
 import quantum.circuit.domain.circuit.QuantumCircuit;
+import quantum.circuit.gui.controller.CircuitController;
 import quantum.circuit.gui.view.MainWindow;
 
 public class GuiApplication extends Application {
@@ -17,6 +18,10 @@ public class GuiApplication extends Application {
     @Override
     public void start(Stage primaryStage) {
         MainWindow mainWindow = new MainWindow();
+
+        // CircuitController 생성 및 설정
+        CircuitController controller = new CircuitController(mainWindow);
+        mainWindow.setController(controller);
 
         // 샘플 회로 표시 (Bell State)
         showSampleCircuit(mainWindow);

@@ -2,6 +2,7 @@ package quantum.circuit.gui.view;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
@@ -10,10 +11,14 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
+import quantum.circuit.algorithm.AlgorithmType;
 import quantum.circuit.domain.circuit.QuantumCircuit;
 import quantum.circuit.domain.state.QuantumState;
+import quantum.circuit.gui.controller.CircuitController;
 import quantum.circuit.gui.renderer.CircuitCanvas;
 import quantum.circuit.gui.renderer.CircuitRenderer;
+
+import java.util.Optional;
 
 public class MainWindow {
 
@@ -27,6 +32,8 @@ public class MainWindow {
     private final ScrollPane circuitCanvasArea;
     private final StateInfoPanel stateInfoPanel;
     private final CircuitRenderer renderer;
+
+    private CircuitController controller;
 
     public MainWindow() {
         this.root = new BorderPane();
@@ -68,6 +75,12 @@ public class MainWindow {
         Button algorithmModeButton = createModeButton("알고리즘 라이브러리", "algorithmModeButton");
         Button optimizationModeButton = createModeButton("최적화 모드", "optimizationModeButton");
         Button benchmarkModeButton = createModeButton("벤치마크 모드", "benchmarkModeButton");
+
+        // 이벤트 핸들러 설정
+        freeModeButton.setOnAction(e -> handleFreeMode());
+        algorithmModeButton.setOnAction(e -> handleAlgorithmMode());
+        optimizationModeButton.setOnAction(e -> handleOptimizationMode());
+        benchmarkModeButton.setOnAction(e -> handleBenchmarkMode());
 
         VBox modePanel = new VBox(SPACING);
         modePanel.getChildren().addAll(
@@ -143,6 +156,50 @@ public class MainWindow {
         root.setStyle("-fx-background-color: #f5f6fa;");
     }
 
+    // 이벤트 핸들러들
+    private void handleFreeMode() {
+        showNotImplementedAlert("자유 모드");
+    }
+
+    private void handleAlgorithmMode() {
+        if (controller == null) {
+            showErrorAlert("컨트롤러가 설정되지 않았습니다.");
+            return;
+        }
+
+        AlgorithmSelectionDialog dialog = new AlgorithmSelectionDialog();
+        Optional<AlgorithmType> selected = dialog.show();
+
+        selected.ifPresent(algorithmType -> {
+            controller.loadAlgorithm(algorithmType);
+        });
+    }
+
+    private void handleOptimizationMode() {
+        showNotImplementedAlert("최적화 모드");
+    }
+
+    private void handleBenchmarkMode() {
+        showNotImplementedAlert("벤치마크 모드");
+    }
+
+    private void showNotImplementedAlert(String modeName) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("준비 중");
+        alert.setHeaderText(modeName + " 준비 중");
+        alert.setContentText("이 기능은 아직 구현되지 않았습니다.");
+        alert.showAndWait();
+    }
+
+    private void showErrorAlert(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("오류");
+        alert.setHeaderText("오류 발생");
+        alert.setContentText(message);
+        alert.showAndWait();
+    }
+
+    // Public 메서드들
     public void setCircuit(QuantumCircuit circuit) {
         Pane circuitPane = renderer.render(circuit);
         circuitCanvasArea.setContent(circuitPane);
@@ -150,6 +207,10 @@ public class MainWindow {
         // 회로 실행 후 상태 업데이트
         QuantumState state = circuit.execute();
         stateInfoPanel.updateState(state);
+    }
+
+    public void setController(CircuitController controller) {
+        this.controller = controller;
     }
 
     public BorderPane getRoot() {
