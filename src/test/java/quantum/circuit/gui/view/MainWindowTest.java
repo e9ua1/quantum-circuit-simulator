@@ -84,4 +84,18 @@ class MainWindowTest {
         assertThat(method).isNotNull();
         assertThat(method.getReturnType()).isEqualTo(void.class);
     }
+
+    @Test
+    @DisplayName("setController 메서드가 존재한다")
+    void setController_메서드가_존재한다() throws Exception {
+        // given
+        Class<?> clazz = MainWindow.class;
+
+        // when
+        Method method = clazz.getDeclaredMethod("setController", quantum.circuit.gui.controller.CircuitController.class);
+
+        // then
+        assertThat(method).isNotNull();
+        assertThat(method.getReturnType()).isEqualTo(void.class);
+    }
 }
