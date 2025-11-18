@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'application'
+    id 'org.openjfx.javafxplugin' version '0.1.0'
 }
 
 group = 'quantum.circuit'
@@ -15,6 +16,11 @@ java {
 repositories {
     mavenCentral()
     maven { url 'https://jitpack.io' }
+}
+
+javafx {
+    version = '21'
+    modules = ['javafx.controls', 'javafx.fxml', 'javafx.graphics']
 }
 
 dependencies {
@@ -50,4 +56,12 @@ run {
 
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
+}
+
+// GUI 실행 태스크
+task runGui(type: JavaExec) {
+    group = 'application'
+    description = 'Run the JavaFX GUI application'
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'quantum.circuit.gui.GuiApplication'
 }
