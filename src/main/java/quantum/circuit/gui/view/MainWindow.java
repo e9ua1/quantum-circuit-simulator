@@ -11,6 +11,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import quantum.circuit.domain.circuit.QuantumCircuit;
+import quantum.circuit.domain.state.QuantumState;
 import quantum.circuit.gui.renderer.CircuitCanvas;
 import quantum.circuit.gui.renderer.CircuitRenderer;
 
@@ -24,13 +25,13 @@ public class MainWindow {
 
     private final BorderPane root;
     private final ScrollPane circuitCanvasArea;
-    private final Pane stateInfoPanel;
+    private final StateInfoPanel stateInfoPanel;
     private final CircuitRenderer renderer;
 
     public MainWindow() {
         this.root = new BorderPane();
         this.circuitCanvasArea = createCircuitCanvasArea();
-        this.stateInfoPanel = createStateInfoPanel();
+        this.stateInfoPanel = new StateInfoPanel();
         this.renderer = new CircuitCanvas();
 
         setupLayout();
@@ -41,7 +42,7 @@ public class MainWindow {
         root.setTop(createHeader());
         root.setLeft(createModeSelectionPanel());
         root.setCenter(circuitCanvasArea);
-        root.setRight(stateInfoPanel);
+        root.setRight(stateInfoPanel.getRoot());
     }
 
     private VBox createHeader() {
@@ -138,25 +139,6 @@ public class MainWindow {
         return scrollPane;
     }
 
-    private Pane createStateInfoPanel() {
-        VBox statePanel = new VBox(SPACING);
-        statePanel.setId("stateInfoPanel");
-        statePanel.setPadding(new Insets(PADDING));
-        statePanel.setStyle("-fx-background-color: #ecf0f1;");
-        statePanel.setPrefWidth(300);
-
-        Label titleLabel = new Label("양자 상태 정보");
-        titleLabel.setFont(Font.font("System", FontWeight.BOLD, 16));
-        titleLabel.setStyle("-fx-text-fill: #2c3e50;");
-
-        Label placeholder = new Label("상태 정보가 여기에 표시됩니다");
-        placeholder.setFont(Font.font("System", 14));
-        placeholder.setStyle("-fx-text-fill: #7f8c8d;");
-
-        statePanel.getChildren().addAll(titleLabel, placeholder);
-        return statePanel;
-    }
-
     private void applyStyles() {
         root.setStyle("-fx-background-color: #f5f6fa;");
     }
@@ -164,6 +146,10 @@ public class MainWindow {
     public void setCircuit(QuantumCircuit circuit) {
         Pane circuitPane = renderer.render(circuit);
         circuitCanvasArea.setContent(circuitPane);
+
+        // 회로 실행 후 상태 업데이트
+        QuantumState state = circuit.execute();
+        stateInfoPanel.updateState(state);
     }
 
     public BorderPane getRoot() {
@@ -174,7 +160,7 @@ public class MainWindow {
         return circuitCanvasArea;
     }
 
-    public Pane getStateInfoPanel() {
+    public StateInfoPanel getStateInfoPanel() {
         return stateInfoPanel;
     }
 }
