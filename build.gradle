@@ -59,7 +59,7 @@ tasks.withType(JavaCompile) {
 }
 
 // GUI 실행 태스크 - JavaFX 모듈 명시적 추가
-task runGui(type: JavaExec) {
+tasks.register('runGui', JavaExec) {
     group = 'application'
     description = 'Run the JavaFX GUI application'
     mainClass = 'quantum.circuit.gui.GuiApplication'
