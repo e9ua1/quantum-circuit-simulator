@@ -10,6 +10,7 @@ public class QuantumCircuit {
 
     private static final String ERROR_INVALID_QUBIT_COUNT = "[ERROR] 큐비트 개수는 1 이상이어야 합니다.";
     private static final String ERROR_NULL_STEPS = "[ERROR] Step 리스트는 null일 수 없습니다.";
+    private static final String ERROR_INVALID_STEP = "[ERROR] 단계는 0 이상이어야 합니다.";
 
     private final int qubitCount;
     private final List<CircuitStep> steps;
@@ -39,6 +40,25 @@ public class QuantumCircuit {
             step.applyTo(state);
         }
         return state;
+    }
+
+    public QuantumState executeUntilStep(int untilStep) {
+        validateStep(untilStep);
+
+        QuantumState state = QuantumState.initialize(qubitCount);
+
+        int stepsToExecute = Math.min(untilStep, steps.size());
+        for (int i = 0; i < stepsToExecute; i++) {
+            steps.get(i).applyTo(state);
+        }
+
+        return state;
+    }
+
+    private void validateStep(int step) {
+        if (step < 0) {
+            throw new IllegalArgumentException(ERROR_INVALID_STEP);
+        }
     }
 
     public int getQubitCount() {
