@@ -13,10 +13,6 @@ import quantum.circuit.domain.state.Probability;
 import quantum.circuit.domain.state.QuantumState;
 import quantum.circuit.gui.renderer.BlochSphereRenderer;
 
-/**
- * 양자 상태 정보 패널
- * 블로흐 구면과 큐비트 확률 정보를 표시합니다.
- */
 public class StateInfoPanel {
 
     private static final double SPACING = 15.0;
@@ -25,11 +21,13 @@ public class StateInfoPanel {
     private final VBox root;
     private final BlochSphereRenderer blochSphereRenderer;
     private final VBox probabilityInfoBox;
+    private final SystemStateHistogram histogram;
 
     public StateInfoPanel() {
         this.root = new VBox(SPACING);
         this.blochSphereRenderer = new BlochSphereRenderer();
         this.probabilityInfoBox = new VBox(5);
+        this.histogram = new SystemStateHistogram();
 
         setupLayout();
         applyStyles();
@@ -39,21 +37,21 @@ public class StateInfoPanel {
         root.setAlignment(Pos.TOP_CENTER);
         root.setPadding(new Insets(PADDING));
 
-        // 타이틀
         Label titleLabel = new Label("양자 상태 정보");
         titleLabel.setFont(Font.font("System", FontWeight.BOLD, 16));
         titleLabel.setStyle("-fx-text-fill: #2c3e50;");
 
-        // 블로흐 구면 섹션
         Label blochLabel = new Label("블로흐 구면 (Qubit 0)");
         blochLabel.setFont(Font.font("System", FontWeight.SEMI_BOLD, 14));
         blochLabel.setStyle("-fx-text-fill: #34495e;");
 
-        // 초기 블로흐 구면 (|0⟩ 상태)
         SubScene blochSphere = blochSphereRenderer.render(0.0);
 
-        // 확률 정보 섹션
-        Label probabilityLabel = new Label("확률 분포");
+        Label histogramLabel = new Label("전체 시스템 상태");
+        histogramLabel.setFont(Font.font("System", FontWeight.SEMI_BOLD, 14));
+        histogramLabel.setStyle("-fx-text-fill: #34495e;");
+
+        Label probabilityLabel = new Label("개별 큐비트 확률");
         probabilityLabel.setFont(Font.font("System", FontWeight.SEMI_BOLD, 14));
         probabilityLabel.setStyle("-fx-text-fill: #34495e;");
 
@@ -66,12 +64,14 @@ public class StateInfoPanel {
         placeholderLabel.setAlignment(Pos.CENTER);
         probabilityInfoBox.getChildren().add(placeholderLabel);
 
-        // 레이아웃 조립
         root.getChildren().addAll(
                 titleLabel,
                 new Separator(),
                 blochLabel,
                 blochSphere,
+                new Separator(),
+                histogramLabel,
+                histogram.getRoot(),
                 new Separator(),
                 probabilityLabel,
                 probabilityInfoBox
@@ -83,17 +83,10 @@ public class StateInfoPanel {
         root.setPrefWidth(300);
     }
 
-    /**
-     * 양자 상태를 업데이트하여 블로흐 구면과 확률 정보를 갱신합니다.
-     *
-     * @param state 양자 상태
-     */
     public void updateState(QuantumState state) {
-        // 블로흐 구면 업데이트 (Qubit 0)
         Probability probOne = state.getProbabilityOfOne(new QubitIndex(0));
         SubScene updatedBlochSphere = blochSphereRenderer.render(probOne.getValue());
 
-        // 기존 블로흐 구면 제거 후 새로운 것으로 교체
         root.getChildren().removeIf(node -> node instanceof SubScene);
         int blochIndex = root.getChildren().indexOf(
                 root.getChildren().stream()
@@ -105,7 +98,8 @@ public class StateInfoPanel {
             root.getChildren().add(blochIndex + 1, updatedBlochSphere);
         }
 
-        // 확률 정보 업데이트
+        histogram.updateState(state);
+
         probabilityInfoBox.getChildren().clear();
 
         for (int i = 0; i < state.getQubitCount(); i++) {
