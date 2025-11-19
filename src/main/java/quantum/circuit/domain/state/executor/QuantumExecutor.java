@@ -4,6 +4,8 @@ import quantum.circuit.domain.circuit.QubitIndex;
 import quantum.circuit.domain.state.MeasurementResult;
 import quantum.circuit.domain.state.Probability;
 
+import java.util.Map;
+
 public interface QuantumExecutor {
 
     void applyXGate(QubitIndex target);
@@ -19,4 +21,6 @@ public interface QuantumExecutor {
     MeasurementResult measure(QubitIndex index);
 
     boolean isEmpty();
+
+    Map<String, Double> getBasisStateProbabilities();
 }
