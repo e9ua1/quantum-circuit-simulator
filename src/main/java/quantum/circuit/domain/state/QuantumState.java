@@ -4,6 +4,8 @@ import quantum.circuit.domain.circuit.QubitIndex;
 import quantum.circuit.domain.state.executor.QuantumExecutor;
 import quantum.circuit.infrastructure.executor.StrangeQuantumExecutor;
 
+import java.util.Map;
+
 public class QuantumState {
 
     private static final String ERROR_INVALID_QUBIT_COUNT = "[ERROR] 큐비트 개수는 1 이상 10 이하여야 합니다.";
@@ -69,6 +71,10 @@ public class QuantumState {
     public MeasurementResult measure(QubitIndex index) {
         validateIndex(index);
         return executor.measure(index);
+    }
+
+    public Map<String, Double> getBasisStateProbabilities() {
+        return executor.getBasisStateProbabilities();
     }
 
     public int getQubitCount() {
