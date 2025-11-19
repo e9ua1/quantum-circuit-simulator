@@ -5,15 +5,14 @@ import quantum.circuit.domain.state.QuantumState;
 import quantum.circuit.gui.view.MainWindow;
 
 /**
- * 단계별 실행 컨트롤러 (단순화 버전)
- * 회로는 한 번만 실행하고, currentStep만 관리하여 UI를 업데이트합니다.
+ * 단계별 실행 컨트롤러
+ * executeUntilStep을 사용하여 실제 단계별 상태를 계산합니다.
  */
 public class StepController {
 
     private final MainWindow mainWindow;
 
     private QuantumCircuit circuit;
-    private QuantumState finalState;
     private int currentStep;
     private int totalSteps;
 
@@ -24,18 +23,14 @@ public class StepController {
     }
 
     /**
-     * 회로를 로드하고 실행합니다.
+     * 회로를 로드합니다.
      *
      * @param circuit 실행할 회로
      */
     public void loadCircuit(QuantumCircuit circuit) {
         this.circuit = circuit;
         this.currentStep = 0;
-        // totalSteps = 전체 게이트 수
         this.totalSteps = circuit.getSteps().size();
-
-        // 회로를 한 번만 실행하여 최종 상태 저장
-        this.finalState = circuit.execute();
 
         // 초기 상태 표시
         updateView();
@@ -77,37 +72,26 @@ public class StepController {
         updateView();
     }
 
-    /**
-     * 현재 단계를 반환합니다.
-     *
-     * @return 현재 단계 (0 = 초기 상태, 1+ = 각 게이트 적용 후)
-     */
     public int getCurrentStep() {
         return currentStep;
     }
 
-    /**
-     * 전체 단계 수를 반환합니다.
-     *
-     * @return 전체 단계 수 (게이트 개수)
-     */
     public int getTotalSteps() {
         return totalSteps;
     }
 
     /**
-     * 현재 단계에 맞게 UI를 업데이트합니다.
+     * 현재 단계에 맞는 실제 상태를 계산하여 UI를 업데이트합니다.
      */
     private void updateView() {
         if (circuit == null) {
             return;
         }
 
-        // 단순화 버전: 모든 단계에서 최종 상태 표시
-        // (실제로는 단계별 상태를 계산해야 하지만, 도메인 수정 없이는 불가능)
-        QuantumState displayState = finalState;
+        // 현재 단계까지 실행한 실제 상태 계산
+        QuantumState currentState = circuit.executeUntilStep(currentStep);
 
         // MainWindow에 상태와 현재 단계 전달
-        mainWindow.updateStateOnly(displayState, currentStep);
+        mainWindow.updateStateOnly(currentState, currentStep);
     }
 }
