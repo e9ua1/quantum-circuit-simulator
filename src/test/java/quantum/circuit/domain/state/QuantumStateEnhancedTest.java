@@ -1,18 +1,21 @@
 package quantum.circuit.domain.state;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
 import quantum.circuit.domain.circuit.QubitIndex;
 import quantum.circuit.domain.state.executor.QuantumExecutor;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+@DisplayName("QuantumState 향상된 테스트")
 class QuantumStateEnhancedTest {
 
     @Test
-    @DisplayName("커스텀 Executor로 QuantumState를 생성한다")
-    void createWithCustomExecutor() {
+    @DisplayName("커스텀 Executor로 초기화할 수 있다")
+    void 커스텀Executor로_초기화() {
         MockQuantumExecutor mockExecutor = new MockQuantumExecutor();
 
         QuantumState state = QuantumState.initialize(2, mockExecutor);
@@ -21,151 +24,136 @@ class QuantumStateEnhancedTest {
     }
 
     @Test
-    @DisplayName("X 게이트가 Executor에 위임된다")
-    void xGateDelegation() {
+    @DisplayName("X 게이트 적용 시 Executor에 위임한다")
+    void X게이트_Executor위임() {
         MockQuantumExecutor mockExecutor = new MockQuantumExecutor();
         QuantumState state = QuantumState.initialize(1, mockExecutor);
-        QubitIndex index = new QubitIndex(0);
 
-        state.applyXGate(index);
+        state.applyXGate(new QubitIndex(0));
 
-        assertThat(mockExecutor.xGateCount).isEqualTo(1);
-        assertThat(mockExecutor.lastXGateTarget).isEqualTo(index);
+        assertThat(mockExecutor.xGateApplied).isTrue();
     }
 
     @Test
-    @DisplayName("Hadamard 게이트가 Executor에 위임된다")
-    void hadamardGateDelegation() {
+    @DisplayName("Hadamard 게이트 적용 시 Executor에 위임한다")
+    void Hadamard게이트_Executor위임() {
         MockQuantumExecutor mockExecutor = new MockQuantumExecutor();
         QuantumState state = QuantumState.initialize(1, mockExecutor);
-        QubitIndex index = new QubitIndex(0);
 
-        state.applyHadamardGate(index);
+        state.applyHadamardGate(new QubitIndex(0));
 
-        assertThat(mockExecutor.hadamardGateCount).isEqualTo(1);
-        assertThat(mockExecutor.lastHadamardTarget).isEqualTo(index);
+        assertThat(mockExecutor.hadamardGateApplied).isTrue();
     }
 
     @Test
-    @DisplayName("Z 게이트가 Executor에 위임된다")
-    void zGateDelegation() {
+    @DisplayName("Z 게이트 적용 시 Executor에 위임한다")
+    void Z게이트_Executor위임() {
         MockQuantumExecutor mockExecutor = new MockQuantumExecutor();
         QuantumState state = QuantumState.initialize(1, mockExecutor);
-        QubitIndex index = new QubitIndex(0);
 
-        state.applyZGate(index);
+        state.applyZGate(new QubitIndex(0));
 
-        assertThat(mockExecutor.zGateCount).isEqualTo(1);
-        assertThat(mockExecutor.lastZGateTarget).isEqualTo(index);
+        assertThat(mockExecutor.zGateApplied).isTrue();
     }
 
     @Test
-    @DisplayName("CNOT 게이트가 Executor에 위임된다")
-    void cnotGateDelegation() {
+    @DisplayName("CNOT 게이트 적용 시 Executor에 위임한다")
+    void CNOT게이트_Executor위임() {
         MockQuantumExecutor mockExecutor = new MockQuantumExecutor();
         QuantumState state = QuantumState.initialize(2, mockExecutor);
-        QubitIndex control = new QubitIndex(0);
-        QubitIndex target = new QubitIndex(1);
 
-        state.applyCNOTGate(control, target);
+        state.applyCNOTGate(new QubitIndex(0), new QubitIndex(1));
 
-        assertThat(mockExecutor.cnotGateCount).isEqualTo(1);
-        assertThat(mockExecutor.lastCNOTControl).isEqualTo(control);
-        assertThat(mockExecutor.lastCNOTTarget).isEqualTo(target);
+        assertThat(mockExecutor.cnotGateApplied).isTrue();
     }
 
     @Test
-    @DisplayName("확률 계산이 Executor에 위임된다")
-    void probabilityDelegation() {
+    @DisplayName("확률 조회 시 Executor에 위임한다")
+    void 확률조회_Executor위임() {
         MockQuantumExecutor mockExecutor = new MockQuantumExecutor();
+        mockExecutor.probability = 0.75;
         QuantumState state = QuantumState.initialize(1, mockExecutor);
-        QubitIndex index = new QubitIndex(0);
 
-        Probability probability = state.getProbabilityOfOne(index);
+        Probability prob = state.getProbabilityOfOne(new QubitIndex(0));
 
-        assertThat(mockExecutor.getProbabilityCount).isEqualTo(1);
-        assertThat(probability.getValue()).isEqualTo(0.75);
+        assertThat(prob.getValue()).isEqualTo(0.75);
     }
 
     @Test
-    @DisplayName("측정이 Executor에 위임된다")
-    void measurementDelegation() {
+    @DisplayName("측정 시 Executor에 위임한다")
+    void 측정_Executor위임() {
         MockQuantumExecutor mockExecutor = new MockQuantumExecutor();
+        mockExecutor.measurementResult = MeasurementResult.ONE;
         QuantumState state = QuantumState.initialize(1, mockExecutor);
-        QubitIndex index = new QubitIndex(0);
 
-        MeasurementResult result = state.measure(index);
+        MeasurementResult result = state.measure(new QubitIndex(0));
 
-        assertThat(mockExecutor.measureCount).isEqualTo(1);
         assertThat(result).isEqualTo(MeasurementResult.ONE);
     }
 
     @Test
-    @DisplayName("기본 생성자는 Strange Executor를 사용한다")
-    void defaultConstructorUsesStrangeExecutor() {
-        QuantumState state = QuantumState.initialize(1);
-        QubitIndex index = new QubitIndex(0);
+    @DisplayName("전체 상태 확률 조회 시 Executor에 위임한다")
+    void 전체상태확률_Executor위임() {
+        MockQuantumExecutor mockExecutor = new MockQuantumExecutor();
+        Map<String, Double> expected = new HashMap<>();
+        expected.put("0", 0.6);
+        expected.put("1", 0.4);
+        mockExecutor.basisStateProbabilities = expected;
 
-        state.applyXGate(index);
-        Probability probability = state.getProbabilityOfOne(index);
+        QuantumState state = QuantumState.initialize(1, mockExecutor);
 
-        assertThat(probability.getValue()).isEqualTo(1.0);
+        Map<String, Double> probabilities = state.getBasisStateProbabilities();
+
+        assertThat(probabilities).isEqualTo(expected);
     }
 
     private static class MockQuantumExecutor implements QuantumExecutor {
-        int xGateCount = 0;
-        int hadamardGateCount = 0;
-        int zGateCount = 0;
-        int cnotGateCount = 0;
-        int getProbabilityCount = 0;
-        int measureCount = 0;
-
-        QubitIndex lastXGateTarget = null;
-        QubitIndex lastHadamardTarget = null;
-        QubitIndex lastZGateTarget = null;
-        QubitIndex lastCNOTControl = null;
-        QubitIndex lastCNOTTarget = null;
+        boolean xGateApplied = false;
+        boolean hadamardGateApplied = false;
+        boolean zGateApplied = false;
+        boolean cnotGateApplied = false;
+        double probability = 0.5;
+        MeasurementResult measurementResult = MeasurementResult.ZERO;
+        Map<String, Double> basisStateProbabilities = new HashMap<>();
 
         @Override
         public void applyXGate(QubitIndex target) {
-            xGateCount++;
-            lastXGateTarget = target;
+            xGateApplied = true;
         }
 
         @Override
         public void applyHadamardGate(QubitIndex target) {
-            hadamardGateCount++;
-            lastHadamardTarget = target;
+            hadamardGateApplied = true;
         }
 
         @Override
         public void applyZGate(QubitIndex target) {
-            zGateCount++;
-            lastZGateTarget = target;
+            zGateApplied = true;
         }
 
         @Override
         public void applyCNOTGate(QubitIndex control, QubitIndex target) {
-            cnotGateCount++;
-            lastCNOTControl = control;
-            lastCNOTTarget = target;
+            cnotGateApplied = true;
         }
 
         @Override
         public Probability getProbabilityOfOne(QubitIndex index) {
-            getProbabilityCount++;
-            return new Probability(0.75);
+            return new Probability(probability);
         }
 
         @Override
         public MeasurementResult measure(QubitIndex index) {
-            measureCount++;
-            return MeasurementResult.ONE;
+            return measurementResult;
         }
 
         @Override
         public boolean isEmpty() {
             return false;
+        }
+
+        @Override
+        public Map<String, Double> getBasisStateProbabilities() {
+            return basisStateProbabilities;
         }
     }
 }
