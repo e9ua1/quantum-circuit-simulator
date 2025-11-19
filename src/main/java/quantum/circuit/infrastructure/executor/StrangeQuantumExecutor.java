@@ -14,14 +14,21 @@ import quantum.circuit.domain.state.MeasurementResult;
 import quantum.circuit.domain.state.Probability;
 import quantum.circuit.domain.state.executor.QuantumExecutor;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class StrangeQuantumExecutor implements QuantumExecutor {
+
+    private static final int SAMPLE_COUNT = 10000;
 
     private final Program program;
     private final SimpleQuantumExecutionEnvironment environment;
+    private final int qubitCount;
 
     public StrangeQuantumExecutor(int qubitCount) {
         this.program = new Program(qubitCount);
         this.environment = new SimpleQuantumExecutionEnvironment();
+        this.qubitCount = qubitCount;
     }
 
     @Override
@@ -75,6 +82,58 @@ public class StrangeQuantumExecutor implements QuantumExecutor {
     @Override
     public boolean isEmpty() {
         return program.getSteps().isEmpty();
+    }
+
+    @Override
+    public Map<String, Double> getBasisStateProbabilities() {
+        int numStates = 1 << qubitCount;
+        Map<String, Double> probabilities = new HashMap<>();
+
+        for (int i = 0; i < numStates; i++) {
+            String basisState = toBinaryString(i, qubitCount);
+            probabilities.put(basisState, 0.0);
+        }
+
+        if (isEmpty()) {
+            String initialState = "0".repeat(qubitCount);
+            probabilities.put(initialState, 1.0);
+            return probabilities;
+        }
+
+        Map<String, Integer> counts = new HashMap<>();
+        for (int i = 0; i < numStates; i++) {
+            String basisState = toBinaryString(i, qubitCount);
+            counts.put(basisState, 0);
+        }
+
+        for (int sample = 0; sample < SAMPLE_COUNT; sample++) {
+            String measuredState = measureAllQubits();
+            counts.put(measuredState, counts.get(measuredState) + 1);
+        }
+
+        for (Map.Entry<String, Integer> entry : counts.entrySet()) {
+            double probability = (double) entry.getValue() / SAMPLE_COUNT;
+            probabilities.put(entry.getKey(), probability);
+        }
+
+        return probabilities;
+    }
+
+    private String measureAllQubits() {
+        Result result = environment.runProgram(copyProgram());
+        StringBuilder measured = new StringBuilder();
+
+        for (int i = 0; i < qubitCount; i++) {
+            int bit = result.getQubits()[i].measure();
+            measured.append(bit);
+        }
+
+        return measured.toString();
+    }
+
+    private String toBinaryString(int value, int length) {
+        String binary = Integer.toBinaryString(value);
+        return String.format("%" + length + "s", binary).replace(' ', '0');
     }
 
     private Program copyProgram() {
