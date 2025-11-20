@@ -1,0 +1,24 @@
+{
+  "circuit_name": "Bell State",
+  "qubit_count": 2,
+  "steps": [
+    {
+      "step": 0,
+      "gates": ["H(Q0)"]
+    },
+    {
+      "step": 1,
+      "gates": ["CNOT(Q0→Q1)"]
+    }
+  ],
+  "qubit_probabilities": {
+    "0": 0.5,
+    "1": 0.5
+  },
+  "system_state": {
+    "00": 0.5,
+    "01": 0.0,
+    "10": 0.0,
+    "11": 0.5
+  }
+}
