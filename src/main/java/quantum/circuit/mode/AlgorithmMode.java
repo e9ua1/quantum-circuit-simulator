@@ -7,6 +7,7 @@ import quantum.circuit.domain.state.QuantumState;
 import quantum.circuit.util.InputRetryHandler;
 import quantum.circuit.view.OutputView;
 import quantum.circuit.visualizer.CircuitVisualizer;
+import quantum.circuit.visualizer.PythonVisualizer;
 import quantum.circuit.visualizer.StateVisualizer;
 
 public class AlgorithmMode {
@@ -24,6 +25,9 @@ public class AlgorithmMode {
     private static final String PROMPT_ALGORITHM = "\n알고리즘을 선택하세요 (예: BELL_STATE):";
     private static final String ALGORITHM_HEADER_FORMAT = "\n=== %s Algorithm ===";
     private static final String DESCRIPTION_FORMAT = "설명: %s";
+    private static final String VISUALIZATION_START = "\n🎨 Python 시각화 시작...";
+    private static final String VISUALIZATION_COMPLETE = "\n✅ 시각화 완료!";
+    private static final String VISUALIZATION_INFO = "📊 결과 확인: open output/bloch_sphere.png output/histogram.png";
 
     private final AlgorithmFactory algorithmFactory;
 
@@ -66,6 +70,9 @@ public class AlgorithmMode {
 
         QuantumState state = circuit.execute();
         printState(state);
+
+        // Python 시각화 자동 실행
+        visualizeWithPython(circuit, state, algorithm.getName());
     }
 
     private void printAlgorithmInfo(QuantumAlgorithm algorithm) {
@@ -82,5 +89,17 @@ public class AlgorithmMode {
         System.out.println();
         System.out.println(StateVisualizer.visualizeQubitProbabilities(state));
         OutputView.printSeparator();
+    }
+
+    private void visualizeWithPython(QuantumCircuit circuit, QuantumState state, String algorithmName) {
+        try {
+            System.out.println(VISUALIZATION_START);
+            PythonVisualizer.visualize(circuit, state, algorithmName);
+            System.out.println(VISUALIZATION_COMPLETE);
+            System.out.println(VISUALIZATION_INFO);
+        } catch (Exception e) {
+            System.err.println("\n⚠️  Python 시각화 실패: " + e.getMessage());
+            System.err.println("💡 Python 환경을 확인하세요: ./install.sh");
+        }
     }
 }
