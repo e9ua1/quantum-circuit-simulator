@@ -36,3 +36,5 @@ bin/
 # Jar files (but keep gradle wrapper)
 *.jar
 !gradle/wrapper/gradle-wrapper.jar
+
+output/
