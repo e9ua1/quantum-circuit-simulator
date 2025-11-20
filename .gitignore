@@ -38,3 +38,8 @@ bin/
 !gradle/wrapper/gradle-wrapper.jar
 
 output/
+
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
