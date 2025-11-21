@@ -25,9 +25,15 @@ public class AlgorithmMode {
     private static final String PROMPT_ALGORITHM = "\n알고리즘을 선택하세요 (예: BELL_STATE):";
     private static final String ALGORITHM_HEADER_FORMAT = "\n=== %s Algorithm ===";
     private static final String DESCRIPTION_FORMAT = "설명: %s";
-    private static final String VISUALIZATION_START = "\n🎨 Python 시각화 시작...";
+    private static final String VISUALIZATION_START = "\n🎨 단계별 시각화 생성 중...";
     private static final String VISUALIZATION_COMPLETE = "\n✅ 시각화 완료!";
-    private static final String VISUALIZATION_INFO = "📊 결과 확인: open output/bloch_sphere.png output/histogram.png";
+    private static final String VISUALIZATION_INFO = """
+            📊 생성된 파일:
+              - output/bloch_sphere.png (최종 상태)
+              - output/histogram.png (최종 상태)
+              - output/bloch_steps.png (단계별 궤적) ⭐
+              - output/histogram_steps.png (단계별 비교) ⭐
+            💡 확인: open output/*.png""";
 
     private final AlgorithmFactory algorithmFactory;
 
@@ -71,7 +77,7 @@ public class AlgorithmMode {
         QuantumState state = circuit.execute();
         printState(state);
 
-        // Python 시각화 자동 실행
+        // Python 시각화 자동 실행 (단계별 + 정확한 얽힘 상태)
         visualizeWithPython(circuit, state, algorithm.getName());
     }
 

@@ -22,10 +22,10 @@ public class PythonVisualizer {
     }
 
     public static void visualize(QuantumCircuit circuit, QuantumState state, String circuitName) {
-        // 1. JSON 출력
-        CircuitResultExporter.exportToJson(circuit, state, circuitName, DEFAULT_OUTPUT_JSON);
+        // 1. 단계별 JSON 출력 (정확한 얽힘 상태 포함)
+        CircuitResultExporter.exportStepByStep(circuit, circuitName, DEFAULT_OUTPUT_JSON);
 
-        // 2. Python 실행
+        // 2. Python 실행 (단계별 시각화 자동 생성)
         executePythonScript(DEFAULT_OUTPUT_JSON);
     }
 
