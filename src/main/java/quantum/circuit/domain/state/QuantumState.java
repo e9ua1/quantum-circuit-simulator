@@ -1,5 +1,7 @@
 package quantum.circuit.domain.state;
 
+import java.util.Map;
+
 import quantum.circuit.domain.circuit.QubitIndex;
 import quantum.circuit.domain.state.executor.QuantumExecutor;
 import quantum.circuit.infrastructure.executor.StrangeQuantumExecutor;
@@ -69,6 +71,15 @@ public class QuantumState {
     public MeasurementResult measure(QubitIndex index) {
         validateIndex(index);
         return executor.measure(index);
+    }
+
+    /**
+     * 모든 basis state의 정확한 확률을 반환
+     *
+     * @return basis state(이진 문자열) -> 확률 매핑
+     */
+    public Map<String, Double> getStateProbabilities() {
+        return executor.getStateProbabilities();
     }
 
     public int getQubitCount() {
