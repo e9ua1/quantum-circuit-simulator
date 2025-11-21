@@ -260,6 +260,21 @@ public class CircuitResultExporter {
     }
 
     private static Map<String, Double> calculateSystemState(QuantumState state) {
+        // Strange에서 정확한 amplitude 기반 확률 가져오기
+        Map<String, Double> accurateProbabilities = state.getStateProbabilities();
+
+        if (accurateProbabilities != null && !accurateProbabilities.isEmpty()) {
+            return accurateProbabilities;
+        }
+
+        // fallback: 근사값 계산 (얽힘 상태에서는 부정확)
+        return calculateApproximateSystemState(state);
+    }
+
+    /**
+     * Fallback: 각 큐비트를 독립적으로 계산 (얽힘 상태에서는 부정확)
+     */
+    private static Map<String, Double> calculateApproximateSystemState(QuantumState state) {
         int qubitCount = state.getQubitCount();
         int numStates = 1 << qubitCount; // 2^qubitCount
 
@@ -273,7 +288,6 @@ public class CircuitResultExporter {
                     .collect(Collectors.joining());
 
             // 간단한 근사: 각 큐비트 독립적으로 계산
-            // 실제로는 얽힘을 고려해야 하지만, 현재는 기본 구현
             double probability = calculateStateProbability(state, binaryState);
             systemState.put(binaryState, probability);
         }
