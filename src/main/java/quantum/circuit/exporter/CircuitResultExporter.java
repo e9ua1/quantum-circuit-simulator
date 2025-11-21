@@ -3,7 +3,9 @@ package quantum.circuit.exporter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -11,6 +13,7 @@ import java.util.stream.IntStream;
 import quantum.circuit.domain.circuit.CircuitStep;
 import quantum.circuit.domain.circuit.QubitIndex;
 import quantum.circuit.domain.circuit.QuantumCircuit;
+import quantum.circuit.domain.circuit.QuantumCircuitBuilder;
 import quantum.circuit.domain.gate.CNOTGate;
 import quantum.circuit.domain.gate.QuantumGate;
 import quantum.circuit.domain.state.QuantumState;
@@ -38,6 +41,16 @@ public class CircuitResultExporter {
         writeToFile(json, outputPath);
     }
 
+    /**
+     * 회로를 단계별로 실행하며 각 단계의 상태를 JSON으로 출력
+     */
+    public static void exportStepByStep(QuantumCircuit circuit, String circuitName, String outputPath) {
+        validatePath(outputPath);
+
+        String json = buildStepByStepJson(circuit, circuitName);
+        writeToFile(json, outputPath);
+    }
+
     private static void validatePath(String path) {
         if (path == null) {
             throw new IllegalArgumentException(ERROR_NULL_PATH);
@@ -56,6 +69,108 @@ public class CircuitResultExporter {
         json.append(buildQubitProbabilitiesJson(state));
         json.append(buildSystemStateJson(state));
         json.append("}");
+        return json.toString();
+    }
+
+    private static String buildStepByStepJson(QuantumCircuit circuit, String circuitName) {
+        StringBuilder json = new StringBuilder();
+        json.append("{\n");
+        json.append(String.format("  \"circuit_name\": \"%s\",\n", escapeJson(circuitName)));
+        json.append(String.format("  \"qubit_count\": %d,\n", circuit.getQubitCount()));
+        json.append(buildStepsJson(circuit));
+        json.append(buildStepStatesJson(circuit));
+        json.append("}");
+        return json.toString();
+    }
+
+    private static String buildStepStatesJson(QuantumCircuit circuit) {
+        StringBuilder json = new StringBuilder();
+        json.append("  \"step_states\": [\n");
+
+        List<StepState> stepStates = collectStepStates(circuit);
+
+        for (int i = 0; i < stepStates.size(); i++) {
+            StepState stepState = stepStates.get(i);
+            json.append(buildSingleStepStateJson(stepState));
+
+            if (i < stepStates.size() - 1) {
+                json.append(",");
+            }
+            json.append("\n");
+        }
+
+        json.append("  ]\n");
+        return json.toString();
+    }
+
+    private static List<StepState> collectStepStates(QuantumCircuit circuit) {
+        List<StepState> states = new ArrayList<>();
+        int qubitCount = circuit.getQubitCount();
+
+        // Step 0: 초기 상태
+        QuantumState initialState = QuantumState.initialize(qubitCount);
+        states.add(new StepState(0, "Initial State", initialState));
+
+        // 각 Step 실행 후 상태
+        List<CircuitStep> steps = circuit.getSteps();
+        for (int i = 0; i < steps.size(); i++) {
+            // 현재 단계까지의 부분 회로 생성
+            QuantumCircuit partialCircuit = new QuantumCircuitBuilder()
+                    .withQubits(qubitCount)
+                    .addSteps(steps.subList(0, i + 1))
+                    .build();
+
+            QuantumState state = partialCircuit.execute();
+            String description = buildStepDescription(steps.get(i));
+            states.add(new StepState(i + 1, description, state));
+        }
+
+        return states;
+    }
+
+    private static String buildStepDescription(CircuitStep step) {
+        List<String> gateDescriptions = step.getGates().stream()
+                .map(CircuitResultExporter::describeGate)
+                .collect(Collectors.toList());
+
+        return "After " + String.join(", ", gateDescriptions);
+    }
+
+    private static String buildSingleStepStateJson(StepState stepState) {
+        StringBuilder json = new StringBuilder();
+        json.append("    {\n");
+        json.append(String.format("      \"step\": %d,\n", stepState.stepNumber));
+        json.append(String.format("      \"description\": \"%s\",\n", escapeJson(stepState.description)));
+
+        // 큐비트 확률
+        json.append("      \"qubit_probabilities\": {\n");
+        int qubitCount = stepState.state.getQubitCount();
+        for (int i = 0; i < qubitCount; i++) {
+            double probability = stepState.state.getProbabilityOfOne(new QubitIndex(i)).getValue();
+            json.append(String.format("        \"%d\": %.6f", i, probability));
+            if (i < qubitCount - 1) {
+                json.append(",");
+            }
+            json.append("\n");
+        }
+        json.append("      },\n");
+
+        // 시스템 상태
+        json.append("      \"system_state\": {\n");
+        Map<String, Double> systemState = calculateSystemState(stepState.state);
+        int count = 0;
+        int total = systemState.size();
+        for (Map.Entry<String, Double> entry : systemState.entrySet()) {
+            json.append(String.format("        \"%s\": %.6f", entry.getKey(), entry.getValue()));
+            count++;
+            if (count < total) {
+                json.append(",");
+            }
+            json.append("\n");
+        }
+        json.append("      }\n");
+
+        json.append("    }");
         return json.toString();
     }
 
@@ -207,6 +322,21 @@ public class CircuitResultExporter {
             Files.writeString(filePath, content);
         } catch (IOException e) {
             throw new RuntimeException(ERROR_WRITE_FAILED, e);
+        }
+    }
+
+    /**
+     * 단계별 상태 정보를 담는 내부 클래스
+     */
+    private static class StepState {
+        private final int stepNumber;
+        private final String description;
+        private final QuantumState state;
+
+        public StepState(int stepNumber, String description, QuantumState state) {
+            this.stepNumber = stepNumber;
+            this.description = description;
+            this.state = state;
         }
     }
 }
