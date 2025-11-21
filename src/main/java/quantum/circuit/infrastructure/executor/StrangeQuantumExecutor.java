@@ -1,5 +1,9 @@
 package quantum.circuit.infrastructure.executor;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.redfx.strange.Complex;
 import org.redfx.strange.Program;
 import org.redfx.strange.Result;
 import org.redfx.strange.Step;
@@ -18,10 +22,12 @@ public class StrangeQuantumExecutor implements QuantumExecutor {
 
     private final Program program;
     private final SimpleQuantumExecutionEnvironment environment;
+    private final int qubitCount;
 
     public StrangeQuantumExecutor(int qubitCount) {
         this.program = new Program(qubitCount);
         this.environment = new SimpleQuantumExecutionEnvironment();
+        this.qubitCount = qubitCount;
     }
 
     @Override
@@ -75,6 +81,104 @@ public class StrangeQuantumExecutor implements QuantumExecutor {
     @Override
     public boolean isEmpty() {
         return program.getSteps().isEmpty();
+    }
+
+    /**
+     * 모든 basis state의 정확한 확률을 반환
+     *
+     * @return basis state(이진 문자열) -> 확률 매핑
+     */
+    public Map<String, Double> getStateProbabilities() {
+        if (isEmpty()) {
+            // 초기 상태: |00...0⟩ = 100%
+            Map<String, Double> initialState = new HashMap<>();
+            String zeroState = "0".repeat(qubitCount);
+
+            int numStates = 1 << qubitCount; // 2^n
+            for (int i = 0; i < numStates; i++) {
+                String binaryState = toBinaryString(i, qubitCount);
+                initialState.put(binaryState, binaryState.equals(zeroState) ? 1.0 : 0.0);
+            }
+            return initialState;
+        }
+
+        Result result = environment.runProgram(copyProgram());
+        return extractStateProbabilities(result);
+    }
+
+    /**
+     * Strange의 Result에서 각 basis state의 확률을 추출
+     */
+    private Map<String, Double> extractStateProbabilities(Result result) {
+        Map<String, Double> probabilities = new HashMap<>();
+        int numStates = 1 << qubitCount; // 2^n
+
+        // Strange의 Result에서 amplitude를 가져옴
+        Complex[] amplitudes = getAmplitudesFromResult(result);
+
+        for (int i = 0; i < numStates; i++) {
+            String binaryState = toBinaryString(i, qubitCount);
+
+            // |amplitude|^2 = 확률
+            if (amplitudes != null && i < amplitudes.length) {
+                double probability = amplitudes[i].abssqr();
+                probabilities.put(binaryState, probability);
+            } else {
+                probabilities.put(binaryState, 0.0);
+            }
+        }
+
+        return probabilities;
+    }
+
+    /**
+     * Strange Result에서 amplitude 배열을 추출
+     * Reflection을 사용하여 내부 필드에 접근
+     */
+    private Complex[] getAmplitudesFromResult(Result result) {
+        try {
+            // Strange Result의 내부 필드명은 "probability"
+            java.lang.reflect.Field field = result.getClass().getDeclaredField("probability");
+            field.setAccessible(true);
+            return (Complex[]) field.get(result);
+        } catch (NoSuchFieldException e) {
+            // 필드명이 다를 수 있음, 다른 이름 시도
+            return tryAlternativeFieldNames(result);
+        } catch (Exception e) {
+            // Reflection 실패 시 null 반환 (fallback 사용)
+            System.err.println("Warning: Could not extract amplitudes from Strange Result: " + e.getMessage());
+            return null;
+        }
+    }
+
+    private Complex[] tryAlternativeFieldNames(Result result) {
+        String[] possibleNames = {"probability", "probabilities", "amplitude", "amplitudes", "state"};
+
+        for (String fieldName : possibleNames) {
+            try {
+                java.lang.reflect.Field field = result.getClass().getDeclaredField(fieldName);
+                field.setAccessible(true);
+                Object value = field.get(result);
+                if (value instanceof Complex[]) {
+                    return (Complex[]) value;
+                }
+            } catch (Exception e) {
+                // 다음 이름 시도
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * 정수를 이진 문자열로 변환 (큐비트 순서에 맞게)
+     */
+    private String toBinaryString(int value, int length) {
+        StringBuilder binary = new StringBuilder();
+        for (int i = length - 1; i >= 0; i--) {
+            binary.append((value >> i) & 1);
+        }
+        return binary.toString();
     }
 
     private Program copyProgram() {
