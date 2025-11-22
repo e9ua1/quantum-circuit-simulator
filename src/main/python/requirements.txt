@@ -3,3 +3,4 @@ qutip==5.2.2
 numpy==1.26.4
 plotly==5.9.0
 scipy==1.11.4
+pillow>=9.0.0

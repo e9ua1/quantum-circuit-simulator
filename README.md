@@ -584,13 +584,17 @@ Q1: ────
 
 ### 환경 설정
 
-#### 1. Java 17 설치
+#### 1. Java 21 설치
 ```bash
 # macOS (Homebrew)
-brew install openjdk@17
+brew install openjdk@21
 
 # Ubuntu
-sudo apt install openjdk-17-jdk
+sudo apt install openjdk-21-jdk
+
+# 버전 확인
+java -version
+# openjdk version "21.x.x"
 ```
 
 #### 2. Python 환경 설정 (시각화용)
@@ -607,9 +611,11 @@ pip3 install -r requirements.txt --break-system-packages
 
 **requirements.txt:**
 ```
-qutip>=4.7.0
-matplotlib>=3.5.0
-numpy>=1.21.0
+matplotlib==3.8.0
+qutip==5.2.2
+numpy==1.26.4
+plotly==5.9.0
+scipy==1.11.4
 pillow>=9.0.0
 ```
 
@@ -623,9 +629,6 @@ cd quantum-circuit-simulator
 # 2. 빌드 및 실행
 ./gradlew build
 ./gradlew run
-
-# 또는 JAR 파일 실행
-java -jar build/libs/quantum-circuit-simulator.jar
 ```
 
 ### 테스트 실행
@@ -672,7 +675,7 @@ xdg-open output/*.png output/*.gif
 ## 기술 스택
 
 ### 핵심 기술
-- **Java 17**: 최신 LTS 버전
+- **Java 21**: 최신 LTS 버전
 - **Gradle 8.5**: 빌드 도구
 - **JUnit 5**: 테스트 프레임워크
 - **AssertJ**: 유창한 assertion 라이브러리
@@ -1056,7 +1059,7 @@ public class QuantumState {
 package quantum.circuit.domain.state.executor;
 public interface QuantumExecutor {
     void applyXGate(QubitIndex target);
-    Map<String, Double> getStateProbabilities();  // ⭐ 정확한 확률
+    Map<String, Double> getStateProbabilities();  // 정확한 확률
 }
 
 // Infrastructure가 구현
@@ -1087,7 +1090,7 @@ public class QuantumState {
 - ✅ **라이브러리 독립성**: Strange → Qiskit 교체 가능
 - ✅ **테스트 용이성**: Mock 객체 주입 가능
 - ✅ **진정한 계층 분리**: Domain이 Infrastructure를 모름
-- ✅ **정확한 확률 계산**: amplitude 기반 얽힘 상태 정확도 ⭐
+- ✅ **정확한 확률 계산**: amplitude 기반 얽힘 상태 정확도
 
 ## 프로그래밍 요구사항
 
@@ -1164,5 +1167,4 @@ public class QuantumState {
 - [Quantum Algorithm Zoo](https://quantumalgorithmzoo.org/)
 - [Qiskit Textbook](https://qiskit.org/textbook/)
 - [QuTiP - Quantum Toolbox in Python](https://qutip.org/)
-- [ANIMATION_GUIDE.md - 애니메이션 시각화 상세 가이드](./ANIMATION_GUIDE.md) 🎬
 - [Clean Architecture - Robert C. Martin](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
