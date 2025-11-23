@@ -1,6 +1,9 @@
 import json
 import sys
 import os
+import platform
+import subprocess
+import webbrowser
 
 sys.path.append(os.path.join(os.path.dirname(__file__), 'visualizer'))
 
@@ -337,6 +340,180 @@ def create_entanglement_visualization(circuit_result):
     plt.close()
     print(f"    ✅ output/entanglement_evolution.gif")
 
+def create_html_viewer(circuit_name, num_qubits):
+    html_content = f"""<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Circuit Visualization - {circuit_name}</title>
+    <style>
+        * {{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }}
+        body {{
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }}
+        .container {{
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+        }}
+        h1 {{
+            text-align: center;
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }}
+        .subtitle {{
+            text-align: center;
+            color: #718096;
+            margin-bottom: 40px;
+            font-size: 1.2em;
+        }}
+        .animation-grid {{
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }}
+        .animation-card {{
+            background: #f7fafc;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }}
+        .animation-card:hover {{
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+        }}
+        .animation-title {{
+            font-size: 1.3em;
+            color: #2d3748;
+            margin-bottom: 15px;
+            font-weight: 600;
+            text-align: center;
+        }}
+        .animation-container {{
+            width: 100%;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
+        }}
+        .animation-container img {{
+            width: 100%;
+            height: auto;
+            display: block;
+        }}
+        .info-box {{
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 30px;
+            text-align: center;
+        }}
+        .info-box h3 {{
+            margin-bottom: 10px;
+            font-size: 1.5em;
+        }}
+        .info-box p {{
+            font-size: 1.1em;
+            opacity: 0.9;
+        }}
+        .badge {{
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            margin: 5px;
+            font-size: 0.9em;
+        }}
+        @media (max-width: 768px) {{
+            .animation-grid {{
+                grid-template-columns: 1fr;
+            }}
+            h1 {{
+                font-size: 2em;
+            }}
+        }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌌 Quantum Circuit Visualization</h1>
+        <p class="subtitle">{circuit_name} | {num_qubits} Qubit{"s" if num_qubits > 1 else ""}</p>
+
+        <div class="animation-grid">
+            <div class="animation-card">
+                <div class="animation-title">🔵 Bloch Sphere Evolution</div>
+                <div class="animation-container">
+                    <img src="bloch_evolution.gif" alt="Bloch Sphere Animation">
+                </div>
+            </div>
+
+            <div class="animation-card">
+                <div class="animation-title">📊 State Probability Distribution</div>
+                <div class="animation-container">
+                    <img src="histogram_evolution.gif" alt="Histogram Animation">
+                </div>
+            </div>
+
+            {"" if num_qubits < 2 else '''
+            <div class="animation-card">
+                <div class="animation-title">⚡ Quantum Entanglement</div>
+                <div class="animation-container">
+                    <img src="entanglement_evolution.gif" alt="Entanglement Animation">
+                </div>
+            </div>
+            '''}
+        </div>
+
+        <div class="info-box">
+            <h3>✨ Visualization Info</h3>
+            <p>
+                <span class="badge">🎬 2.5s Animation</span>
+                <span class="badge">🎨 SLERP Interpolation</span>
+                <span class="badge">📈 Real-time State Tracking</span>
+            </p>
+            <p style="margin-top: 15px; font-size: 0.95em;">
+                Generated by Quantum Circuit Simulator | Powered by QuTiP & Matplotlib
+            </p>
+        </div>
+    </div>
+</body>
+</html>"""
+
+    html_path = 'output/visualization.html'
+    with open(html_path, 'w', encoding='utf-8') as f:
+        f.write(html_content)
+
+    return html_path
+
+def open_visualization_in_browser(html_path):
+    abs_path = os.path.abspath(html_path)
+    file_url = f'file://{abs_path}'
+
+    print(f"\n🌐 웹 브라우저에서 시각화를 여시겠습니까?")
+    print(f"   {html_path}")
+
+    webbrowser.open(file_url)
+    print(f"  ✅ 브라우저에서 열림!")
+
 def main():
     if len(sys.argv) < 2:
         print("Usage: python main.py <circuit_result_json>")
@@ -415,6 +592,14 @@ def main():
     print("    - output/histogram_evolution.gif")
     if qubit_count >= 2:
         print("    - output/entanglement_evolution.gif")
+
+    print("\n=== Creating HTML Viewer ===")
+    try:
+        html_path = create_html_viewer(circuit_name, qubit_count)
+        print(f"  ✅ {html_path}")
+        open_visualization_in_browser(html_path)
+    except Exception as e:
+        print(f"  ⚠️  HTML viewer failed: {e}")
 
 if __name__ == '__main__':
     main()
