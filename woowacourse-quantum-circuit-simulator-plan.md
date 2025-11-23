@@ -11,9 +11,9 @@
 - **원점 회귀**: 나를 이 길로 이끌어준 양자역학 도메인을, 내가 갖춘 개발 실력으로 직접 구현
 
 ### 1.2 시의성
-2025년 노벨 물리학상은 1984-1985년 조셉슨 접합을 이용한 초전도 전기 회로에서 거시적 양자 터널링과 에너지 양자화를 발견한 John Clarke, Michel Devoret, John Martinis에게 수여되었습니다.
+양자 컴퓨팅은 현재 가장 주목받는 기술 분야 중 하나입니다. IBM, Google, Amazon 등 주요 기업들이 양자 컴퓨터 개발에 막대한 투자를 하고 있으며, 우리나라도 양자 기술 개발에 적극 나서고 있습니다.
 
-이 연구는 초전도 양자 비트(qubit) 개발의 토대가 되었으며, 연구자들은 마이크로파 입력을 사용하여 초전도 전자를 여기시키고 터널링에 미치는 영향을 관찰했습니다.
+2019년 Google의 "양자 우월성(Quantum Supremacy)" 달성 이후, 실용적인 양자 알고리즘 개발과 양자 시뮬레이터의 중요성이 더욱 커지고 있습니다. 특히 초전도 큐비트 기반의 양자 컴퓨터가 상용화 단계에 접어들면서, 양자 회로 설계와 최적화 기술이 핵심 역량으로 부상하고 있습니다.
 
 ### 1.3 도전 과제
 - **도메인 복잡성**: 양자역학의 비직관적 개념을 코드로 표현
@@ -32,7 +32,7 @@
 ### 2.2 학습 목표
 1. **도메인 주도 설계**: 양자역학 개념을 도메인 객체로 표현
 2. **SOLID 원칙 적용**: 단일 책임, 개방-폐쇄 원칙 등
-3. **디자인 패턴 8종 실전 적용**:
+3. **디자인 패턴 10종 실전 적용** ⭐:
    - Builder: 복잡한 회로 구성
    - Template Method: 알고리즘 공통 흐름
    - Factory: 알고리즘 생성
@@ -41,6 +41,8 @@
    - Composite: 최적화 파이프라인
    - Facade: 회로 분석
    - Observer: 벤치마크 실행 추적
+   - **Port-Adapter**: Strange 라이브러리 격리 ⭐
+   - **Adapter**: Python 시각화 통합 ⭐
 4. **TDD 실천**: 확률적 결과의 테스트 전략 수립 (Red-Green-Refactor)
 5. **일급 컬렉션**: 게이트 목록, 큐비트 상태 관리
 6. **복잡한 협력 구조**: 4-5단계 깊이의 객체 협력 설계
@@ -223,15 +225,31 @@ QuantumCircuitSimulator → QuantumCircuitBuilder → CircuitStep → QuantumGat
 - GroverAlgorithm (양자 검색)
 - DeutschJozsaAlgorithm (양자 오라클)
 - AlgorithmMode (모드 UI)
+- **CircuitResultExporter** (단계별 JSON 출력) ⭐
+- **Python 시각화 시스템** (Java-Python 하이브리드) ⭐
+   - main.py: 통합 시각화 스크립트
+   - bloch_animation.py: SLERP 보간 블로흐 구면
+   - histogram_animation.py: 선형 보간 히스토그램
+   - entanglement_visualizer.py: 2큐비트 얽힘 시각화
+   - requirements.txt: matplotlib, qutip, numpy, scipy, pillow
 
 **협력 구조**:
 ```
 AlgorithmMode → AlgorithmFactory → QuantumAlgorithm (Template Method)
                                  → QuantumCircuitBuilder
                                  → QuantumCircuit
+                                 → CircuitResultExporter (JSON 출력)
+                                 → Python subprocess (시각화 실행)
+                                       ↓
+                                 [8개 파일 자동 생성]
+                                 - bloch_sphere.png, histogram.png
+                                 - bloch_steps.png, histogram_steps.png
+                                 - bloch_evolution.gif, histogram_evolution.gif
+                                 - entanglement_steps.png (2큐비트+)
+                                 - entanglement_evolution.gif (2큐비트+)
 ```
 
-**핵심 패턴**: Template Method, Factory
+**핵심 패턴**: Template Method, Factory, **Port-Adapter** (Python 통합)
 
 ---
 
@@ -624,17 +642,23 @@ class BenchmarkRunner {
 ## 7. 구현 성과
 
 ### 7.1 구현 완료 현황
-- **Phase 완료**: 7/7 단계 완료
-- **디자인 패턴 적용**: 8종
+- **Phase 완료**: 7/7 단계 완료 + Python 시각화 통합 ⭐
+- **디자인 패턴 적용**: 10종 (Builder, Template Method, Factory, Strategy, Chain of Responsibility, Composite, Facade, Observer, **Port-Adapter**, **Adapter**) ⭐
 - **알고리즘 구현**: 5개 (Bell State, GHZ State, QFT, Grover, Deutsch-Jozsa)
 - **모드 구현**: 4개 (자유, 알고리즘, 최적화, 벤치마크)
+- **시각화 시스템**: Java-Python 하이브리드 (8개 파일 자동 생성) ⭐
+- **테스트 커버리지**: 420+ 테스트 케이스 ⭐
 
 ### 7.2 기술적 성과
 - 복잡한 도메인의 객체지향 설계 완료
 - 4-5단계 깊이의 협력 구조 구현
-- TDD 기반 안정적 개발 프로세스
-- 확장 가능한 아키텍처 설계
-- 8가지 디자인 패턴의 실전 적용 경험
+- TDD 기반 안정적 개발 프로세스 (Red-Green-Refactor)
+- 확장 가능한 아키텍처 설계 (개방-폐쇄 원칙 준수)
+- 10가지 디자인 패턴의 실전 적용 경험 ⭐
+- **Java-Python 프로세스 간 통신 구현** (JSON 기반) ⭐
+- **양자 상태 시각화 완성** (블로흐 구면, 히스토그램, 얽힘) ⭐
+- **애니메이션 GIF 자동 생성 시스템** (SLERP 보간) ⭐
+- **Port-Adapter 패턴으로 외부 의존성 격리** (Strange 라이브러리) ⭐
 
 ---
 
@@ -702,10 +726,24 @@ class BenchmarkRunner {
 ## 11. 프로젝트 정보
 
 ### 11.1 기술 스택
+
+**Backend (Java)**:
 - **언어**: Java 21
 - **빌드 도구**: Gradle 8.14
 - **테스트**: JUnit 5, AssertJ
-- **라이브러리**: Strange 0.1.3, mission-utils 1.2.0
+- **라이브러리**:
+   - Strange 0.1.3 (양자 컴퓨팅 시뮬레이션)
+   - mission-utils 1.2.0 (랜덤, 콘솔)
+
+**Visualization (Python)** ⭐:
+- **언어**: Python 3.8+
+- **핵심 라이브러리**:
+   - matplotlib 3.8.0 (2D/3D 시각화)
+   - qutip 5.2.2 (양자 상태 표현)
+   - numpy 1.26.4 (수치 연산)
+   - scipy 1.11.4 (SLERP 보간)
+   - pillow 9.0.0+ (GIF 생성)
+- **통신 방식**: JSON 기반 프로세스 간 통신 (subprocess)
 
 ### 11.2 개발 환경
 - **IDE**: IntelliJ IDEA
