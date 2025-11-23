@@ -13,7 +13,7 @@
 ### 1.2 시의성
 양자 컴퓨팅은 현재 가장 주목받는 기술 분야 중 하나입니다. IBM, Google, Amazon 등 주요 기업들이 양자 컴퓨터 개발에 막대한 투자를 하고 있으며, 우리나라도 양자 기술 개발에 적극 나서고 있습니다.
 
-2019년 Google의 "양자 우월성(Quantum Supremacy)" 달성 이후, 실용적인 양자 알고리즘 개발과 양자 시뮬레이터의 중요성이 더욱 커지고 있습니다. 특히 초전도 큐비트 기반의 양자 컴퓨터가 상용화 단계에 접어들면서, 양자 회로 설계와 최적화 기술이 핵심 역량으로 부상하고 있습니다.
+2019년 Google의 "양자 우월성(Quantum Supremacy)" 달성 이후, 실용적인 양자 알고리즘 개발과 양자 시뮬레이터의 중요성이 더욱 커지고 있습니다. 특히 초전도 큐비트 기반의 양자 컴퓨터가 실용화 연구 단계로 진입하면서, IBM Quantum Experience, AWS Braket 등 클라우드 기반 양자 컴퓨팅 플랫폼이 등장했고, 이에 따라 양자 회로 설계와 최적화 기술이 핵심 역량으로 부상하고 있습니다.
 
 ### 1.3 도전 과제
 - **도메인 복잡성**: 양자역학의 비직관적 개념을 코드로 표현
@@ -32,17 +32,17 @@
 ### 2.2 학습 목표
 1. **도메인 주도 설계**: 양자역학 개념을 도메인 객체로 표현
 2. **SOLID 원칙 적용**: 단일 책임, 개방-폐쇄 원칙 등
-3. **디자인 패턴 10종 실전 적용** ⭐:
-   - Builder: 복잡한 회로 구성
-   - Template Method: 알고리즘 공통 흐름
-   - Factory: 알고리즘 생성
-   - Strategy: 최적화 전략
-   - Chain of Responsibility: 검증 체인, 최적화 파이프라인
-   - Composite: 최적화 파이프라인
-   - Facade: 회로 분석
-   - Observer: 벤치마크 실행 추적
-   - **Port-Adapter**: Strange 라이브러리 격리 ⭐
-   - **Adapter**: Python 시각화 통합 ⭐
+3. **디자인 패턴 10종 실전 적용**:
+    - Builder: 복잡한 회로 구성
+    - Template Method: 알고리즘 공통 흐름
+    - Factory: 알고리즘 생성
+    - Strategy: 최적화 전략
+    - Chain of Responsibility: 검증 체인, 최적화 파이프라인
+    - Composite: 최적화 파이프라인
+    - Facade: 회로 분석
+    - Observer: 벤치마크 실행 추적
+    - Port-Adapter: Strange 라이브러리 격리
+    - Adapter: Python 시각화 통합
 4. **TDD 실천**: 확률적 결과의 테스트 전략 수립 (Red-Green-Refactor)
 5. **일급 컬렉션**: 게이트 목록, 큐비트 상태 관리
 6. **복잡한 협력 구조**: 4-5단계 깊이의 객체 협력 설계
@@ -225,13 +225,13 @@ QuantumCircuitSimulator → QuantumCircuitBuilder → CircuitStep → QuantumGat
 - GroverAlgorithm (양자 검색)
 - DeutschJozsaAlgorithm (양자 오라클)
 - AlgorithmMode (모드 UI)
-- **CircuitResultExporter** (단계별 JSON 출력) ⭐
-- **Python 시각화 시스템** (Java-Python 하이브리드) ⭐
-   - main.py: 통합 시각화 스크립트
-   - bloch_animation.py: SLERP 보간 블로흐 구면
-   - histogram_animation.py: 선형 보간 히스토그램
-   - entanglement_visualizer.py: 2큐비트 얽힘 시각화
-   - requirements.txt: matplotlib, qutip, numpy, scipy, pillow
+- CircuitResultExporter (단계별 JSON 출력)
+- Python 시각화 시스템 (Java-Python 하이브리드)
+    - main.py: 통합 시각화 스크립트
+    - bloch_animation.py: SLERP 보간 블로흐 구면
+    - histogram_animation.py: 선형 보간 히스토그램
+    - entanglement_visualizer.py: 2큐비트 얽힘 시각화
+    - requirements.txt: matplotlib, qutip, numpy, scipy, pillow
 
 **협력 구조**:
 ```
@@ -249,7 +249,7 @@ AlgorithmMode → AlgorithmFactory → QuantumAlgorithm (Template Method)
                                  - entanglement_evolution.gif (2큐비트+)
 ```
 
-**핵심 패턴**: Template Method, Factory, **Port-Adapter** (Python 통합)
+**핵심 패턴**: Template Method, Factory, Adapter (Python 통합)
 
 ---
 
@@ -323,112 +323,117 @@ ValidationChain → [QubitRangeValidator, GateCompatibilityValidator,
 ### Phase 6: 비교 및 벤치마크 [완료]
 
 **구현 항목**:
+- BenchmarkRunner (벤치마크 실행 관리)
+- PerformanceMonitor (interface - Observer)
+- ResultCollector (결과 수집 - Observer 구현체)
 - CircuitComparator (회로 비교)
-- ComparisonReport (비교 결과)
-- BenchmarkRunner (벤치마크 실행)
-- PerformanceMonitor (Observer 인터페이스)
-- ResultCollector (Observer 구현체)
 - PerformanceMetrics (성능 지표)
-- BenchmarkReport (벤치마크 결과)
+- BenchmarkReport (벤치마크 결과 리포트)
+- ComparisonReport (회로 비교 리포트)
 
 **협력 구조**:
 ```
-BenchmarkRunner → [Algorithm1, Algorithm2, ...]
-               → PerformanceMonitor (Observer 인터페이스)
-               → ResultCollector (Observer 구현체)
-               → PerformanceMetrics
-               → CircuitComparator
-               → BenchmarkReport
+BenchmarkRunner (Subject) → [ResultCollector, ...] (Observer)
+                          → CircuitComparator
+                          → PerformanceMetrics
+                          → BenchmarkReport / ComparisonReport
 ```
 
 **핵심 패턴**: Observer
 
 ---
 
-### Phase 7: 통합 및 UI [완료]
+### Phase 7: Port-Adapter 리팩토링 [완료]
 
 **구현 항목**:
-- BenchmarkMode (벤치마크 모드 UI)
-- Application (4가지 모드 통합)
-- 모드 선택 및 실행
+- QuantumExecutor (interface - Port, Domain에 위치)
+- StrangeQuantumExecutor (Adapter 구현체, Infrastructure에 위치)
+- 전체 계층 분리 완성
+- DIP(의존성 역전 원칙) 달성
 
 **협력 구조**:
 ```
-Application → [QuantumCircuitSimulator, AlgorithmMode, OptimizationMode, BenchmarkMode]
-           → InputView, OutputView
+Domain Layer:
+    QuantumState → QuantumExecutor (Port)
+                        ↑
+                        | 구현 (의존성 역전)
+Infrastructure Layer:
+    StrangeQuantumExecutor (Adapter) → Strange Library
 ```
 
-**통합 완료**: 4가지 모드 완전 통합
+**핵심 패턴**: Port-Adapter, Adapter
+
+**효과**:
+- Domain이 Infrastructure에 의존하지 않음
+- Strange 라이브러리 교체 가능 (Qiskit, Cirq 등)
+- Mock 객체로 테스트 가능
+- 진정한 도메인 중심 설계
 
 ---
 
-## 6. 디자인 패턴 적용 상세
+## 6. 디자인 패턴 상세
 
 ### 6.1 Builder Pattern (빌더 패턴)
 **적용 위치**: Phase 1 - 회로 구성
 
 ```java
 class QuantumCircuitBuilder {
-    private int qubitCount;
+    private int qubits;
     private List<CircuitStep> steps;
     
-    public QuantumCircuitBuilder withQubits(int count) {
-        this.qubitCount = count;
-        return this;
+    public QuantumCircuitBuilder(int qubits) {
+        this.qubits = qubits;
+        this.steps = new ArrayList<>();
     }
     
-    public QuantumCircuitBuilder addStep(CircuitStep step) {
-        this.steps.add(step);
+    public QuantumCircuitBuilder addGate(QuantumGate gate) {
+        // 게이트 추가
         return this;
     }
     
     public QuantumCircuit build() {
-        return new QuantumCircuit(qubitCount, steps);
+        return new QuantumCircuit(qubits, List.copyOf(steps));
     }
 }
 ```
 
-**목적**: 복잡한 양자 회로를 단계적으로 구성
+**목적**: 복잡한 회로 객체를 단계적으로 구성
 
 **효과**:
-- 회로 생성 로직의 가독성 향상
 - 불변 객체 생성 지원
-- 필수/선택 매개변수 구분
+- 유창한 인터페이스 (Fluent Interface)
+- 생성 과정의 명확성
 
 ---
 
 ### 6.2 Template Method Pattern (템플릿 메서드 패턴)
-**적용 위치**: Phase 2 - 알고리즘 라이브러리
+**적용 위치**: Phase 2 - 알고리즘 공통 흐름
 
 ```java
 abstract class QuantumAlgorithm {
+    // 템플릿 메서드
     public final QuantumCircuit build(int qubits) {
         validateParameters(qubits);
         QuantumCircuitBuilder builder = createBuilder(qubits);
         prepareInitialState(builder);
-        applyMainAlgorithm(builder);  // 추상 메서드 - 하위 클래스 구현
+        applyMainAlgorithm(builder);  // 추상 메서드
         prepareMeasurement(builder);
         return builder.build();
     }
     
+    // 하위 클래스에서 구현
     protected abstract void applyMainAlgorithm(QuantumCircuitBuilder builder);
-}
-
-class BellStateAlgorithm extends QuantumAlgorithm {
-    @Override
-    protected void applyMainAlgorithm(QuantumCircuitBuilder builder) {
-        // Bell State 고유 로직
-        builder.addStep(hadamardStep);
-        builder.addStep(cnotStep);
-    }
+    
+    // 공통 메서드들
+    protected void validateParameters(int qubits) { }
+    protected QuantumCircuitBuilder createBuilder(int qubits) { }
 }
 ```
 
-**목적**: 알고리즘의 공통 흐름은 상위 클래스에서, 세부 로직은 하위 클래스에서 구현
+**목적**: 알고리즘의 골격을 정의하고, 세부 단계는 하위 클래스에서 구현
 
 **효과**:
 - 코드 중복 제거
-- 알고리즘 추가 시 확장성 향상
 - 공통 로직의 일관성 보장
 
 ---
@@ -639,26 +644,102 @@ class BenchmarkRunner {
 
 ---
 
+### 6.9 Adapter Pattern (어댑터 패턴)
+**적용 위치**: Phase 2 - Python 시각화 통합
+
+```java
+class PythonVisualizerAdapter {
+    public void visualize(String jsonPath) {
+        try {
+            ProcessBuilder pb = new ProcessBuilder(
+                "python3", "src/main/python/main.py", jsonPath
+            );
+            Process process = pb.start();
+            int exitCode = process.waitFor();
+            
+            if (exitCode != 0) {
+                throw new VisualizationException("Python 시각화 실패");
+            }
+        } catch (Exception e) {
+            throw new VisualizationException("시각화 프로세스 에러", e);
+        }
+    }
+}
+```
+
+**목적**: Java와 Python 간의 인터페이스 불일치 해결
+
+**효과**:
+- 이질적인 시스템 간 통합
+- JSON 기반 데이터 교환
+- 프로세스 간 통신 캡슐화
+
+---
+
+### 6.10 Port-Adapter Pattern (포트-어댑터 패턴)
+**적용 위치**: Phase 7 - 계층 분리 및 DIP
+
+```java
+// Domain Layer (Port)
+package quantum.circuit.domain.state.executor;
+
+public interface QuantumExecutor {
+    void applyXGate(QubitIndex target);
+    void applyHadamardGate(QubitIndex target);
+    Map<String, Double> getStateProbabilities();
+}
+
+// Infrastructure Layer (Adapter)
+package quantum.circuit.infrastructure.executor;
+
+public class StrangeQuantumExecutor implements QuantumExecutor {
+    private final Program program;
+    
+    @Override
+    public void applyHadamardGate(QubitIndex target) {
+        Step step = new Step();
+        step.addGate(new Hadamard(target.getValue()));
+        program.addStep(step);
+    }
+    
+    @Override
+    public Map<String, Double> getStateProbabilities() {
+        Complex[] amplitudes = getAmplitudesFromResult();
+        return calculateProbabilities(amplitudes);
+    }
+}
+```
+
+**목적**: 도메인과 인프라의 완전한 분리, DIP 달성
+
+**효과**:
+- Domain이 Infrastructure를 모름
+- Strange → Qiskit, Cirq 등 라이브러리 교체 가능
+- Mock 객체로 독립적 테스트
+- 진정한 도메인 중심 설계
+
+---
+
 ## 7. 구현 성과
 
 ### 7.1 구현 완료 현황
-- **Phase 완료**: 7/7 단계 완료 + Python 시각화 통합 ⭐
-- **디자인 패턴 적용**: 10종 (Builder, Template Method, Factory, Strategy, Chain of Responsibility, Composite, Facade, Observer, **Port-Adapter**, **Adapter**) ⭐
+- **Phase 완료**: 7/7 단계 완료 + Python 시각화 통합
+- **디자인 패턴 적용**: 10종 (Builder, Template Method, Factory, Strategy, Chain of Responsibility, Composite, Facade, Observer, Port-Adapter, Adapter)
 - **알고리즘 구현**: 5개 (Bell State, GHZ State, QFT, Grover, Deutsch-Jozsa)
 - **모드 구현**: 4개 (자유, 알고리즘, 최적화, 벤치마크)
-- **시각화 시스템**: Java-Python 하이브리드 (8개 파일 자동 생성) ⭐
-- **테스트 커버리지**: 420+ 테스트 케이스 ⭐
+- **시각화 시스템**: Java-Python 하이브리드 (8개 파일 자동 생성)
+- **테스트 커버리지**: 420+ 테스트 케이스
 
 ### 7.2 기술적 성과
 - 복잡한 도메인의 객체지향 설계 완료
 - 4-5단계 깊이의 협력 구조 구현
 - TDD 기반 안정적 개발 프로세스 (Red-Green-Refactor)
 - 확장 가능한 아키텍처 설계 (개방-폐쇄 원칙 준수)
-- 10가지 디자인 패턴의 실전 적용 경험 ⭐
-- **Java-Python 프로세스 간 통신 구현** (JSON 기반) ⭐
-- **양자 상태 시각화 완성** (블로흐 구면, 히스토그램, 얽힘) ⭐
-- **애니메이션 GIF 자동 생성 시스템** (SLERP 보간) ⭐
-- **Port-Adapter 패턴으로 외부 의존성 격리** (Strange 라이브러리) ⭐
+- 10가지 디자인 패턴의 실전 적용 경험
+- Java-Python 프로세스 간 통신 구현 (JSON 기반)
+- 양자 상태 시각화 완성 (블로흐 구면, 히스토그램, 얽힘)
+- 애니메이션 GIF 자동 생성 시스템 (SLERP 보간)
+- Port-Adapter 패턴으로 외부 의존성 격리 (Strange 라이브러리)
 
 ---
 
@@ -666,7 +747,7 @@ class BenchmarkRunner {
 
 ### 8.1 기술적 성장
 - **복잡한 도메인 설계**: 양자역학의 추상적 개념을 구체적 코드로 구현
-- **디자인 패턴 숙련도**: 8가지 패턴의 적절한 사용 시기 및 방법 체득
+- **디자인 패턴 숙련도**: 10가지 패턴의 적절한 사용 시기 및 방법 체득
 - **협력 구조 설계**: 4-5단계 깊이의 객체 간 협력 관계 설계 능력
 - **TDD 실천**: Red-Green-Refactor 사이클 체화
 - **확장 가능한 설계**: 새로운 기능 추가 시 기존 코드 수정 최소화
@@ -704,53 +785,166 @@ class BenchmarkRunner {
 
 ---
 
-## 10. 참고 자료
+## 10. 실행 방법
 
-### 10.1 양자 컴퓨팅
-- [Nobel Prize 2025 Physics - 공식 발표](https://www.nobelprize.org/prizes/physics/2025/)
+### 10.1 환경 설정
+
+#### 1단계: 저장소 클론
+```bash
+git clone https://github.com/e9ua1/quantum-circuit-simulator
+cd quantum-circuit-simulator
+```
+
+#### 2단계: Python 환경 설정 (필수)
+
+**자동 설치 (권장):**
+```bash
+chmod +x install.sh
+./install.sh
+```
+
+**수동 설치:**
+```bash
+# Python 3.9+ 필요
+python3 --version
+
+# 의존성 설치
+pip3 install -r src/main/python/requirements.txt --break-system-packages
+
+# 또는 setup.py 사용
+pip3 install -e .
+```
+
+**필요한 라이브러리:**
+- matplotlib==3.8.0
+- qutip==5.2.2
+- numpy==1.26.4
+- plotly==5.9.0
+- scipy==1.11.4
+- pillow>=9.0.0
+
+#### 3단계: Java 빌드 및 실행
+```bash
+# 빌드
+./gradlew clean build
+
+# 실행
+./gradlew run
+```
+
+#### 4단계: 테스트 실행
+```bash
+# 전체 테스트
+./gradlew test
+
+# 특정 테스트
+./gradlew test --tests "quantum.circuit.*"
+```
+
+### 10.2 실행 플로우
+
+```
+1. Clone Repository
+   ↓
+2. Install Python Dependencies (install.sh)
+   ↓
+3. Build Java Project (./gradlew build)
+   ↓
+4. Run Application (./gradlew run)
+   ↓
+5. Select Mode → Execute Algorithm
+   ↓
+6. Java generates JSON → Python creates visualizations
+   ↓
+7. Check output/ directory for results
+   - *.png (static images)
+   - *.gif (animations)
+```
+
+### 10.3 트러블슈팅
+
+**Python 라이브러리 설치 실패 시:**
+```bash
+# pip 업그레이드
+pip3 install --upgrade pip
+
+# 가상 환경 사용 (권장)
+python3 -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+pip install -r src/main/python/requirements.txt
+```
+
+**Java 빌드 실패 시:**
+```bash
+# Gradle 캐시 정리
+./gradlew clean --refresh-dependencies
+
+# JDK 버전 확인 (Java 21 필요)
+java -version
+```
+
+**시각화 파일이 생성되지 않을 때:**
+```bash
+# output/ 디렉토리 권한 확인
+chmod -R 755 output/
+
+# Python 스크립트 직접 실행 테스트
+python3 src/main/python/main.py output/circuit_result.json
+```
+
+---
+
+## 11. 참고 자료
+
+### 11.1 양자 컴퓨팅
 - [Quantum Algorithm Zoo](https://quantumalgorithmzoo.org/)
 - [Qiskit Textbook](https://qiskit.org/textbook/)
 - [『퀀텀 스토리』 - 짐 배것 (반니)](https://www.aladin.co.kr/shop/wproduct.aspx?ItemId=35000923)
 - [『Quantum Computing in Action』 - Manning Publications](https://www.manning.com/books/quantum-computing-in-action)
 
-### 10.2 라이브러리
+### 11.2 라이브러리
 - [Strange - GitHub](https://github.com/redfx-quantum/strange)
+- [QuTiP - Quantum Toolbox in Python](https://qutip.org/)
 - [mission-utils](https://github.com/woowacourse/mission-utils)
 
-### 10.3 디자인 패턴
+### 11.3 디자인 패턴
 - [『Head First Design Patterns』](https://www.oreilly.com/library/view/head-first-design/0596007124/)
 - [Refactoring Guru - Design Patterns](https://refactoring.guru/design-patterns)
+- [Clean Architecture - Robert C. Martin](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
 
 ---
 
-## 11. 프로젝트 정보
+## 12. 프로젝트 정보
 
-### 11.1 기술 스택
+### 12.1 기술 스택
 
 **Backend (Java)**:
 - **언어**: Java 21
 - **빌드 도구**: Gradle 8.14
 - **테스트**: JUnit 5, AssertJ
 - **라이브러리**:
-   - Strange 0.1.3 (양자 컴퓨팅 시뮬레이션)
-   - mission-utils 1.2.0 (랜덤, 콘솔)
+    - Strange 0.1.3 (양자 컴퓨팅 시뮬레이션)
+    - mission-utils 1.2.0 (랜덤, 콘솔)
 
-**Visualization (Python)** ⭐:
-- **언어**: Python 3.8+
+**Visualization (Python)**:
+- **언어**: Python 3.9+
 - **핵심 라이브러리**:
-   - matplotlib 3.8.0 (2D/3D 시각화)
-   - qutip 5.2.2 (양자 상태 표현)
-   - numpy 1.26.4 (수치 연산)
-   - scipy 1.11.4 (SLERP 보간)
-   - pillow 9.0.0+ (GIF 생성)
+    - matplotlib 3.8.0 (2D/3D 시각화)
+    - qutip 5.2.2 (양자 상태 표현)
+    - numpy 1.26.4 (수치 연산)
+    - scipy 1.11.4 (SLERP 보간)
+    - pillow 9.0.0+ (GIF 생성)
 - **통신 방식**: JSON 기반 프로세스 간 통신 (subprocess)
 
-### 11.2 개발 환경
+### 12.2 개발 환경
 - **IDE**: IntelliJ IDEA
 - **버전 관리**: Git/GitHub
 - **개발 방법론**: TDD (Red-Green-Refactor)
 
-### 11.3 프로젝트 저장소
-- GitHub: `https://github.com/your-username/quantum-circuit-simulator`
+### 12.3 프로젝트 저장소
+- **GitHub**: https://github.com/e9ua1/quantum-circuit-simulator
+- **문서**:
+    - [README.md](https://github.com/e9ua1/quantum-circuit-simulator/blob/main/README.md)
+    - [QUANTUM_GUIDE.md](https://github.com/e9ua1/quantum-circuit-simulator/blob/main/docs/QUANTUM_GUIDE.md)
 
 ---
