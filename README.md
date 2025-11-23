@@ -558,7 +558,7 @@ start build/reports/tests/test/index.html
   - Port-Adapter 패턴으로 완전 격리
   - `StrangeQuantumExecutor`로만 접근
 - **JUnit 5**: 단위 테스트 프레임워크
-- **AssertJ**: 메서드 체이닝 기반 assertion 라이브러리
+- **AssertJ**: assertion 라이브러리
 
 ### 시각화 도구
 - **Python 3.8+**: 시각화 스크립트
