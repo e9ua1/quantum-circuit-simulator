@@ -11,7 +11,6 @@
 - [기능 요구사항](#기능-요구사항)
 - [예외 상황](#예외-상황)
 - [실행 결과 예시](#실행-결과-예시)
-- [구현 완료 현황](#구현-완료-현황)
 - [실행 방법](#실행-방법)
 - [기술 스택](#기술-스택)
 - [패키지 구조](#패키지-구조)
@@ -120,20 +119,23 @@
 - 알고리즘 실행 시 자동으로 시각화 파일 생성
 - **단계별 상태 변화** 추적 및 시각화
 - **정확한 얽힘 확률** 계산 및 표시
+- **2큐비트 얽힘 시각화** - 두 블로흐 구면 동시 표시
 - **애니메이션 GIF** 자동 생성으로 극적인 시각화
 - Python 기반 블로흐 구면과 히스토그램 생성
 
-**생성 파일 (6개):**
+**생성 파일 (8개):**
 
 정적 이미지 (PNG):
 - `bloch_sphere.png` - 최종 상태의 블로흐 구면
 - `histogram.png` - 최종 상태 분포
 - `bloch_steps.png` - 단계별 궤적 비교
 - `histogram_steps.png` - 단계별 상태 비교
+- `entanglement_steps.png` - 2큐비트 얽힘 단계별 비교
 
-애니메이션 (GIF): 🎬
+애니메이션 (GIF):
 - `bloch_evolution.gif` - 블로흐 구면 벡터가 부드럽게 회전
 - `histogram_evolution.gif` - 상태 분포가 부드럽게 변화
+- `entanglement_evolution.gif` - 얽힘 형성 과정 애니메이션
 
 **협력 구조:**
 ```
@@ -264,11 +266,16 @@ ComparisonReport / BenchmarkReport
   - Strange 라이브러리의 amplitude 직접 접근
   - |amplitude|² 계산으로 정확한 확률
   - Bell State: |00⟩ = 50%, |11⟩ = 50% (정확)
+- **2큐비트 얽힘 시각화**
+  - 두 블로흐 구면을 나란히 배치
+  - 얽힘 강도 계산 및 색상 표시
+  - CNOT 전후 얽힘 상태 변화 극적 표현
 - **Python 시각화 자동 실행**
   - 블로흐 구면: 단일 큐비트 상태 시각화
   - 히스토그램: 전체 시스템 상태 분포
+  - 얽힘 시각화: 2큐비트 상관관계
   - 단계별 궤적: 상태 변화 추적
-  - 단계별 비교: 각 단계의 상태 비교
+  - 애니메이션: 부드러운 전환 효과
 
 ### 3. 회로 최적화 및 분석 (최적화 모드)
 
@@ -302,45 +309,47 @@ ComparisonReport / BenchmarkReport
 
 ### 4. 벤치마크 및 비교 (벤치마크 모드)
 
-#### 4.1 알고리즘 벤치마크
-- 여러 알고리즘의 성능을 비교한다
-- 실행 시간, 게이트 수, 깊이 등을 측정한다
-- 벤치마크 결과를 시각화한다
+#### 4.1 알고리즘 성능 비교
+- 여러 알고리즘의 실행 시간 측정
+- 리소스 사용량 비교
+- 게이트 수 및 깊이 비교
 
-#### 4.2 최적화 효과 측정
-- 최적화 전후 회로를 비교한다
-- 각 최적화 규칙의 효과를 측정한다
-- 최적화 파이프라인의 효율성을 평가한다
+#### 4.2 최적화 전후 비교
+- 동일 회로의 최적화 전후 성능 측정
+- 개선 효과 정량화
+- 비교 리포트 생성
 
-#### 4.3 실행 추적
-- 회로 실행 과정을 단계별로 추적한다 (Observer)
-- 성능 병목 지점을 식별한다
-
-#### 4.4 비교 리포트
-- 여러 회로/알고리즘의 성능을 표 형태로 비교한다
-- 최적 선택을 추천한다
-- 개선 방향을 제시한다
+#### 4.3 성능 모니터링
+- Observer 패턴으로 실행 추적
+- 실시간 성능 지표 수집
+- 벤치마크 결과 시각화
 
 ## 예외 상황
 
-### 입력 검증
-- 잘못된 큐비트 개수 (범위 초과)
-- 유효하지 않은 게이트 이름
-- 큐비트 인덱스 범위 초과
-- 잘못된 알고리즘 이름
-- 빈 입력값
-- 공백만 있는 입력
+### 1. 입력 검증
+- 큐비트 개수가 범위를 벗어난 경우 (1 ≤ n ≤ 10)
+- 존재하지 않는 큐비트 인덱스 접근
+- 잘못된 게이트 파라미터
+- 지원하지 않는 알고리즘 이름
 
-### 회로 실행 검증
-- 초기화되지 않은 회로 실행
-- 게이트가 없는 회로 실행
-- CNOT에서 control과 target이 같은 경우
-- 큐비트 인덱스가 음수인 경우
+### 2. 회로 구성
+- CNOT 게이트의 제어/타겟 큐비트가 동일한 경우
+- 빈 회로 실행 시도
+- 게이트 적용 실패
 
-### 리소스 제한
-- 너무 많은 큐비트 (10개 초과)
-- 너무 깊은 회로 (제한 초과)
-- 메모리 부족
+### 3. 최적화
+- 최적화할 수 없는 회로 구조
+- 검증 실패 시 적절한 에러 메시지
+
+### 4. 시각화
+- Python 환경 미설정
+- 필요 패키지 누락
+- JSON 파일 생성 실패
+
+**예외 처리 원칙:**
+- 사용자에게 명확한 에러 메시지 제공
+- 프로그램 비정상 종료 방지
+- 재시도 가능한 구조
 
 ## 실행 결과 예시
 
@@ -349,6 +358,7 @@ ComparisonReport / BenchmarkReport
 ```
 === 알고리즘 라이브러리 ===
 사용 가능한 알고리즘:
+
 1. Bell State (2큐비트) - 최대 얽힘 상태 생성
 2. GHZ State (3큐비트) - 3큐비트 얽힘 상태
 3. QFT (2큐비트) - 양자 푸리에 변환
@@ -359,18 +369,15 @@ ComparisonReport / BenchmarkReport
 BELL_STATE
 
 === Bell State Algorithm ===
-설명: 최대 얽힘 상태를 생성하는 기본 알고리즘
+설명: 2큐비트 최대 얽힘 상태를 생성합니다. H 게이트로 중첩 상태를 만든 후 CNOT 게이트로 얽힘 상태를 생성합니다.
+===================================
+Q0: ─H──●─
+Q1: ────X─
 
-────────────────────────
-Q0: ──H────●──
-            │
-Q1: ───────⊕──
-────────────────────────
 
-큐비트 상태:
-Q0: 0.500000 (|0⟩: 50.00%, |1⟩: 50.00%)
-Q1: 0.500000 (|0⟩: 50.00%, |1⟩: 50.00%)
-────────────────────────
+Qubit 0 → |0⟩: 50.0% |1⟩: 50.0%
+Qubit 1 → |0⟩: 50.0% |1⟩: 50.0%
+===================================
 
 🎨 단계별 시각화 생성 중...
 
@@ -378,7 +385,7 @@ Loading circuit result from: output/circuit_result.json
 Circuit: Bell State
 Qubits: 2
 
-=== Visualizing Step-by-Step Animation ===
+=== Creating Static Images ===
 Found 3 steps
 Visualizing Bloch Sphere Steps (Qubit 0, 3 steps)
   - output/bloch_steps.png
@@ -391,222 +398,108 @@ Visualizing Bloch Sphere (P(|1⟩) = 0.500)
 Visualizing State Histogram
   - output/histogram.png
 
-Visualization complete!
-  - output/bloch_sphere.png
-  - output/histogram.png
-  - output/bloch_steps.png
-  - output/histogram_steps.png
+=== Creating Animations ===
+  Creating Bloch animation: 50 frames, 2.5s
+    ✅ output/bloch_evolution.gif
+  Creating histogram animation: 50 frames, 2.5s
+    ✅ output/histogram_evolution.gif
+  Creating entanglement steps: 3 steps
+    ✅ output/entanglement_steps.png
+  Creating entanglement animation: 50 frames, 2.5s
+    ✅ output/entanglement_evolution.gif
+
+✅ Visualization complete!
+  Static images:
+    - output/bloch_sphere.png
+    - output/histogram.png
+    - output/bloch_steps.png
+    - output/histogram_steps.png
+    - output/entanglement_steps.png
+  Animations:
+    - output/bloch_evolution.gif
+    - output/histogram_evolution.gif
+    - output/entanglement_evolution.gif
 
 ✅ 시각화 완료!
 📊 생성된 파일:
-  정적 이미지:
   - output/bloch_sphere.png (최종 상태)
   - output/histogram.png (최종 상태)
   - output/bloch_steps.png (단계별 궤적)
   - output/histogram_steps.png (단계별 비교)
-  
-  애니메이션: 🎬
-  - output/bloch_evolution.gif (블로흐 구면 회전)
-  - output/histogram_evolution.gif (상태 분포 변화)
-
+  - output/entanglement_steps.png (얽힘 상태)
+  - output/bloch_evolution.gif (애니메이션)
+  - output/histogram_evolution.gif (애니메이션)
+  - output/entanglement_evolution.gif (얽힘 애니메이션)
 💡 확인: open output/*.png output/*.gif
 ```
 
 **생성된 시각화:**
 
-#### 1. 정적 이미지 (PNG)
+![Bell State Entanglement](assets/demo/entanglement_evolution.gif)
 
-**단계별 블로흐 구면 궤적:**
-
-![Bloch Steps](assets/demo/bloch_steps.png)
-
-Bell State 생성 과정을 블로흐 구면 위의 궤적으로 표현:
-- 초기: 북극 (|0⟩, 녹색 벡터)
-- H 게이트 후: 적도 (|+⟩, 파란 점)
-- CNOT 후: 적도 유지 (얽힘 상태, 빨간 벡터)
-
-**단계별 히스토그램 비교:**
-
-![Histogram Steps](assets/demo/histogram_steps.png)
-
-각 단계의 상태 분포를 서브플롯으로 비교:
-- Step 0: |00⟩ = 100%
-- Step 1: |00⟩ = 50%, |10⟩ = 50%
-- Step 2: |00⟩ = 50%, |11⟩ = 50% (정확한 얽힘!)
-
-#### 2. 애니메이션 (GIF) 🎬
-
-**블로흐 구면 벡터 회전:**
+*두 블로흐 구면이 나란히 배치되어 얽힘 형성 과정을 극적으로 표현합니다. CNOT 게이트 적용 후 ⚡ Entanglement: 1.00 표시와 함께 벡터가 빨간색으로 변합니다.*
 
 ![Bloch Evolution](assets/demo/bloch_evolution.gif)
 
-블로흐 구면에서 벡터가 부드럽게 회전하는 애니메이션 (2.5초):
-- SLERP (구면 선형 보간) 알고리즘으로 최단 경로 회전
-- 각 단계 사이 20프레임으로 부드러운 전환
-- 색상 변화로 진행 상태 표시 (녹색 → 파란색 → 빨간색)
-
-**상태 분포 변화:**
+*블로흐 구면 위의 벡터가 북극(|0⟩)에서 적도(|+⟩)로 부드럽게 회전하는 모습을 보여줍니다.*
 
 ![Histogram Evolution](assets/demo/histogram_evolution.gif)
 
-상태 분포가 부드럽게 변화하는 애니메이션 (2.5초):
-- 막대가 실시간으로 자라고 줄어듦
-- 확률 수치가 카운팅 업 효과
-- 얽힘 형성 과정을 직관적으로 시각화
-
-> 💡 **애니메이션의 강점**: 정적 이미지로는 볼 수 없는 양자 상태의 **연속적인 변화**를 표현하여,
-> 게이트가 상태를 어떻게 변환하는지 물리적 직관을 제공합니다.
-
-### 최적화 모드
-
-```
-=== 회로 최적화 모드 ===
-최적화할 회로를 구성해주세요.
-
-큐비트 개수를 입력하세요 (1-10):
-2
-
-게이트를 추가하시겠습니까? (y/n):
-y
-게이트 종류를 선택하세요 (H/X/Z/CNOT):
-H
-타겟 큐비트 인덱스:
-0
-
-...
-
-🔧 최적화 파이프라인 실행 중...
-
-=== 최적화 결과 ===
-
-원본 회로:
-────────────────────────
-Q0: ──H──H──X──X──
-Q1: ────────────
-────────────────────────
-게이트 수: 4
-회로 깊이: 4
-
-최적화된 회로:
-────────────────────────
-Q0: ────
-Q1: ────
-────────────────────────
-게이트 수: 0
-회로 깊이: 0
-
-개선도:
-- 게이트 수 감소: 100.0%
-- 회로 깊이 감소: 100.0%
-```
-
-## 구현 완료 현황
-
-### ✅ 완료된 기능
-
-#### 1. 자유 모드
-- [x] 양자 회로 초기화
-- [x] 단일 큐비트 게이트 (H, X, Z)
-- [x] 다중 큐비트 게이트 (CNOT)
-- [x] 회로 실행 및 측정
-- [x] 회로 ASCII 시각화
-- [x] 상태 확률 출력
-
-#### 2. 알고리즘 모드
-- [x] Bell State 알고리즘
-- [x] GHZ State 알고리즘
-- [x] QFT 알고리즘
-- [x] Grover 알고리즘
-- [x] Deutsch-Jozsa 알고리즘
-- [x] 알고리즘 팩토리 (Factory 패턴)
-- [x] 알고리즘 템플릿 (Template Method)
-- [x] **자동 시각화 생성**
-- [x] **단계별 상태 추적**
-- [x] **정확한 얽힘 확률 계산**
-
-#### 3. 최적화 모드
-- [x] 중복 게이트 제거
-- [x] Identity 게이트 제거
-- [x] 게이트 융합 최적화
-- [x] 최적화 파이프라인 (Composite)
-- [x] 회로 분석 (Facade)
-  - [x] 회로 깊이 계산
-  - [x] 게이트 개수 통계
-  - [x] 복잡도 분석
-  - [x] 얽힘 정도 측정
-- [x] 회로 검증 (Chain of Responsibility)
-  - [x] 큐비트 범위 검증
-  - [x] 게이트 호환성 검증
-  - [x] 깊이 제한 검증
-  - [x] 리소스 제한 검증
-
-#### 4. 벤치마크 모드
-- [x] 알고리즘 벤치마크
-- [x] 최적화 전후 비교
-- [x] 성능 측정 (Observer)
-- [x] 비교 리포트 생성
-
-#### 5. 아키텍처
-- [x] Port-Adapter 패턴 (DIP 완성)
-- [x] QuantumExecutor 인터페이스 (Port)
-- [x] StrangeQuantumExecutor (Adapter)
-- [x] **amplitude 기반 정확한 확률**
-- [x] 도메인-인프라 완전 분리
-
-#### 6. 시각화 시스템
-- [x] **CircuitResultExporter**
-  - [x] 단계별 JSON 출력 (`exportStepByStep`)
-  - [x] 정확한 얽힘 확률 포함
-  - [x] 각 단계의 상태 정보
-- [x] **Python 시각화**
-  - [x] 블로흐 구면 (최종 상태)
-  - [x] 히스토그램 (최종 상태)
-  - [x] 블로흐 구면 단계별 궤적
-  - [x] 히스토그램 단계별 비교
-- [x] **애니메이션 시스템** 🎬
-  - [x] 블로흐 구면 회전 애니메이션 (`bloch_evolution.gif`)
-  - [x] 히스토그램 변화 애니메이션 (`histogram_evolution.gif`)
-  - [x] SLERP 구면 보간 알고리즘
-  - [x] 부드러운 전환 (20 FPS, 60프레임)
-- [x] **AlgorithmMode 통합**
-  - [x] 자동 시각화 실행
-  - [x] 6개 파일 자동 생성 (PNG 4개 + GIF 2개)
-
-### 📊 구현 통계
-
-- **디자인 패턴**: 10가지 (Builder, Template Method, Factory, Strategy, Chain of Responsibility, Composite, Facade, Observer, Adapter, Port-Adapter)
-- **테스트 커버리지**: 420+ 단위 테스트
-- **코드 라인**: 5000+ 라인
-- **패키지**: 10개 레이어 (도메인, 인프라, 애플리케이션 분리)
-- **SOLID 원칙**: 모든 레이어에 적용
+*양자 상태 분포가 |00⟩ 100%에서 |00⟩ 50% + |11⟩ 50%로 부드럽게 변화합니다.*
 
 ## 실행 방법
 
 ### 환경 설정
 
 #### 1. Java 21 설치
+
+**macOS:**
 ```bash
-# macOS (Homebrew)
 brew install openjdk@21
-
-# Ubuntu
-sudo apt install openjdk-21-jdk
-
-# 버전 확인
 java -version
-# openjdk version "21.x.x"
 ```
 
-#### 2. Python 환경 설정 (시각화용)
+**Ubuntu/Linux:**
 ```bash
-# Python 3.8 이상 필요
+sudo apt update
+sudo apt install openjdk-21-jdk
+java -version
+```
+
+**Windows:**
+1. [Oracle JDK 21](https://www.oracle.com/java/technologies/downloads/#java21) 다운로드
+2. 설치 후 환경 변수 설정
+3. `java -version` 확인
+
+#### 2. Python 환경 설정 (시각화용)
+
+Python 3.8 이상 필요:
+```bash
 python3 --version
+```
 
-# 필요한 패키지 설치
-pip3 install qutip matplotlib numpy --break-system-packages
+**필요한 패키지 설치:**
 
-# 또는 requirements.txt 사용
+macOS/Linux:
+```bash
+pip3 install qutip matplotlib numpy pillow --break-system-packages
+```
+
+Windows:
+```bash
+pip install qutip matplotlib numpy pillow
+```
+
+**또는 requirements.txt 사용:**
+
+macOS/Linux:
+```bash
 pip3 install -r requirements.txt --break-system-packages
+```
+
+Windows:
+```bash
+pip install -r requirements.txt
 ```
 
 **requirements.txt:**
@@ -622,182 +515,150 @@ pillow>=9.0.0
 ### 프로젝트 실행
 
 ```bash
-# 1. 저장소 클론
 git clone https://github.com/username/quantum-circuit-simulator.git
 cd quantum-circuit-simulator
 
-# 2. 빌드 및 실행
 ./gradlew build
 ./gradlew run
 ```
 
 ### 테스트 실행
 
+**모든 테스트:**
 ```bash
-# 모든 테스트 실행
 ./gradlew test
+```
 
-# 특정 패키지 테스트
+**특정 패키지:**
+```bash
 ./gradlew test --tests quantum.circuit.domain.*
+```
 
-# 테스트 결과 확인
+**테스트 결과 확인:**
+
+macOS/Linux:
+```bash
 open build/reports/tests/test/index.html
 ```
 
-### 시각화 파일 확인
-
-알고리즘 모드 실행 후 자동으로 생성되는 파일:
-
+Windows:
 ```bash
-# 생성된 파일 확인
-ls -l output/
-
-# 이미지 및 애니메이션 열기 (macOS)
-open output/*.png output/*.gif
-
-# 이미지 및 애니메이션 열기 (Linux)
-xdg-open output/*.png output/*.gif
+start build/reports/tests/test/index.html
 ```
-
-**생성 파일 (6개):**
-
-정적 이미지:
-- `circuit_result.json` - 단계별 상태 데이터
-- `bloch_sphere.png` - 최종 블로흐 구면
-- `histogram.png` - 최종 상태 분포
-- `bloch_steps.png` - 단계별 궤적
-- `histogram_steps.png` - 단계별 비교
-
-애니메이션: 🎬
-- `bloch_evolution.gif` - 블로흐 구면 벡터 회전 (2-3초)
-- `histogram_evolution.gif` - 상태 분포 변화 (2-3초)
 
 ## 기술 스택
 
-### 핵심 기술
-- **Java 21**: 최신 LTS 버전
-- **Gradle 8.5**: 빌드 도구
-- **JUnit 5**: 테스트 프레임워크
-- **AssertJ**: 유창한 assertion 라이브러리
+### 개발 환경
+- **언어**: Java 21
+- **빌드 도구**: Gradle 8.14
+- **테스트**: JUnit 5, AssertJ
 
-### 양자 컴퓨팅
-- **Strange 0.1.3**: 양자 시뮬레이션 라이브러리
-  - Port-Adapter 패턴으로 완전히 격리
-  - 다른 라이브러리로 교체 가능
+### 라이브러리
+- **Strange** (`org.redfx:strange:0.1.3`): 양자 컴퓨팅 시뮬레이션
+  - Port-Adapter 패턴으로 완전 격리
+  - `StrangeQuantumExecutor`로만 접근
+- **JUnit 5**: 단위 테스트 프레임워크
+- **AssertJ**: 메서드 체이닝 기반 assertion 라이브러리
 
 ### 시각화 도구
 - **Python 3.8+**: 시각화 스크립트
-- **QuTiP 4.7+**: 양자역학 시각화 라이브러리
-  - 블로흐 구면 렌더링
-  - 양자 상태 시각화
-- **Matplotlib 3.5+**: 그래프 및 차트 생성
-  - 히스토그램 생성
-  - 단계별 비교 플롯
-  - 애니메이션 생성 (FuncAnimation)
+- **QuTiP 4.7+**: 양자 상태 시각화 (블로흐 구면)
+- **Matplotlib 3.5+**: 그래프 및 애니메이션
 - **NumPy 1.21+**: 수치 계산
-- **Pillow 9.0+**: GIF 애니메이션 저장
-
-### 개발 도구
-- **Git**: 버전 관리
-- **GitHub**: 코드 저장소
-- **IntelliJ IDEA**: IDE
+- **Pillow 9.0+**: GIF 저장
 
 ## 패키지 구조
 
 ```
-src/main/java/quantum/circuit/
-├── domain/                              # 도메인 레이어
-│   ├── circuit/                         # 회로 도메인
-│   │   ├── QuantumCircuit.java         # 양자 회로
-│   │   ├── CircuitStep.java            # 회로 단계 (일급 컬렉션)
-│   │   ├── QubitIndex.java             # 큐비트 인덱스 (원시값 포장)
-│   │   └── QuantumCircuitBuilder.java  # Builder 패턴
-│   ├── gate/                            # 게이트 도메인
-│   │   ├── QuantumGate.java            # 게이트 인터페이스
-│   │   ├── SingleQubitGate.java        # 단일 큐비트 게이트
-│   │   ├── HadamardGate.java
-│   │   ├── PauliXGate.java
-│   │   ├── PauliZGate.java
-│   │   └── CNOTGate.java
-│   └── state/                           # 상태 도메인
-│       ├── QuantumState.java            # 양자 상태
-│       ├── Probability.java             # 확률 (원시값 포장)
-│       ├── MeasurementResult.java       # 측정 결과 (Enum)
-│       └── executor/                    # Port (인터페이스)
-│           └── QuantumExecutor.java     # 실행기 인터페이스 (Port)
-│
-├── infrastructure/                      # 인프라 레이어
-│   └── executor/
-│       └── StrangeQuantumExecutor.java # Adapter (Strange 구현)
-│
-├── algorithm/                           # 알고리즘 레이어
-│   ├── QuantumAlgorithm.java           # Template Method
-│   ├── AlgorithmFactory.java           # Factory 패턴
-│   ├── AlgorithmType.java              # Enum
-│   ├── BellStateAlgorithm.java
-│   ├── GHZStateAlgorithm.java
-│   ├── QFTAlgorithm.java
-│   ├── GroverAlgorithm.java
-│   └── DeutschJozsaAlgorithm.java
-│
-├── optimizer/                           # 최적화 레이어
-│   ├── CircuitOptimizer.java           # Strategy 인터페이스
-│   ├── OptimizationRule.java           # Strategy 구현
-│   ├── OptimizationPipeline.java       # Composite 패턴
-│   ├── RedundantGateRemover.java
-│   ├── IdentityGateRemover.java
-│   └── GateFusionOptimizer.java
-│
-├── analyzer/                            # 분석 레이어
-│   ├── CircuitAnalyzer.java            # Facade 패턴
-│   ├── CircuitMetric.java              # Strategy 인터페이스
-│   ├── CircuitDepthMetric.java
-│   ├── GateCountMetric.java
-│   ├── ComplexityMetric.java
-│   └── EntanglementMetric.java
-│
-├── validator/                           # 검증 레이어
-│   ├── CircuitValidator.java           # Strategy 인터페이스
-│   ├── ValidationChain.java            # Chain of Responsibility
-│   ├── QubitRangeValidator.java
-│   ├── GateCompatibilityValidator.java
-│   ├── DepthLimitValidator.java
-│   └── ResourceValidator.java
-│
-├── benchmark/                           # 벤치마크 레이어
-│   ├── BenchmarkRunner.java
-│   ├── PerformanceMonitor.java         # Observer 패턴
-│   ├── CircuitComparator.java
-│   └── ResultCollector.java
-│
-├── exporter/                            # 출력 레이어
-│   └── CircuitResultExporter.java      # JSON 출력 (단계별)
-│
-├── visualizer/                          # 시각화 레이어
-│   ├── PythonVisualizer.java           # Python 실행
-│   ├── CircuitVisualizer.java          # ASCII 아트
-│   └── StateVisualizer.java            # 상태 출력
-│
-├── mode/                                # 모드 레이어
-│   ├── FreeMode.java
-│   ├── AlgorithmMode.java
-│   ├── OptimizationMode.java
-│   └── BenchmarkMode.java
-│
-├── view/                                # 뷰 레이어
-│   ├── InputView.java
-│   └── OutputView.java
-│
-├── util/                                # 유틸리티
-│   └── InputRetryHandler.java
-│
-└── Application.java                     # 메인
-
-src/main/python/                         # Python 시각화
-├── main.py                              # 메인 실행
-└── visualizer/
-    ├── bloch_sphere.py                 # 블로흐 구면
-    └── histogram.py                    # 히스토그램
+quantum.circuit
+├── domain                      # 핵심 도메인 로직
+│   ├── circuit                 # 회로 구성
+│   │   ├── QuantumCircuit      # 회로 실행
+│   │   ├── QuantumCircuitBuilder # Fluent Builder
+│   │   ├── CircuitStep         # 게이트 그룹 (일급 컬렉션)
+│   │   └── QubitIndex          # 원시값 포장
+│   ├── gate                    # 게이트
+│   │   ├── QuantumGate         # 인터페이스
+│   │   ├── SingleQubitGate     # 추상 클래스
+│   │   ├── HadamardGate, PauliXGate, PauliZGate
+│   │   └── CNOTGate            # 다중 큐비트 게이트
+│   └── state                   # 양자 상태
+│       ├── QuantumState        # Port-Adapter 패턴
+│       ├── Probability         # 원시값 포장
+│       ├── MeasurementResult   # Enum
+│       └── executor            # Port 정의
+│           └── QuantumExecutor # 인터페이스
+├── infrastructure              # 기술적 구현
+│   └── executor                # Adapter 구현
+│       └── StrangeQuantumExecutor # Strange 연동
+├── algorithm                   # 알고리즘 라이브러리
+│   ├── QuantumAlgorithm        # Template Method
+│   ├── AlgorithmFactory        # Factory 패턴
+│   ├── AlgorithmType           # Enum
+│   ├── BellStateAlgorithm
+│   ├── GHZStateAlgorithm
+│   ├── QFTAlgorithm
+│   ├── GroverAlgorithm
+│   └── DeutschJozsaAlgorithm
+├── optimizer                   # 회로 최적화
+│   ├── CircuitOptimizer        # Strategy 인터페이스
+│   ├── RuleBasedOptimizer
+│   ├── OptimizationPipeline    # Composite 패턴
+│   ├── RedundantGateRemover
+│   ├── IdentityGateRemover
+│   ├── GateFusionOptimizer
+│   └── rule
+│       ├── OptimizationRule
+│       └── ConsecutiveSameGateRule
+├── analyzer                    # 회로 분석
+│   ├── CircuitAnalyzer         # Facade 패턴
+│   ├── CircuitMetric           # Strategy 인터페이스
+│   ├── CircuitDepthMetric
+│   ├── GateCountMetric
+│   ├── ComplexityMetric
+│   ├── EntanglementMetric
+│   ├── AnalysisReport          # VO
+│   └── facade                  # 정적 유틸리티
+│       ├── CircuitDepth
+│       ├── GateCount
+│       ├── CircuitComplexity
+│       └── EntanglementDegree
+├── validator                   # 회로 검증
+│   ├── CircuitValidator        # Strategy 인터페이스
+│   ├── ValidationChain         # Chain of Responsibility
+│   ├── QubitRangeValidator
+│   ├── DepthLimitValidator
+│   ├── GateCompatibilityValidator
+│   ├── ResourceValidator
+│   ├── ValidationResult        # VO
+│   └── ValidationReport        # VO
+├── benchmark                   # 벤치마크
+│   ├── BenchmarkRunner
+│   ├── CircuitComparator
+│   ├── PerformanceMonitor      # Observer 인터페이스
+│   ├── ResultCollector
+│   ├── PerformanceMetrics      # VO
+│   ├── BenchmarkReport         # VO
+│   └── ComparisonReport        # VO
+├── exporter                    # 회로 출력
+│   └── CircuitResultExporter   # JSON 변환
+├── visualizer                  # 시각화
+│   ├── CircuitVisualizer       # ASCII 회로
+│   ├── StateVisualizer         # 확률 표시
+│   └── PythonVisualizer        # Python 스크립트 실행
+├── mode                        # 실행 모드
+│   ├── AlgorithmMode
+│   ├── OptimizationMode
+│   ├── BenchmarkMode
+│   └── (FreeMode는 QuantumCircuitSimulator)
+├── view                        # 콘솔 I/O
+│   ├── InputView
+│   └── OutputView
+├── util                        # 유틸리티
+│   ├── CircuitStepBuilder
+│   ├── SingleQubitGateFactory
+│   └── InputRetryHandler
+└── Application                 # 메인 진입점
 ```
 
 ## 디자인 패턴 활용
@@ -807,57 +668,50 @@ src/main/python/                         # Python 시각화
 ```java
 QuantumCircuit circuit = new QuantumCircuitBuilder()
     .withQubits(2)
-    .addStep(new CircuitStep(List.of(
-        new HadamardGate(new QubitIndex(0))
-    )))
-    .addStep(new CircuitStep(List.of(
-        new CNOTGate(new QubitIndex(0), new QubitIndex(1))
-    )))
+    .addStep(step -> step
+        .addGate(new HadamardGate(new QubitIndex(0))))
+    .addStep(step -> step
+        .addGate(new CNOTGate(new QubitIndex(0), new QubitIndex(1))))
     .build();
 ```
 
-**장점**:
-- 복잡한 회로를 단계적으로 구성
-- 유효성 검증을 빌더에서 수행
-- 불변 객체 생성
+**적용 위치**: `QuantumCircuitBuilder`
 
 ### 2. Template Method Pattern (알고리즘 공통 흐름)
 
 ```java
 public abstract class QuantumAlgorithm {
     public final QuantumCircuit build(int qubitCount) {
-        QuantumCircuitBuilder builder = new QuantumCircuitBuilder()
-            .withQubits(qubitCount);
-        
-        prepareInitialState(builder);
-        applyMainAlgorithm(builder);   // 하위 클래스가 구현
+        QuantumCircuitBuilder builder = initializeCircuit(qubitCount);
+        applyAlgorithmLogic(builder);
         prepareMeasurement(builder);
-        
         return builder.build();
     }
     
-    protected abstract void applyMainAlgorithm(QuantumCircuitBuilder builder);
+    protected abstract void applyAlgorithmLogic(QuantumCircuitBuilder builder);
 }
 ```
 
-### 3. Factory Pattern (알고리즘 생성)
+**적용 위치**: `QuantumAlgorithm`
+
+### 3. Factory Pattern (객체 생성)
 
 ```java
 public class AlgorithmFactory {
     public QuantumAlgorithm create(String algorithmName) {
-        AlgorithmType type = AlgorithmType.from(algorithmName);
-        return type.createInstance();
+        return AlgorithmType.fromString(algorithmName).createAlgorithm();
     }
 }
 
 public enum AlgorithmType {
     BELL_STATE(BellStateAlgorithm::new),
-    GHZ_STATE(GHZStateAlgorithm::new),
-    // ...
+    GHZ_STATE(GHZStateAlgorithm::new);
 }
 ```
 
-### 4. Strategy Pattern (최적화 전략, 분석 메트릭)
+**적용 위치**: `AlgorithmFactory`, `AlgorithmType`
+
+### 4. Strategy Pattern (최적화 전략)
 
 ```java
 public interface CircuitOptimizer {
@@ -867,10 +721,11 @@ public interface CircuitOptimizer {
 public class RedundantGateRemover implements CircuitOptimizer {
     @Override
     public QuantumCircuit optimize(QuantumCircuit circuit) {
-        // H-H, X-X 제거
     }
 }
 ```
+
+**적용 위치**: `CircuitOptimizer`, `CircuitMetric`, `CircuitValidator`
 
 ### 5. Chain of Responsibility (검증 체인)
 
@@ -890,6 +745,8 @@ public class ValidationChain {
 }
 ```
 
+**적용 위치**: `ValidationChain`
+
 ### 6. Composite Pattern (최적화 파이프라인)
 
 ```java
@@ -907,6 +764,8 @@ public class OptimizationPipeline implements CircuitOptimizer {
 }
 ```
 
+**적용 위치**: `OptimizationPipeline`
+
 ### 7. Facade Pattern (회로 분석)
 
 ```java
@@ -923,6 +782,8 @@ public class CircuitAnalyzer {
 }
 ```
 
+**적용 위치**: `CircuitAnalyzer`
+
 ### 8. Observer Pattern (벤치마크 추적)
 
 ```java
@@ -937,24 +798,23 @@ public class BenchmarkRunner {
     public void run(QuantumAlgorithm algorithm) {
         notifyStart(algorithm.getName());
         long start = System.currentTimeMillis();
-        // 실행
         long duration = System.currentTimeMillis() - start;
         notifyEnd(algorithm.getName(), duration);
     }
 }
 ```
 
+**적용 위치**: `BenchmarkRunner`, `PerformanceMonitor`
+
 ### 9. Adapter Pattern (라이브러리 격리)
 
 ```java
-// Domain의 Port
 public interface QuantumExecutor {
     void applyHadamardGate(QubitIndex target);
 }
 
-// Infrastructure의 Adapter
 public class StrangeQuantumExecutor implements QuantumExecutor {
-    private final Program program;  // Strange 타입
+    private final Program program;
     
     @Override
     public void applyHadamardGate(QubitIndex target) {
@@ -964,6 +824,8 @@ public class StrangeQuantumExecutor implements QuantumExecutor {
     }
 }
 ```
+
+**적용 위치**: `StrangeQuantumExecutor`
 
 ### 10. Port-Adapter Pattern (DIP 달성)
 
@@ -1047,38 +909,32 @@ Infrastructure Layer (Adapter 구현)
 
 **Before (문제)**:
 ```java
-// Domain이 Infrastructure에 직접 의존
 public class QuantumState {
-    private final Program program;  // Strange 타입!
+    private final Program program;
 }
 ```
 
 **After (해결)**:
 ```java
-// Domain이 인터페이스 정의
 package quantum.circuit.domain.state.executor;
 public interface QuantumExecutor {
     void applyXGate(QubitIndex target);
-    Map<String, Double> getStateProbabilities();  // 정확한 확률
+    Map<String, Double> getStateProbabilities();
 }
 
-// Infrastructure가 구현
 package quantum.circuit.infrastructure.executor;
 public class StrangeQuantumExecutor implements QuantumExecutor {
     private final Program program;
     
     @Override
     public Map<String, Double> getStateProbabilities() {
-        // Strange amplitude 직접 접근 (Reflection)
         Complex[] amplitudes = getAmplitudesFromResult(result);
-        // |amplitude|² = 정확한 확률
         return calculateProbabilities(amplitudes);
     }
 }
 
-// Domain이 인터페이스에 의존
 public class QuantumState {
-    private final QuantumExecutor executor;  // 인터페이스!
+    private final QuantumExecutor executor;
     
     public Map<String, Double> getStateProbabilities() {
         return executor.getStateProbabilities();
