@@ -1,25 +1,17 @@
-"""
-양자 회로 시각화 메인 스크립트 (애니메이션 포함)
-- 정적 이미지 (PNG) 4개
-- 애니메이션 (GIF) 2개
-"""
 import json
 import sys
 import os
 
-# 서브 모듈 임포트
 sys.path.append(os.path.join(os.path.dirname(__file__), 'visualizer'))
 
 from visualizer.bloch_sphere import BlochSphereVisualizer
 from visualizer.histogram import StateHistogramVisualizer
 
 def load_circuit_result(filepath):
-    """회로 실행 결과 JSON 로드"""
     with open(filepath, 'r', encoding='utf-8') as f:
         return json.load(f)
 
 def create_bloch_animation_internal(circuit_result, output_path, fps=20):
-    """블로흐 구면 애니메이션 생성"""
     import numpy as np
     import matplotlib.pyplot as plt
     from matplotlib.animation import FuncAnimation, PillowWriter
@@ -28,7 +20,6 @@ def create_bloch_animation_internal(circuit_result, output_path, fps=20):
     step_states = circuit_result['step_states']
     descriptions = [s['description'] for s in step_states]
 
-    # 첫 번째 큐비트 벡터들
     def prob_to_vector(prob_one):
         if prob_one == 0.0:
             return np.array([0, 0, 1])
@@ -42,7 +33,6 @@ def create_bloch_animation_internal(circuit_result, output_path, fps=20):
 
     vectors = [prob_to_vector(s['qubit_probabilities']['0']) for s in step_states]
 
-    # SLERP 보간
     def slerp(v1, v2, num_frames):
         v1 = v1 / np.linalg.norm(v1)
         v2 = v2 / np.linalg.norm(v2)
@@ -56,7 +46,6 @@ def create_bloch_animation_internal(circuit_result, output_path, fps=20):
             for t in np.linspace(0, 1, num_frames)
         ]
 
-    # 전체 프레임 생성
     frames_per = fps
     all_frames = []
     all_colors = []
@@ -73,7 +62,6 @@ def create_bloch_animation_internal(circuit_result, output_path, fps=20):
     all_colors.extend([colors[(len(vectors)-1) % len(colors)]] * (fps//2))
     all_descs.extend([descriptions[-1]] * (fps//2))
 
-    # 애니메이션
     fig = plt.figure(figsize=(8, 8))
 
     def animate(idx):
@@ -96,7 +84,6 @@ def create_bloch_animation_internal(circuit_result, output_path, fps=20):
     print(f"    ✅ {output_path}")
 
 def create_histogram_animation_internal(circuit_result, output_path, fps=20):
-    """히스토그램 애니메이션 생성"""
     import numpy as np
     import matplotlib.pyplot as plt
     from matplotlib.animation import FuncAnimation, PillowWriter
@@ -108,7 +95,6 @@ def create_histogram_animation_internal(circuit_result, output_path, fps=20):
     distributions = [s['system_state'] for s in step_states]
     descriptions = [s['description'] for s in step_states]
 
-    # 선형 보간
     def interpolate(d1, d2, num_frames):
         result = []
         for t in np.linspace(0, 1, num_frames):
@@ -116,7 +102,6 @@ def create_histogram_animation_internal(circuit_result, output_path, fps=20):
             result.append(frame)
         return result
 
-    # 전체 프레임
     frames_per = fps
     all_frames = []
     all_descs = []
@@ -129,7 +114,6 @@ def create_histogram_animation_internal(circuit_result, output_path, fps=20):
     all_frames.extend([distributions[-1]] * (fps//2))
     all_descs.extend([descriptions[-1]] * (fps//2))
 
-    # 애니메이션
     fig, ax = plt.subplots(figsize=(10, 6))
     x_pos = np.arange(len(all_states))
 
@@ -168,6 +152,191 @@ def create_histogram_animation_internal(circuit_result, output_path, fps=20):
     plt.close()
     print(f"    ✅ {output_path}")
 
+def create_entanglement_visualization(circuit_result):
+    import numpy as np
+    import matplotlib.pyplot as plt
+    from matplotlib.animation import FuncAnimation, PillowWriter
+    from qutip import Bloch
+
+    qubit_count = circuit_result['qubit_count']
+    if qubit_count < 2:
+        return
+
+    step_states = circuit_result['step_states']
+
+    def prob_to_vector(prob_one):
+        if prob_one == 0.0:
+            return np.array([0, 0, 1])
+        elif prob_one == 1.0:
+            return np.array([0, 0, -1])
+        elif abs(prob_one - 0.5) < 1e-6:
+            return np.array([1, 0, 0])
+        else:
+            theta = 2 * np.arcsin(np.sqrt(prob_one))
+            return np.array([np.sin(theta), 0, np.cos(theta)])
+
+    def calc_entanglement(system_state, q0_prob, q1_prob):
+        bell_states = ['00', '11']
+        bell_prob = sum(system_state.get(s, 0.0) for s in bell_states)
+        independent_prob = abs(q0_prob - 0.5) + abs(q1_prob - 0.5)
+        if bell_prob > 0.9:
+            return min(1.0, bell_prob)
+        return max(0.0, bell_prob - independent_prob * 0.5)
+
+    num_steps = len(step_states)
+    cols = min(3, num_steps)
+    rows = (num_steps + cols - 1) // cols
+
+    fig = plt.figure(figsize=(6 * cols, 5 * rows))
+
+    for idx, step_state in enumerate(step_states):
+        q0_prob = step_state['qubit_probabilities']['0']
+        q1_prob = step_state['qubit_probabilities']['1']
+        system_state = step_state['system_state']
+        description = step_state['description']
+
+        q0_vec = prob_to_vector(q0_prob)
+        q1_vec = prob_to_vector(q1_prob)
+
+        entanglement = calc_entanglement(system_state, q0_prob, q1_prob)
+
+        ax_left = fig.add_subplot(rows, cols * 2, idx * 2 + 1, projection='3d')
+        ax_right = fig.add_subplot(rows, cols * 2, idx * 2 + 2, projection='3d')
+
+        b_q0 = Bloch(fig=fig, axes=ax_left)
+        b_q1 = Bloch(fig=fig, axes=ax_right)
+
+        b_q0.add_vectors([q0_vec])
+        b_q1.add_vectors([q1_vec])
+
+        color = 'red' if entanglement > 0.3 else 'blue'
+        b_q0.vector_color = [color]
+        b_q1.vector_color = [color]
+
+        ax_left.set_title(f'Q0 | {description}', fontsize=10, fontweight='bold')
+        ax_right.set_title(f'Q1 | Ent: {entanglement:.2f}', fontsize=10, fontweight='bold')
+
+        b_q0.render()
+        b_q1.render()
+
+    plt.tight_layout()
+    plt.savefig('output/entanglement_steps.png', dpi=150, bbox_inches='tight')
+    plt.close()
+
+    print(f"  Creating entanglement steps: {num_steps} steps")
+    print(f"    ✅ output/entanglement_steps.png")
+
+    def slerp(v1, v2, num_frames):
+        v1 = v1 / np.linalg.norm(v1)
+        v2 = v2 / np.linalg.norm(v2)
+        dot = np.clip(np.dot(v1, v2), -1.0, 1.0)
+        theta = np.arccos(dot)
+        if theta < 1e-6:
+            return [v1 * (1-t) + v2 * t for t in np.linspace(0, 1, num_frames)]
+        sin_theta = np.sin(theta)
+        return [
+            (np.sin((1-t)*theta)/sin_theta)*v1 + (np.sin(t*theta)/sin_theta)*v2
+            for t in np.linspace(0, 1, num_frames)
+        ]
+
+    q0_vectors = []
+    q1_vectors = []
+    entanglements = []
+    descriptions = []
+
+    for step_state in step_states:
+        q0_prob = step_state['qubit_probabilities']['0']
+        q1_prob = step_state['qubit_probabilities']['1']
+        system_state = step_state['system_state']
+
+        q0_vec = prob_to_vector(q0_prob)
+        q1_vec = prob_to_vector(q1_prob)
+        ent = calc_entanglement(system_state, q0_prob, q1_prob)
+
+        q0_vectors.append(q0_vec)
+        q1_vectors.append(q1_vec)
+        entanglements.append(ent)
+        descriptions.append(step_state['description'])
+
+    fps = 20
+    frames_per = fps
+
+    all_q0 = []
+    all_q1 = []
+    all_ent = []
+    all_desc = []
+
+    for i in range(len(q0_vectors) - 1):
+        q0_interp = slerp(q0_vectors[i], q0_vectors[i+1], frames_per)
+        q1_interp = slerp(q1_vectors[i], q1_vectors[i+1], frames_per)
+        ent_interp = np.linspace(entanglements[i], entanglements[i+1], frames_per)
+
+        all_q0.extend(q0_interp)
+        all_q1.extend(q1_interp)
+        all_ent.extend(ent_interp)
+        all_desc.extend([descriptions[i+1]] * frames_per)
+
+    all_q0.extend([q0_vectors[-1]] * (fps//2))
+    all_q1.extend([q1_vectors[-1]] * (fps//2))
+    all_ent.extend([entanglements[-1]] * (fps//2))
+    all_desc.extend([descriptions[-1]] * (fps//2))
+
+    fig = plt.figure(figsize=(16, 7))
+
+    def animate(idx):
+        plt.clf()
+
+        ax_left = fig.add_subplot(1, 2, 1, projection='3d')
+        ax_right = fig.add_subplot(1, 2, 2, projection='3d')
+
+        b_q0 = Bloch(fig=fig, axes=ax_left)
+        b_q1 = Bloch(fig=fig, axes=ax_right)
+
+        q0_vec = all_q0[idx]
+        q1_vec = all_q1[idx]
+        ent = all_ent[idx]
+        desc = all_desc[idx]
+
+        b_q0.add_vectors([q0_vec])
+        b_q1.add_vectors([q1_vec])
+
+        color = 'red' if ent > 0.3 else 'blue'
+        b_q0.vector_color = [color]
+        b_q1.vector_color = [color]
+        b_q0.vector_width = 3
+        b_q1.vector_width = 3
+
+        ax_left.set_title('Qubit 0', fontsize=14, fontweight='bold', pad=20)
+        ax_right.set_title('Qubit 1', fontsize=14, fontweight='bold', pad=20)
+
+        b_q0.render()
+        b_q1.render()
+
+        if ent > 0.1:
+            fig.text(0.5, 0.95, f'⚡ Entanglement: {ent:.2f}',
+                    ha='center', fontsize=16, fontweight='bold',
+                    color='red',
+                    bbox=dict(boxstyle='round', facecolor='yellow', alpha=0.8))
+
+        fig.text(0.5, 0.05, desc, ha='center', fontsize=13, fontweight='bold')
+
+        step_num = idx // frames_per
+        fig.text(0.02, 0.95, f'Step {step_num}/{len(descriptions)-1}',
+                fontsize=12, va='top',
+                bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
+
+        return fig,
+
+    total_frames = len(all_q0)
+
+    print(f"  Creating entanglement animation: {total_frames} frames, {total_frames/fps:.1f}s")
+    anim = FuncAnimation(fig, animate, frames=total_frames,
+                        interval=1000/fps, blit=False)
+    writer = PillowWriter(fps=fps)
+    anim.save('output/entanglement_evolution.gif', writer=writer)
+    plt.close()
+    print(f"    ✅ output/entanglement_evolution.gif")
+
 def main():
     if len(sys.argv) < 2:
         print("Usage: python main.py <circuit_result_json>")
@@ -184,29 +353,24 @@ def main():
     print(f"Circuit: {circuit_name}")
     print(f"Qubits: {qubit_count}")
 
-    # 1. 단계별 정적 이미지
     print("\n=== Creating Static Images ===")
     step_states = circuit_result.get('step_states', [])
     print(f"Found {len(step_states)} steps")
 
-    # 블로흐 구면 단계별
     if qubit_count >= 1:
         try:
             BlochSphereVisualizer.animate_steps(step_states, 0, 'output/bloch_steps.png')
         except Exception as e:
             print(f"  ⚠️  Bloch steps failed: {e}")
 
-    # 히스토그램 단계별
     try:
         StateHistogramVisualizer.animate_steps(step_states, 'output/histogram_steps.png')
     except Exception as e:
         print(f"  ⚠️  Histogram steps failed: {e}")
 
-    # 최종 상태 이미지
     if step_states:
         final_state = step_states[-1]
 
-        # 블로흐 구면
         if qubit_count >= 1:
             prob_one = final_state['qubit_probabilities'].get('0', 0.0)
             try:
@@ -214,14 +378,12 @@ def main():
             except Exception as e:
                 print(f"  ⚠️  Bloch sphere failed: {e}")
 
-        # 히스토그램
         system_state = final_state.get('system_state', {})
         try:
             StateHistogramVisualizer.visualize_static(system_state, 'output/histogram.png')
         except Exception as e:
             print(f"  ⚠️  Histogram failed: {e}")
 
-    # 2. 애니메이션 생성 (GIF) 🎬
     print("\n=== Creating Animations ===")
 
     try:
@@ -234,16 +396,25 @@ def main():
     except Exception as e:
         print(f"  ⚠️  Histogram animation failed: {e}")
 
-    # 완료
+    if qubit_count >= 2:
+        try:
+            create_entanglement_visualization(circuit_result)
+        except Exception as e:
+            print(f"  ⚠️  Entanglement visualization failed: {e}")
+
     print("\n✅ Visualization complete!")
     print("  Static images:")
     print("    - output/bloch_sphere.png")
     print("    - output/histogram.png")
     print("    - output/bloch_steps.png")
     print("    - output/histogram_steps.png")
-    print("  Animations: 🎬")
+    if qubit_count >= 2:
+        print("    - output/entanglement_steps.png")
+    print("  Animations:")
     print("    - output/bloch_evolution.gif")
     print("    - output/histogram_evolution.gif")
+    if qubit_count >= 2:
+        print("    - output/entanglement_evolution.gif")
 
 if __name__ == '__main__':
     main()

@@ -31,9 +31,13 @@ public class AlgorithmMode {
             📊 생성된 파일:
               - output/bloch_sphere.png (최종 상태)
               - output/histogram.png (최종 상태)
-              - output/bloch_steps.png (단계별 궤적) ⭐
-              - output/histogram_steps.png (단계별 비교) ⭐
-            💡 확인: open output/*.png""";
+              - output/bloch_steps.png (단계별 궤적)
+              - output/histogram_steps.png (단계별 비교)
+              - output/entanglement_steps.png (얽힘 상태)
+              - output/bloch_evolution.gif (애니메이션)
+              - output/histogram_evolution.gif (애니메이션)
+              - output/entanglement_evolution.gif (얽힘 애니메이션)
+            💡 확인: open output/*.png output/*.gif""";
 
     private final AlgorithmFactory algorithmFactory;
 
@@ -77,7 +81,6 @@ public class AlgorithmMode {
         QuantumState state = circuit.execute();
         printState(state);
 
-        // Python 시각화 자동 실행 (단계별 + 정확한 얽힘 상태)
         visualizeWithPython(circuit, state, algorithm.getName());
     }
 
