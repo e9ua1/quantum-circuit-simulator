@@ -3,6 +3,12 @@
 > 📘 **처음 오셨나요?** 양자역학이 처음이라면 먼저 [양자 회로 시뮬레이터 입문 가이드](./docs/QUANTUM_GUIDE.md)를 읽어보세요!  
 > 큐비트, 중첩, 얽힘 같은 핵심 개념부터 프로그램 사용법까지 자세히 설명되어 있습니다.
 
+## ✨ 라이브 데모
+
+**🌐 [시각화 라이브 데모 보기](https://e9ua1.github.io/quantum-circuit-simulator/)**
+
+*Bell State 알고리즘 시각화 - 클릭하면 3개 애니메이션을 볼 수 있습니다!*
+
 ## 목차
 
 - [학습 목표](#학습-목표)
@@ -18,14 +24,6 @@
 - [아키텍처 설계](#아키텍처-설계)
 - [프로그래밍 요구사항](#프로그래밍-요구사항)
 - [참고 자료](#참고-자료)
-
-## ✨ 라이브 데모
-
-**🌐 [시각화 라이브 데모 보기](https://e9ua1.github.io/quantum-circuit-simulator/)**
-
-[![Visualization Demo](assets/demo/bloch_evolution.gif)](https://e9ua1.github.io/quantum-circuit-simulator/)
-
-*Bell State 알고리즘 시각화 - 클릭하면 3개 애니메이션을 볼 수 있습니다!*
 
 ## 학습 목표
 
