@@ -1,6 +1,6 @@
 # 양자 회로 시뮬레이터
 
-> 📘 **처음 오셨나요?** 양자역학이 처음이라면 먼저 [양자 회로 시뮬레이터 입문 가이드](./QUANTUM_GUIDE.md)를 읽어보세요!  
+> 📘 **처음 오셨나요?** 양자역학이 처음이라면 먼저 [양자 회로 시뮬레이터 입문 가이드](./docs/QUANTUM_GUIDE.md)를 읽어보세요!  
 > 큐비트, 중첩, 얽힘 같은 핵심 개념부터 프로그램 사용법까지 자세히 설명되어 있습니다.
 
 ## 목차
@@ -471,38 +471,40 @@ java -version
 2. 설치 후 환경 변수 설정
 3. `java -version` 확인
 
+
 #### 2. Python 환경 설정 (시각화용)
 
-Python 3.8 이상 필요:
+Python 3.9 이상 필요:
 ```bash
 python3 --version
 ```
 
-**필요한 패키지 설치:**
+**자동 설치 (권장):**
+```bash
+chmod +x install.sh
+./install.sh
+```
+
+**수동 설치:**
+
+필요한 패키지 설치:
 
 macOS/Linux:
 ```bash
-pip3 install qutip matplotlib numpy pillow --break-system-packages
+pip3 install -r src/main/python/requirements.txt --break-system-packages
 ```
 
 Windows:
 ```bash
-pip install qutip matplotlib numpy pillow
+pip install -r src/main/python/requirements.txt
 ```
 
-**또는 requirements.txt 사용:**
-
-macOS/Linux:
+**또는 setup.py 사용:**
 ```bash
-pip3 install -r requirements.txt --break-system-packages
+pip3 install -e .
 ```
 
-Windows:
-```bash
-pip install -r requirements.txt
-```
-
-**requirements.txt:**
+**src/main/python/requirements.txt:**
 ```
 matplotlib==3.8.0
 qutip==5.2.2
@@ -513,12 +515,16 @@ pillow>=9.0.0
 ```
 
 ### 프로젝트 실행
-
 ```bash
-git clone https://github.com/username/quantum-circuit-simulator.git
+# 1. 저장소 클론
+git clone https://github.com/e9ua1/quantum-circuit-simulator.git
 cd quantum-circuit-simulator
 
-./gradlew build
+# 2. Python 환경 설정 (시각화를 위해 필수!)
+./install.sh
+
+# 3. Java 빌드 및 실행
+./gradlew clean build
 ./gradlew run
 ```
 
