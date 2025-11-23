@@ -19,6 +19,14 @@
 - [프로그래밍 요구사항](#프로그래밍-요구사항)
 - [참고 자료](#참고-자료)
 
+## ✨ 라이브 데모
+
+**🌐 [시각화 라이브 데모 보기](https://e9ua1.github.io/quantum-circuit-simulator/)**
+
+[![Visualization Demo](assets/demo/bloch_evolution.gif)](https://e9ua1.github.io/quantum-circuit-simulator/)
+
+*Bell State 알고리즘 시각화 - 클릭하면 3개 애니메이션을 볼 수 있습니다!*
+
 ## 학습 목표
 
 - **객체지향 설계**: 복잡한 양자역학 도메인을 명확한 책임과 협력 관계로 표현한다
