@@ -42,18 +42,9 @@ public abstract class QuantumAlgorithm {
      */
     protected abstract void applyMainAlgorithm(QuantumCircuitBuilder builder);
 
-    /**
-     * 알고리즘 이름
-     */
     public abstract String getName();
 
-    /**
-     * 알고리즘 설명
-     */
     public abstract String getDescription();
 
-    /**
-     * 필요한 큐비트 개수
-     */
     public abstract int getRequiredQubits();
 }

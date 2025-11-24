@@ -25,8 +25,4 @@ public class AlgorithmFactory {
                 .map(Enum::name)
                 .collect(Collectors.toList());
     }
-
-    public List<AlgorithmType> getAlgorithmTypes() {
-        return Arrays.asList(AlgorithmType.values());
-    }
 }
