@@ -107,14 +107,11 @@ public class CircuitResultExporter {
         List<StepState> states = new ArrayList<>();
         int qubitCount = circuit.getQubitCount();
 
-        // Step 0: 초기 상태
         QuantumState initialState = QuantumState.initialize(qubitCount);
         states.add(new StepState(0, "Initial State", initialState));
 
-        // 각 Step 실행 후 상태
         List<CircuitStep> steps = circuit.getSteps();
         for (int i = 0; i < steps.size(); i++) {
-            // 현재 단계까지의 부분 회로 생성
             QuantumCircuit partialCircuit = new QuantumCircuitBuilder()
                     .withQubits(qubitCount)
                     .addSteps(steps.subList(0, i + 1))
@@ -139,14 +136,13 @@ public class CircuitResultExporter {
     private static String buildSingleStepStateJson(StepState stepState) {
         StringBuilder json = new StringBuilder();
         json.append("    {\n");
-        json.append(String.format("      \"step\": %d,\n", stepState.stepNumber));
-        json.append(String.format("      \"description\": \"%s\",\n", escapeJson(stepState.description)));
+        json.append(String.format("      \"step\": %d,\n", stepState.stepNumber()));
+        json.append(String.format("      \"description\": \"%s\",\n", escapeJson(stepState.description())));
 
-        // 큐비트 확률
         json.append("      \"qubit_probabilities\": {\n");
-        int qubitCount = stepState.state.getQubitCount();
+        int qubitCount = stepState.state().getQubitCount();
         for (int i = 0; i < qubitCount; i++) {
-            double probability = stepState.state.getProbabilityOfOne(new QubitIndex(i)).getValue();
+            double probability = stepState.state().getProbabilityOfOne(new QubitIndex(i)).getValue();
             json.append(String.format("        \"%d\": %.6f", i, probability));
             if (i < qubitCount - 1) {
                 json.append(",");
@@ -155,9 +151,8 @@ public class CircuitResultExporter {
         }
         json.append("      },\n");
 
-        // 시스템 상태
         json.append("      \"system_state\": {\n");
-        Map<String, Double> systemState = calculateSystemState(stepState.state);
+        Map<String, Double> systemState = calculateSystemState(stepState.state());
         int count = 0;
         int total = systemState.size();
         for (Map.Entry<String, Double> entry : systemState.entrySet()) {
@@ -204,8 +199,7 @@ public class CircuitResultExporter {
     }
 
     private static String describeGate(QuantumGate gate) {
-        if (gate instanceof CNOTGate) {
-            CNOTGate cnot = (CNOTGate) gate;
+        if (gate instanceof CNOTGate cnot) {
             return String.format("CNOT(Q%d→Q%d)",
                     cnot.getControl().getValue(),
                     cnot.getTarget().getValue());
@@ -260,14 +254,12 @@ public class CircuitResultExporter {
     }
 
     private static Map<String, Double> calculateSystemState(QuantumState state) {
-        // Strange에서 정확한 amplitude 기반 확률 가져오기
         Map<String, Double> accurateProbabilities = state.getStateProbabilities();
 
         if (accurateProbabilities != null && !accurateProbabilities.isEmpty()) {
             return accurateProbabilities;
         }
 
-        // fallback: 근사값 계산 (얽힘 상태에서는 부정확)
         return calculateApproximateSystemState(state);
     }
 
@@ -276,18 +268,17 @@ public class CircuitResultExporter {
      */
     private static Map<String, Double> calculateApproximateSystemState(QuantumState state) {
         int qubitCount = state.getQubitCount();
-        int numStates = 1 << qubitCount; // 2^qubitCount
+        int numStates = 1 << qubitCount;
 
         Map<String, Double> systemState = new HashMap<>();
 
         for (int i = 0; i < numStates; i++) {
-            final int stateIndex = i; // final 변수로 복사
+            final int stateIndex = i;
             String binaryState = IntStream.range(0, qubitCount)
                     .map(bit -> (stateIndex >> (qubitCount - 1 - bit)) & 1)
                     .mapToObj(String::valueOf)
                     .collect(Collectors.joining());
 
-            // 간단한 근사: 각 큐비트 독립적으로 계산
             double probability = calculateStateProbability(state, binaryState);
             systemState.put(binaryState, probability);
         }
@@ -296,8 +287,6 @@ public class CircuitResultExporter {
     }
 
     private static double calculateStateProbability(QuantumState state, String binaryState) {
-        // 간단한 근사: 각 큐비트의 확률을 곱함
-        // 얽힘 상태에서는 정확하지 않지만, 기본 동작을 위한 구현
         double probability = 1.0;
 
         for (int i = 0; i < binaryState.length(); i++) {
@@ -328,7 +317,6 @@ public class CircuitResultExporter {
             Path filePath = Path.of(path);
             Path parent = filePath.getParent();
 
-            // parent가 null이 아닐 때만 디렉토리 생성
             if (parent != null) {
                 Files.createDirectories(parent);
             }
@@ -339,18 +327,6 @@ public class CircuitResultExporter {
         }
     }
 
-    /**
-     * 단계별 상태 정보를 담는 내부 클래스
-     */
-    private static class StepState {
-        private final int stepNumber;
-        private final String description;
-        private final QuantumState state;
-
-        public StepState(int stepNumber, String description, QuantumState state) {
-            this.stepNumber = stepNumber;
-            this.description = description;
-            this.state = state;
-        }
+    private record StepState(int stepNumber, String description, QuantumState state) {
     }
 }

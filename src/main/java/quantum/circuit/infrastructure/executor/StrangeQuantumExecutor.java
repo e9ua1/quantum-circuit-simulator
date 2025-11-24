@@ -90,11 +90,10 @@ public class StrangeQuantumExecutor implements QuantumExecutor {
      */
     public Map<String, Double> getStateProbabilities() {
         if (isEmpty()) {
-            // 초기 상태: |00...0⟩ = 100%
             Map<String, Double> initialState = new HashMap<>();
             String zeroState = "0".repeat(qubitCount);
 
-            int numStates = 1 << qubitCount; // 2^n
+            int numStates = 1 << qubitCount;
             for (int i = 0; i < numStates; i++) {
                 String binaryState = toBinaryString(i, qubitCount);
                 initialState.put(binaryState, binaryState.equals(zeroState) ? 1.0 : 0.0);
@@ -111,15 +110,13 @@ public class StrangeQuantumExecutor implements QuantumExecutor {
      */
     private Map<String, Double> extractStateProbabilities(Result result) {
         Map<String, Double> probabilities = new HashMap<>();
-        int numStates = 1 << qubitCount; // 2^n
+        int numStates = 1 << qubitCount;
 
-        // Strange의 Result에서 amplitude를 가져옴
         Complex[] amplitudes = getAmplitudesFromResult(result);
 
         for (int i = 0; i < numStates; i++) {
             String binaryState = toBinaryString(i, qubitCount);
 
-            // |amplitude|^2 = 확률
             if (amplitudes != null && i < amplitudes.length) {
                 double probability = amplitudes[i].abssqr();
                 probabilities.put(binaryState, probability);
@@ -137,15 +134,12 @@ public class StrangeQuantumExecutor implements QuantumExecutor {
      */
     private Complex[] getAmplitudesFromResult(Result result) {
         try {
-            // Strange Result의 내부 필드명은 "probability"
             java.lang.reflect.Field field = result.getClass().getDeclaredField("probability");
             field.setAccessible(true);
             return (Complex[]) field.get(result);
         } catch (NoSuchFieldException e) {
-            // 필드명이 다를 수 있음, 다른 이름 시도
             return tryAlternativeFieldNames(result);
         } catch (Exception e) {
-            // Reflection 실패 시 null 반환 (fallback 사용)
             System.err.println("Warning: Could not extract amplitudes from Strange Result: " + e.getMessage());
             return null;
         }
@@ -170,9 +164,6 @@ public class StrangeQuantumExecutor implements QuantumExecutor {
         return null;
     }
 
-    /**
-     * 정수를 이진 문자열로 변환 (큐비트 순서에 맞게)
-     */
     private String toBinaryString(int value, int length) {
         StringBuilder binary = new StringBuilder();
         for (int i = length - 1; i >= 0; i--) {
