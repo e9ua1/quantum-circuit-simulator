@@ -33,10 +33,9 @@ class PythonVisualizerIntegrationTest {
         // given
         BellStateAlgorithm algorithm = new BellStateAlgorithm();
         QuantumCircuit circuit = algorithm.build(algorithm.getRequiredQubits());
-        QuantumState state = circuit.execute();
 
         // when
-        PythonVisualizer.visualize(circuit, state, algorithm.getName());
+        PythonVisualizer.visualize(circuit, algorithm.getName());
 
         // then
         assertThat(Files.exists(Path.of(TEST_OUTPUT_PATH))).isTrue();
@@ -59,10 +58,9 @@ class PythonVisualizerIntegrationTest {
         // given
         BellStateAlgorithm algorithm = new BellStateAlgorithm();
         QuantumCircuit circuit = algorithm.build(algorithm.getRequiredQubits());
-        QuantumState state = circuit.execute();
 
         // when
-        PythonVisualizer.visualize(circuit, state, algorithm.getName());
+        PythonVisualizer.visualize(circuit, algorithm.getName());
 
         // then
         String json = Files.readString(Path.of(TEST_OUTPUT_PATH));
@@ -79,10 +77,9 @@ class PythonVisualizerIntegrationTest {
         // given
         BellStateAlgorithm algorithm = new BellStateAlgorithm();
         QuantumCircuit circuit = algorithm.build(algorithm.getRequiredQubits());
-        QuantumState state = circuit.execute();
 
         // when
-        PythonVisualizer.visualize(circuit, state, algorithm.getName());
+        PythonVisualizer.visualize(circuit, algorithm.getName());
 
         // then
         String json = Files.readString(Path.of(TEST_OUTPUT_PATH));
@@ -99,10 +96,9 @@ class PythonVisualizerIntegrationTest {
         // given
         BellStateAlgorithm algorithm = new BellStateAlgorithm();
         QuantumCircuit circuit = algorithm.build(algorithm.getRequiredQubits());
-        QuantumState state = circuit.execute();
 
         // when
-        PythonVisualizer.visualize(circuit, state, algorithm.getName());
+        PythonVisualizer.visualize(circuit, algorithm.getName());
 
         // then
         String json = Files.readString(Path.of(TEST_OUTPUT_PATH));
