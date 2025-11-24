@@ -15,7 +15,7 @@ class QubitIndexTest {
     void createValidQubitIndex() {
         QubitIndex index = new QubitIndex(0);
 
-        assertThat(index.getValue()).isEqualTo(0);
+        assertThat(index.value()).isEqualTo(0);
     }
 
     @ParameterizedTest
@@ -24,7 +24,7 @@ class QubitIndexTest {
     void validIndices(int value) {
         QubitIndex index = new QubitIndex(value);
 
-        assertThat(index.getValue()).isEqualTo(value);
+        assertThat(index.value()).isEqualTo(value);
     }
 
     @ParameterizedTest

@@ -33,28 +33,28 @@ public class StrangeQuantumExecutor implements QuantumExecutor {
     @Override
     public void applyXGate(QubitIndex target) {
         Step step = new Step();
-        step.addGate(new X(target.getValue()));
+        step.addGate(new X(target.value()));
         program.addStep(step);
     }
 
     @Override
     public void applyHadamardGate(QubitIndex target) {
         Step step = new Step();
-        step.addGate(new Hadamard(target.getValue()));
+        step.addGate(new Hadamard(target.value()));
         program.addStep(step);
     }
 
     @Override
     public void applyZGate(QubitIndex target) {
         Step step = new Step();
-        step.addGate(new Z(target.getValue()));
+        step.addGate(new Z(target.value()));
         program.addStep(step);
     }
 
     @Override
     public void applyCNOTGate(QubitIndex control, QubitIndex target) {
         Step step = new Step();
-        step.addGate(new Cnot(control.getValue(), target.getValue()));
+        step.addGate(new Cnot(control.value(), target.value()));
         program.addStep(step);
     }
 
@@ -64,7 +64,7 @@ public class StrangeQuantumExecutor implements QuantumExecutor {
             return new Probability(0.0);
         }
         Result result = environment.runProgram(copyProgram());
-        double probability = result.getQubits()[index.getValue()].getProbability();
+        double probability = result.getQubits()[index.value()].getProbability();
         return new Probability(probability);
     }
 
@@ -74,7 +74,7 @@ public class StrangeQuantumExecutor implements QuantumExecutor {
             return MeasurementResult.ZERO;
         }
         Result result = environment.runProgram(copyProgram());
-        int measured = result.getQubits()[index.getValue()].measure();
+        int measured = result.getQubits()[index.value()].measure();
         return MeasurementResult.from(measured);
     }
 

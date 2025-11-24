@@ -27,7 +27,7 @@ public class QubitRangeValidator implements CircuitValidator {
     }
 
     private boolean isOutOfRange(QubitIndex index, int qubitCount) {
-        return index.getValue() < 0 || index.getValue() >= qubitCount;
+        return index.value() < 0 || index.value() >= qubitCount;
     }
 
     @Override

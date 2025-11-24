@@ -201,14 +201,14 @@ public class CircuitResultExporter {
     private static String describeGate(QuantumGate gate) {
         if (gate instanceof CNOTGate cnot) {
             return String.format("CNOT(Q%d→Q%d)",
-                    cnot.getControl().getValue(),
-                    cnot.getTarget().getValue());
+                    cnot.getControl().value(),
+                    cnot.getTarget().value());
         }
 
         var affected = gate.getAffectedQubits();
         if (!affected.isEmpty()) {
             QubitIndex target = affected.iterator().next();
-            return String.format("%s(Q%d)", gate.getName(), target.getValue());
+            return String.format("%s(Q%d)", gate.getName(), target.value());
         }
 
         return gate.getName();

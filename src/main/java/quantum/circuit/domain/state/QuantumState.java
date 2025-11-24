@@ -58,7 +58,7 @@ public class QuantumState {
     }
 
     private void validateIndex(QubitIndex index) {
-        if (index.getValue() >= qubitCount) {
+        if (index.value() >= qubitCount) {
             throw new IllegalArgumentException(ERROR_INVALID_INDEX);
         }
     }

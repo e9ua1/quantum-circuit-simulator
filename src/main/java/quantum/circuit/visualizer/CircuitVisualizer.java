@@ -39,8 +39,8 @@ public class CircuitVisualizer {
     private static String getGateSymbolForQubit(int qubitIndex, CircuitStep step) {
         for (QuantumGate gate : step.getGates()) {
             if (gate instanceof CNOTGate cnot) {
-                int controlIndex = cnot.getControl().getValue();
-                int targetIndex = cnot.getTarget().getValue();
+                int controlIndex = cnot.getControl().value();
+                int targetIndex = cnot.getTarget().value();
 
                 if (qubitIndex == controlIndex) {
                     return GATE_PREFIX + CONTROL_SYMBOL + GATE_SUFFIX;
@@ -66,7 +66,7 @@ public class CircuitVisualizer {
         }
 
         return gate.getAffectedQubits().stream()
-                .anyMatch(index -> index.getValue() == qubitIndex);
+                .anyMatch(index -> index.value() == qubitIndex);
     }
 
     private static boolean isBetween(int qubit, int control, int target) {
@@ -104,14 +104,14 @@ public class CircuitVisualizer {
     private static String describeGate(QuantumGate gate) {
         if (gate instanceof CNOTGate cnot) {
             return String.format("CNOT(Q%d→Q%d)",
-                    cnot.getControl().getValue(),
-                    cnot.getTarget().getValue());
+                    cnot.getControl().value(),
+                    cnot.getTarget().value());
         }
 
         Set<QubitIndex> affected = gate.getAffectedQubits();
         if (!affected.isEmpty()) {
             QubitIndex target = affected.iterator().next();
-            return String.format("%s(Q%d)", gate.getName(), target.getValue());
+            return String.format("%s(Q%d)", gate.getName(), target.value());
         }
 
         return gate.getName();

@@ -48,6 +48,6 @@ public class CircuitStep {
         if (!isSingleGateStep()) {
             throw new IllegalStateException(ERROR_NOT_SINGLE_GATE);
         }
-        return gates.get(0);
+        return gates.getFirst();
     }
 }
