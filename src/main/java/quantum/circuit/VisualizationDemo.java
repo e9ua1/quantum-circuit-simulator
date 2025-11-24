@@ -8,7 +8,6 @@ import quantum.circuit.domain.circuit.QuantumCircuit;
 import quantum.circuit.domain.circuit.QuantumCircuitBuilder;
 import quantum.circuit.domain.gate.CNOTGate;
 import quantum.circuit.domain.gate.HadamardGate;
-import quantum.circuit.domain.state.QuantumState;
 import quantum.circuit.visualizer.PythonVisualizer;
 
 public class VisualizationDemo {
