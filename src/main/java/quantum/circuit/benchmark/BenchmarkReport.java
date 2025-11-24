@@ -1,5 +1,6 @@
 package quantum.circuit.benchmark;
 
+import java.util.Comparator;
 import java.util.Map;
 
 public class BenchmarkReport {
@@ -27,20 +28,14 @@ public class BenchmarkReport {
 
     public String getFastestCircuit() {
         return results.entrySet().stream()
-                .min((e1, e2) -> Long.compare(
-                        e1.getValue().executionTime(),
-                        e2.getValue().executionTime()
-                ))
+                .min(Comparator.comparingLong(e -> e.getValue().executionTime()))
                 .map(Map.Entry::getKey)
                 .orElse(null);
     }
 
     public String getMostEfficientCircuit() {
         return results.entrySet().stream()
-                .min((e1, e2) -> Integer.compare(
-                        e1.getValue().gateCount(),
-                        e2.getValue().gateCount()
-                ))
+                .min(Comparator.comparingInt(e -> e.getValue().gateCount()))
                 .map(Map.Entry::getKey)
                 .orElse(null);
     }

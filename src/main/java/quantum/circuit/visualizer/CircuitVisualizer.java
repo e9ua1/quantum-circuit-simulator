@@ -38,8 +38,7 @@ public class CircuitVisualizer {
 
     private static String getGateSymbolForQubit(int qubitIndex, CircuitStep step, int qubitCount) {
         for (QuantumGate gate : step.getGates()) {
-            if (gate instanceof CNOTGate) {
-                CNOTGate cnot = (CNOTGate) gate;
+            if (gate instanceof CNOTGate cnot) {
                 int controlIndex = cnot.getControl().getValue();
                 int targetIndex = cnot.getTarget().getValue();
 
@@ -103,8 +102,7 @@ public class CircuitVisualizer {
     }
 
     private static String describeGate(QuantumGate gate) {
-        if (gate instanceof CNOTGate) {
-            CNOTGate cnot = (CNOTGate) gate;
+        if (gate instanceof CNOTGate cnot) {
             return String.format("CNOT(Q%d→Q%d)",
                     cnot.getControl().getValue(),
                     cnot.getTarget().getValue());
