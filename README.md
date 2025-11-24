@@ -453,54 +453,63 @@ Visualizing State Histogram
 
 *양자 상태 분포가 |00⟩ 100%에서 |00⟩ 50% + |11⟩ 50%로 부드럽게 변화합니다.*
 
+
 ## 실행 방법
 
-### 환경 설정
+### 사전 요구사항
 
-#### 1. Java 21 설치
+- **Java 21** 이상
+- **Python 3.9** 이상 (시각화용)
+- **Gradle** (프로젝트에 포함된 Gradle Wrapper 사용)
 
-**macOS:**
+---
+
+### 1️⃣ Java 21 설치
+
+#### macOS
 ```bash
 brew install openjdk@21
 java -version
 ```
 
-**Ubuntu/Linux:**
+#### Ubuntu/Linux
 ```bash
 sudo apt update
 sudo apt install openjdk-21-jdk
 java -version
 ```
 
-**Windows:**
+#### Windows
 1. [Oracle JDK 21](https://www.oracle.com/java/technologies/downloads/#java21) 다운로드
 2. 설치 후 환경 변수 설정
-3. `java -version` 확인
-
-
-#### 2. Python 환경 설정 (시각화용)
-
-Python 3.9 이상 필요:
+3. 명령 프롬프트에서 확인:
 ```bash
-python3 --version
+java -version
 ```
 
-**자동 설치 (권장):**
+---
+
+### 2️⃣ Python 환경 설정 (시각화용)
+
+#### Python 버전 확인
+```bash
+python3 --version  # 3.9 이상 필요
+```
+
+#### 옵션 A: 자동 설치 스크립트 (권장)
 ```bash
 chmod +x install.sh
 ./install.sh
 ```
 
-**수동 설치:**
+#### 옵션 B: 수동 설치
 
-필요한 패키지 설치:
-
-macOS/Linux:
+**macOS/Linux:**
 ```bash
-pip3 install -r src/main/python/requirements.txt --break-system-packages
+pip3 install -r src/main/python/requirements.txt
 ```
 
-Windows:
+**Windows:**
 ```bash
 pip install -r src/main/python/requirements.txt
 ```
@@ -510,7 +519,7 @@ pip install -r src/main/python/requirements.txt
 pip3 install -e .
 ```
 
-**src/main/python/requirements.txt:**
+#### 필요한 Python 패키지
 ```
 matplotlib==3.8.0
 qutip==5.2.2
@@ -520,7 +529,11 @@ scipy==1.11.4
 pillow>=9.0.0
 ```
 
-### 프로젝트 실행
+---
+
+### 3️⃣ 프로젝트 실행
+
+#### 저장소 클론 및 실행
 ```bash
 # 1. 저장소 클론
 git clone https://github.com/e9ua1/quantum-circuit-simulator.git
@@ -529,34 +542,156 @@ cd quantum-circuit-simulator
 # 2. Python 환경 설정 (시각화를 위해 필수!)
 ./install.sh
 
-# 3. Java 빌드 및 실행
+# 3. 빌드
 ./gradlew clean build
+
+# 4. 실행
 ./gradlew run
 ```
 
-### 테스트 실행
+#### 시각화 브라우저 제어
 
-**모든 테스트:**
+**기본 동작:**
+- `./gradlew run` 실행 시 시각화 파일 경로만 표시됩니다
+- 브라우저 자동 실행이 필요하면 아래 명령어 사용:
+
+```bash
+# 브라우저 자동 실행
+export QUANTUM_AUTO_OPEN=true
+./gradlew run
+```
+
+**시각화 파일 수동으로 열기:**
+```bash
+# macOS
+open output/visualization.html
+
+# Linux
+xdg-open output/visualization.html
+
+# Windows
+start output/visualization.html
+```
+
+---
+
+### 4️⃣ 테스트 실행
+
+#### 전체 테스트
 ```bash
 ./gradlew test
 ```
 
-**특정 패키지:**
+#### 특정 패키지 테스트
 ```bash
-./gradlew test --tests quantum.circuit.domain.*
+# 도메인 계층만 테스트
+./gradlew test --tests "quantum.circuit.domain.*"
+
+# 알고리즘만 테스트
+./gradlew test --tests "quantum.circuit.algorithm.*"
 ```
 
-**테스트 결과 확인:**
+#### 테스트 결과 확인
 
-macOS/Linux:
+**macOS/Linux:**
 ```bash
 open build/reports/tests/test/index.html
 ```
 
-Windows:
+**Windows:**
 ```bash
 start build/reports/tests/test/index.html
 ```
+
+---
+
+### 시각화 출력 파일
+
+실행 후 `output/` 디렉토리에 생성되는 파일:
+
+**정적 이미지:**
+- `bloch_sphere.png` - Bloch 구면 (최종 상태)
+- `histogram.png` - 확률 분포 히스토그램 (최종 상태)
+- `bloch_steps.png` - 단계별 Bloch 구면 궤적
+- `histogram_steps.png` - 단계별 확률 분포 비교
+- `entanglement_steps.png` - 얽힘 상태 시각화 (2큐비트 이상)
+
+**애니메이션 (GIF):**
+- `bloch_evolution.gif` - Bloch 구면 진화 애니메이션
+- `histogram_evolution.gif` - 확률 분포 진화 애니메이션
+- `entanglement_evolution.gif` - 얽힘 진화 애니메이션 (2큐비트 이상)
+
+**HTML 뷰어:**
+- `visualization.html` - 모든 시각화를 통합한 웹 페이지
+
+---
+
+### 환경 변수 설정
+
+#### 브라우저 자동 실행 제어
+
+```bash
+# 자동 실행 활성화 (데모/프레젠테이션용)
+export QUANTUM_AUTO_OPEN=true
+./gradlew run
+# → 브라우저 자동으로 열림
+
+# 완전 비활성화 (CI/테스트용)
+export QUANTUM_AUTO_OPEN=false
+./gradlew run
+# → 시각화 파일 생성만 하고 브라우저 안 열림
+
+# 기본값으로 되돌리기 (링크만 표시)
+unset QUANTUM_AUTO_OPEN
+./gradlew run
+# → 시각화 파일 경로만 출력
+
+# 현재 설정 확인
+echo $QUANTUM_AUTO_OPEN
+```
+
+**주의:** `export`로 설정한 환경 변수는 현재 터미널 세션이 끝날 때까지 유지됩니다.  
+기본 동작으로 되돌리려면 반드시 `unset QUANTUM_AUTO_OPEN`을 실행하세요!
+
+---
+
+### 문제 해결
+
+#### Python 패키지 설치 오류
+
+**macOS에서 pip 설치 실패:**
+```bash
+# --break-system-packages 플래그 추가
+pip3 install -r src/main/python/requirements.txt --break-system-packages
+```
+
+**권한 오류:**
+```bash
+# 가상 환경 사용 (권장)
+python3 -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+pip install -r src/main/python/requirements.txt
+```
+
+#### Java 버전 문제
+
+**여러 Java 버전이 설치된 경우:**
+```bash
+# 사용 중인 버전 확인
+java -version
+
+# macOS - Java 버전 전환
+export JAVA_HOME=$(/usr/libexec/java_home -v 21)
+```
+
+#### Gradle 빌드 오류
+
+**캐시 정리:**
+```bash
+./gradlew clean
+./gradlew build --refresh-dependencies
+```
+---
 
 ## 기술 스택
 
