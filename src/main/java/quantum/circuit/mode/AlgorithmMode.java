@@ -22,7 +22,7 @@ public class AlgorithmMode {
     private static final String QFT_INFO = "3. QFT (2큐비트) - 양자 푸리에 변환";
     private static final String GROVER_INFO = "4. Grover's Search (2큐비트) - 양자 검색 알고리즘";
     private static final String DEUTSCH_JOZSA_INFO = "5. Deutsch-Jozsa (2큐비트) - 함수 판별 알고리즘";
-    private static final String PROMPT_ALGORITHM = "\n알고리즘을 선택하세요 (예: BELL_STATE):";
+    private static final String PROMPT_ALGORITHM = "\n알고리즘을 선택하세요 (예: 1 또는 BELL STATE):";
     private static final String ALGORITHM_HEADER_FORMAT = "\n=== %s Algorithm ===";
     private static final String DESCRIPTION_FORMAT = "설명: %s";
     private static final String VISUALIZATION_START = "\n🎨 단계별 시각화 생성 중...";

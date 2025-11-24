@@ -49,11 +49,34 @@ public enum AlgorithmType {
     }
 
     public static AlgorithmType from(String name) {
-        String upperName = name.toUpperCase();
+        String normalizedName = normalizeName(name);
         return Arrays.stream(values())
-                .filter(type -> type.name().equals(upperName))
+                .filter(type -> type.name().equals(normalizedName))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("지원하지 않는 알고리즘입니다: " + name));
+    }
+
+    private static String normalizeName(String name) {
+        String numberToName = convertNumberToName(name.trim());
+        if (numberToName != null) {
+            return numberToName;
+        }
+
+        return name.trim()
+                .replace(" ", "_")
+                .replace("-", "_")
+                .toUpperCase();
+    }
+
+    private static String convertNumberToName(String input) {
+        return switch (input) {
+            case "1" -> "BELL_STATE";
+            case "2" -> "GHZ_STATE";
+            case "3" -> "QFT";
+            case "4" -> "GROVER";
+            case "5" -> "DEUTSCH_JOZSA";
+            default -> null;
+        };
     }
 
     public QuantumAlgorithm create() {
