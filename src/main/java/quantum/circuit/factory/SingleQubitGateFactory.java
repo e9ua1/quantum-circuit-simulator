@@ -1,7 +1,5 @@
 package quantum.circuit.factory;
 
-import java.util.Objects;
-
 import quantum.circuit.domain.circuit.QubitIndex;
 import quantum.circuit.domain.gate.HadamardGate;
 import quantum.circuit.domain.gate.PauliXGate;
