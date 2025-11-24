@@ -20,7 +20,7 @@ class PerformanceMetricsTest {
     void getGateCount() {
         PerformanceMetrics metrics = new PerformanceMetrics(5, 3, 100);
 
-        assertThat(metrics.getGateCount()).isEqualTo(5);
+        assertThat(metrics.gateCount()).isEqualTo(5);
     }
 
     @Test
@@ -28,7 +28,7 @@ class PerformanceMetricsTest {
     void getDepth() {
         PerformanceMetrics metrics = new PerformanceMetrics(5, 3, 100);
 
-        assertThat(metrics.getDepth()).isEqualTo(3);
+        assertThat(metrics.depth()).isEqualTo(3);
     }
 
     @Test
@@ -36,7 +36,7 @@ class PerformanceMetricsTest {
     void getExecutionTime() {
         PerformanceMetrics metrics = new PerformanceMetrics(5, 3, 100);
 
-        assertThat(metrics.getExecutionTime()).isEqualTo(100);
+        assertThat(metrics.executionTime()).isEqualTo(100);
     }
 
     @Test
@@ -44,8 +44,8 @@ class PerformanceMetricsTest {
     void createWithZeroValues() {
         PerformanceMetrics metrics = new PerformanceMetrics(0, 0, 0);
 
-        assertThat(metrics.getGateCount()).isEqualTo(0);
-        assertThat(metrics.getDepth()).isEqualTo(0);
-        assertThat(metrics.getExecutionTime()).isEqualTo(0);
+        assertThat(metrics.gateCount()).isEqualTo(0);
+        assertThat(metrics.depth()).isEqualTo(0);
+        assertThat(metrics.executionTime()).isEqualTo(0);
     }
 }

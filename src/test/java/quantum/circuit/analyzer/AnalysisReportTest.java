@@ -20,7 +20,7 @@ class AnalysisReportTest {
     void getDepth() {
         AnalysisReport report = new AnalysisReport(3, 5, 7, 2);
 
-        assertThat(report.getDepth()).isEqualTo(3);
+        assertThat(report.depth()).isEqualTo(3);
     }
 
     @Test
@@ -28,7 +28,7 @@ class AnalysisReportTest {
     void getGateCount() {
         AnalysisReport report = new AnalysisReport(3, 5, 7, 2);
 
-        assertThat(report.getGateCount()).isEqualTo(5);
+        assertThat(report.gateCount()).isEqualTo(5);
     }
 
     @Test
@@ -36,7 +36,7 @@ class AnalysisReportTest {
     void getComplexity() {
         AnalysisReport report = new AnalysisReport(3, 5, 7, 2);
 
-        assertThat(report.getComplexity()).isEqualTo(7);
+        assertThat(report.complexity()).isEqualTo(7);
     }
 
     @Test
@@ -44,7 +44,7 @@ class AnalysisReportTest {
     void getEntanglementDegree() {
         AnalysisReport report = new AnalysisReport(3, 5, 7, 2);
 
-        assertThat(report.getEntanglementDegree()).isEqualTo(2);
+        assertThat(report.entanglementDegree()).isEqualTo(2);
     }
 
     @Test
@@ -65,10 +65,10 @@ class AnalysisReportTest {
     void emptyCircuitReport() {
         AnalysisReport report = new AnalysisReport(0, 0, 0, 0);
 
-        assertThat(report.getDepth()).isEqualTo(0);
-        assertThat(report.getGateCount()).isEqualTo(0);
-        assertThat(report.getComplexity()).isEqualTo(0);
-        assertThat(report.getEntanglementDegree()).isEqualTo(0);
+        assertThat(report.depth()).isEqualTo(0);
+        assertThat(report.gateCount()).isEqualTo(0);
+        assertThat(report.complexity()).isEqualTo(0);
+        assertThat(report.entanglementDegree()).isEqualTo(0);
     }
 
     @Test
@@ -76,9 +76,9 @@ class AnalysisReportTest {
     void complexCircuitReport() {
         AnalysisReport report = new AnalysisReport(10, 20, 25, 5);
 
-        assertThat(report.getDepth()).isEqualTo(10);
-        assertThat(report.getGateCount()).isEqualTo(20);
-        assertThat(report.getComplexity()).isEqualTo(25);
-        assertThat(report.getEntanglementDegree()).isEqualTo(5);
+        assertThat(report.depth()).isEqualTo(10);
+        assertThat(report.gateCount()).isEqualTo(20);
+        assertThat(report.complexity()).isEqualTo(25);
+        assertThat(report.entanglementDegree()).isEqualTo(5);
     }
 }

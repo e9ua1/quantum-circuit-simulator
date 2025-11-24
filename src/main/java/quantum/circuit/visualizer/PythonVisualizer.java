@@ -7,7 +7,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import quantum.circuit.domain.circuit.QuantumCircuit;
-import quantum.circuit.domain.state.QuantumState;
 import quantum.circuit.exporter.CircuitResultExporter;
 
 public class PythonVisualizer {
@@ -17,26 +16,19 @@ public class PythonVisualizer {
     private static final String ERROR_SCRIPT_NOT_FOUND = "Python 스크립트를 찾을 수 없습니다: ";
     private static final String ERROR_PYTHON_EXECUTION_FAILED = "Python 시각화 실행에 실패했습니다.";
 
-    public static void visualize(QuantumCircuit circuit, QuantumState state) {
-        visualize(circuit, state, "Quantum Circuit");
-    }
-
-    public static void visualize(QuantumCircuit circuit, QuantumState state, String circuitName) {
-        // 1. 단계별 JSON 출력 (정확한 얽힘 상태 포함)
+    public static void visualize(QuantumCircuit circuit, String circuitName) {
         CircuitResultExporter.exportStepByStep(circuit, circuitName, DEFAULT_OUTPUT_JSON);
-
-        // 2. Python 실행 (단계별 시각화 자동 생성)
-        executePythonScript(DEFAULT_OUTPUT_JSON);
+        executePythonScript();
     }
 
-    private static void executePythonScript(String jsonPath) {
+    private static void executePythonScript() {
         validateScriptExists();
 
         try {
             ProcessBuilder processBuilder = new ProcessBuilder(
                     "python3",
                     PYTHON_SCRIPT_PATH,
-                    jsonPath
+                    DEFAULT_OUTPUT_JSON
             );
 
             processBuilder.redirectErrorStream(true);

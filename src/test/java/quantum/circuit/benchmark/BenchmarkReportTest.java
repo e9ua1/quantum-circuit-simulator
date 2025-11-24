@@ -40,7 +40,7 @@ class BenchmarkReportTest {
         PerformanceMetrics metrics = report.getResult("Circuit A");
 
         assertThat(metrics).isNotNull();
-        assertThat(metrics.getGateCount()).isEqualTo(5);
+        assertThat(metrics.gateCount()).isEqualTo(5);
     }
 
     @Test

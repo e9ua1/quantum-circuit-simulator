@@ -81,7 +81,7 @@ public class AlgorithmMode {
         QuantumState state = circuit.execute();
         printState(state);
 
-        visualizeWithPython(circuit, state, algorithm.getName());
+        visualizeWithPython(circuit, algorithm.getName());
     }
 
     private void printAlgorithmInfo(QuantumAlgorithm algorithm) {
@@ -100,10 +100,10 @@ public class AlgorithmMode {
         OutputView.printSeparator();
     }
 
-    private void visualizeWithPython(QuantumCircuit circuit, QuantumState state, String algorithmName) {
+    private void visualizeWithPython(QuantumCircuit circuit, String algorithmName) {
         try {
             System.out.println(VISUALIZATION_START);
-            PythonVisualizer.visualize(circuit, state, algorithmName);
+            PythonVisualizer.visualize(circuit, algorithmName);
             System.out.println(VISUALIZATION_COMPLETE);
             System.out.println(VISUALIZATION_INFO);
         } catch (Exception e) {

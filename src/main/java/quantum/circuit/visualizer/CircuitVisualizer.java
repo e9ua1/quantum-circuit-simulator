@@ -28,7 +28,7 @@ public class CircuitVisualizer {
         for (int i = 0; i < qubitCount; i++) {
             visualization.append(String.format("Q%d: ", i));
             for (CircuitStep step : steps) {
-                visualization.append(getGateSymbolForQubit(i, step, qubitCount));
+                visualization.append(getGateSymbolForQubit(i, step));
             }
             visualization.append(NEWLINE);
         }
@@ -36,7 +36,7 @@ public class CircuitVisualizer {
         return visualization.toString();
     }
 
-    private static String getGateSymbolForQubit(int qubitIndex, CircuitStep step, int qubitCount) {
+    private static String getGateSymbolForQubit(int qubitIndex, CircuitStep step) {
         for (QuantumGate gate : step.getGates()) {
             if (gate instanceof CNOTGate cnot) {
                 int controlIndex = cnot.getControl().getValue();

@@ -26,10 +26,10 @@ class CircuitAnalyzerTest {
 
         AnalysisReport report = CircuitAnalyzer.analyze(circuit);
 
-        assertThat(report.getDepth()).isEqualTo(0);
-        assertThat(report.getGateCount()).isEqualTo(0);
-        assertThat(report.getComplexity()).isEqualTo(0);
-        assertThat(report.getEntanglementDegree()).isEqualTo(0);
+        assertThat(report.depth()).isEqualTo(0);
+        assertThat(report.gateCount()).isEqualTo(0);
+        assertThat(report.complexity()).isEqualTo(0);
+        assertThat(report.entanglementDegree()).isEqualTo(0);
     }
 
     @Test
@@ -42,10 +42,10 @@ class CircuitAnalyzerTest {
 
         AnalysisReport report = CircuitAnalyzer.analyze(circuit);
 
-        assertThat(report.getDepth()).isEqualTo(1);
-        assertThat(report.getGateCount()).isEqualTo(1);
-        assertThat(report.getComplexity()).isEqualTo(1);
-        assertThat(report.getEntanglementDegree()).isEqualTo(0);
+        assertThat(report.depth()).isEqualTo(1);
+        assertThat(report.gateCount()).isEqualTo(1);
+        assertThat(report.complexity()).isEqualTo(1);
+        assertThat(report.entanglementDegree()).isEqualTo(0);
     }
 
     @Test
@@ -59,10 +59,10 @@ class CircuitAnalyzerTest {
 
         AnalysisReport report = CircuitAnalyzer.analyze(circuit);
 
-        assertThat(report.getDepth()).isEqualTo(2);
-        assertThat(report.getGateCount()).isEqualTo(2);
-        assertThat(report.getComplexity()).isEqualTo(3);
-        assertThat(report.getEntanglementDegree()).isEqualTo(1);
+        assertThat(report.depth()).isEqualTo(2);
+        assertThat(report.gateCount()).isEqualTo(2);
+        assertThat(report.complexity()).isEqualTo(3);
+        assertThat(report.entanglementDegree()).isEqualTo(1);
     }
 
     @Test
@@ -77,10 +77,10 @@ class CircuitAnalyzerTest {
 
         AnalysisReport report = CircuitAnalyzer.analyze(circuit);
 
-        assertThat(report.getDepth()).isEqualTo(3);
-        assertThat(report.getGateCount()).isEqualTo(3);
-        assertThat(report.getComplexity()).isEqualTo(5);
-        assertThat(report.getEntanglementDegree()).isEqualTo(2);
+        assertThat(report.depth()).isEqualTo(3);
+        assertThat(report.gateCount()).isEqualTo(3);
+        assertThat(report.complexity()).isEqualTo(5);
+        assertThat(report.entanglementDegree()).isEqualTo(2);
     }
 
     @Test
@@ -96,10 +96,10 @@ class CircuitAnalyzerTest {
 
         AnalysisReport report = CircuitAnalyzer.analyze(circuit);
 
-        assertThat(report.getDepth()).isEqualTo(4);
-        assertThat(report.getGateCount()).isEqualTo(4);
-        assertThat(report.getComplexity()).isEqualTo(5);
-        assertThat(report.getEntanglementDegree()).isEqualTo(1);
+        assertThat(report.depth()).isEqualTo(4);
+        assertThat(report.gateCount()).isEqualTo(4);
+        assertThat(report.complexity()).isEqualTo(5);
+        assertThat(report.entanglementDegree()).isEqualTo(1);
     }
 
     @Test
@@ -127,9 +127,9 @@ class CircuitAnalyzerTest {
 
         AnalysisReport report = CircuitAnalyzer.analyze(circuit);
 
-        assertThat(report.getDepth()).isEqualTo(1);
-        assertThat(report.getGateCount()).isEqualTo(2);
-        assertThat(report.getComplexity()).isEqualTo(2);
-        assertThat(report.getEntanglementDegree()).isEqualTo(0);
+        assertThat(report.depth()).isEqualTo(1);
+        assertThat(report.gateCount()).isEqualTo(2);
+        assertThat(report.complexity()).isEqualTo(2);
+        assertThat(report.entanglementDegree()).isEqualTo(0);
     }
 }

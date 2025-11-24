@@ -57,8 +57,8 @@ class CircuitAnalyzerEnhancedTest {
 
         AnalysisReport report = analyzer.analyze(circuit);
 
-        assertThat(report.getGateCount()).isEqualTo(2);
-        assertThat(report.getDepth()).isEqualTo(2);
+        assertThat(report.gateCount()).isEqualTo(2);
+        assertThat(report.depth()).isEqualTo(2);
     }
 
     @Test
@@ -73,9 +73,9 @@ class CircuitAnalyzerEnhancedTest {
         AnalysisReport instanceResult = analyzer.analyze(circuit);
         AnalysisReport staticResult = CircuitAnalyzer.analyze(circuit);
 
-        assertThat(instanceResult.getDepth()).isEqualTo(staticResult.getDepth());
-        assertThat(instanceResult.getGateCount()).isEqualTo(staticResult.getGateCount());
-        assertThat(instanceResult.getComplexity()).isEqualTo(staticResult.getComplexity());
-        assertThat(instanceResult.getEntanglementDegree()).isEqualTo(staticResult.getEntanglementDegree());
+        assertThat(instanceResult.depth()).isEqualTo(staticResult.depth());
+        assertThat(instanceResult.gateCount()).isEqualTo(staticResult.gateCount());
+        assertThat(instanceResult.complexity()).isEqualTo(staticResult.complexity());
+        assertThat(instanceResult.entanglementDegree()).isEqualTo(staticResult.entanglementDegree());
     }
 }

@@ -27,12 +27,9 @@ public class VisualizationDemo {
                 )))
                 .build();
 
-        // 실행
-        QuantumState state = circuit.execute();
-
         // Python 시각화 자동 실행
         System.out.println("Python 시각화 시작...\n");
-        PythonVisualizer.visualize(circuit, state, "Bell State");
+        PythonVisualizer.visualize(circuit, "Bell State");
 
         System.out.println("\n시각화 완료!");
         System.out.println("결과 확인: open output/bloch_sphere.png");
