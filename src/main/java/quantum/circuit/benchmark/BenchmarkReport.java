@@ -28,8 +28,8 @@ public class BenchmarkReport {
     public String getFastestCircuit() {
         return results.entrySet().stream()
                 .min((e1, e2) -> Long.compare(
-                        e1.getValue().getExecutionTime(),
-                        e2.getValue().getExecutionTime()
+                        e1.getValue().executionTime(),
+                        e2.getValue().executionTime()
                 ))
                 .map(Map.Entry::getKey)
                 .orElse(null);
@@ -38,8 +38,8 @@ public class BenchmarkReport {
     public String getMostEfficientCircuit() {
         return results.entrySet().stream()
                 .min((e1, e2) -> Integer.compare(
-                        e1.getValue().getGateCount(),
-                        e2.getValue().getGateCount()
+                        e1.getValue().gateCount(),
+                        e2.getValue().gateCount()
                 ))
                 .map(Map.Entry::getKey)
                 .orElse(null);
@@ -59,9 +59,9 @@ public class BenchmarkReport {
             PerformanceMetrics metrics = entry.getValue();
             sb.append(String.format(REPORT_FORMAT,
                     name,
-                    metrics.getGateCount(),
-                    metrics.getDepth(),
-                    metrics.getExecutionTime()
+                    metrics.gateCount(),
+                    metrics.depth(),
+                    metrics.executionTime()
             )).append("\n");
         }
 
