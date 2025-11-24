@@ -11,10 +11,6 @@ public class InputView {
     private static final String PROMPT_TARGET_QUBIT = "타겟 큐비트 인덱스를 입력하세요 (0부터 시작):";
     private static final String PROMPT_CONTROL_QUBIT = "제어 큐비트 인덱스를 입력하세요 (0부터 시작):";
 
-    public static int readMode() {
-        return parseInteger(Console.readLine());
-    }
-
     public static int readQubitCount() {
         return readIntegerWithPrompt(PROMPT_QUBIT_COUNT);
     }
@@ -30,7 +26,10 @@ public class InputView {
     }
 
     public static String readGateType() {
-        return readStringWithPrompt(PROMPT_GATE_TYPE).toUpperCase();
+        System.out.println(PROMPT_GATE_TYPE);
+        String input = Console.readLine();
+        validateNotEmpty(input);
+        return input.trim().toUpperCase();
     }
 
     public static int readTargetQubit() {
@@ -44,13 +43,6 @@ public class InputView {
     private static int readIntegerWithPrompt(String prompt) {
         System.out.println(prompt);
         return parseInteger(Console.readLine());
-    }
-
-    private static String readStringWithPrompt(String prompt) {
-        System.out.println(prompt);
-        String input = Console.readLine();
-        validateNotEmpty(input);
-        return input.trim();
     }
 
     private static int parseInteger(String input) {

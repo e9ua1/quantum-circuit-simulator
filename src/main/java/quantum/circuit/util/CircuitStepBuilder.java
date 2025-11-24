@@ -3,6 +3,7 @@ package quantum.circuit.util;
 import java.util.ArrayList;
 import java.util.List;
 
+import camp.nextstep.edu.missionutils.Console;
 import quantum.circuit.domain.circuit.CircuitStep;
 import quantum.circuit.domain.circuit.QubitIndex;
 import quantum.circuit.domain.gate.CNOTGate;
@@ -25,14 +26,14 @@ public class CircuitStepBuilder {
         System.out.printf(QUBIT_RANGE_FORMAT, qubitCount - 1);
 
         do {
-            QuantumGate gate = InputRetryHandler.retry(() -> readGate(qubitCount));
+            QuantumGate gate = InputRetryHandler.retry(CircuitStepBuilder::readGate);
             steps.add(new CircuitStep(List.of(gate)));
         } while (shouldContinue());
 
         return steps;
     }
 
-    private static QuantumGate readGate(int qubitCount) {
+    private static QuantumGate readGate() {
         String gateType = InputView.readGateType();
 
         if (GATE_CNOT.equals(gateType)) {
@@ -55,7 +56,7 @@ public class CircuitStepBuilder {
 
     private static boolean shouldContinue() {
         System.out.println(PROMPT_CONTINUE);
-        String response = InputRetryHandler.retry(() -> camp.nextstep.edu.missionutils.Console.readLine());
+        String response = InputRetryHandler.retry(Console::readLine);
         return CONTINUE_YES.equalsIgnoreCase(response.strip());
     }
 }
