@@ -74,13 +74,13 @@ def create_bloch_animation_internal(circuit_result, output_path, fps=20):
         b.vector_color = [all_colors[idx]]
         b.vector_width = 3
         b.fig.suptitle(f'Qubit 0 State Evolution\n{all_descs[idx]}',
-                      fontsize=14, fontweight='bold')
+                       fontsize=14, fontweight='bold')
         b.render()
         return b.fig,
 
     print(f"  Creating Bloch animation: {len(all_frames)} frames, {len(all_frames)/fps:.1f}s")
     anim = FuncAnimation(fig, animate, frames=len(all_frames),
-                        interval=1000/fps, blit=False)
+                         interval=1000/fps, blit=False)
     writer = PillowWriter(fps=fps)
     anim.save(output_path, writer=writer)
     plt.close()
@@ -130,12 +130,12 @@ def create_histogram_animation_internal(circuit_result, output_path, fps=20):
         for i, (s, p) in enumerate(zip(all_states, probs)):
             if p > 0.01:
                 ax.text(i, p+0.02, f'{p:.3f}', ha='center', va='bottom',
-                       fontsize=11, fontweight='bold')
+                        fontsize=11, fontweight='bold')
 
         ax.set_xlabel('Quantum State', fontsize=13, fontweight='bold')
         ax.set_ylabel('Probability', fontsize=13, fontweight='bold')
         ax.set_title(f'Quantum State Distribution\n{all_descs[idx]}',
-                    fontsize=14, fontweight='bold', pad=20)
+                     fontsize=14, fontweight='bold', pad=20)
         ax.set_xticks(x_pos)
         ax.set_xticklabels([f'|{s}⟩' for s in all_states], fontsize=11)
         ax.set_ylim(0, 1.05)
@@ -143,13 +143,13 @@ def create_histogram_animation_internal(circuit_result, output_path, fps=20):
 
         step_num = idx // frames_per
         ax.text(0.02, 0.98, f'Step {step_num}/{len(descriptions)-1}',
-               transform=ax.transAxes, fontsize=12, va='top',
-               bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
+                transform=ax.transAxes, fontsize=12, va='top',
+                bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
         return bars,
 
     print(f"  Creating histogram animation: {len(all_frames)} frames, {len(all_frames)/fps:.1f}s")
     anim = FuncAnimation(fig, animate, frames=len(all_frames),
-                        interval=1000/fps, blit=False)
+                         interval=1000/fps, blit=False)
     writer = PillowWriter(fps=fps)
     anim.save(output_path, writer=writer)
     plt.close()
@@ -242,47 +242,39 @@ def create_entanglement_visualization(circuit_result):
             for t in np.linspace(0, 1, num_frames)
         ]
 
-    q0_vectors = []
-    q1_vectors = []
+    q0_vectors = [prob_to_vector(s['qubit_probabilities']['0']) for s in step_states]
+    q1_vectors = [prob_to_vector(s['qubit_probabilities']['1']) for s in step_states]
+    descriptions = [s['description'] for s in step_states]
+
     entanglements = []
-    descriptions = []
-
-    for step_state in step_states:
-        q0_prob = step_state['qubit_probabilities']['0']
-        q1_prob = step_state['qubit_probabilities']['1']
-        system_state = step_state['system_state']
-
-        q0_vec = prob_to_vector(q0_prob)
-        q1_vec = prob_to_vector(q1_prob)
-        ent = calc_entanglement(system_state, q0_prob, q1_prob)
-
-        q0_vectors.append(q0_vec)
-        q1_vectors.append(q1_vec)
-        entanglements.append(ent)
-        descriptions.append(step_state['description'])
+    for s in step_states:
+        q0_p = s['qubit_probabilities']['0']
+        q1_p = s['qubit_probabilities']['1']
+        sys_state = s['system_state']
+        entanglements.append(calc_entanglement(sys_state, q0_p, q1_p))
 
     fps = 20
     frames_per = fps
-
-    all_q0 = []
-    all_q1 = []
-    all_ent = []
-    all_desc = []
+    all_q0_frames = []
+    all_q1_frames = []
+    all_ent_frames = []
+    all_descs = []
 
     for i in range(len(q0_vectors) - 1):
         q0_interp = slerp(q0_vectors[i], q0_vectors[i+1], frames_per)
         q1_interp = slerp(q1_vectors[i], q1_vectors[i+1], frames_per)
         ent_interp = np.linspace(entanglements[i], entanglements[i+1], frames_per)
 
-        all_q0.extend(q0_interp)
-        all_q1.extend(q1_interp)
-        all_ent.extend(ent_interp)
-        all_desc.extend([descriptions[i+1]] * frames_per)
+        all_q0_frames.extend(q0_interp)
+        all_q1_frames.extend(q1_interp)
+        all_ent_frames.extend(ent_interp)
+        all_descs.extend([descriptions[i+1]] * frames_per)
 
-    all_q0.extend([q0_vectors[-1]] * (fps//2))
-    all_q1.extend([q1_vectors[-1]] * (fps//2))
-    all_ent.extend([entanglements[-1]] * (fps//2))
-    all_desc.extend([descriptions[-1]] * (fps//2))
+    hold = fps // 2
+    all_q0_frames.extend([q0_vectors[-1]] * hold)
+    all_q1_frames.extend([q1_vectors[-1]] * hold)
+    all_ent_frames.extend([entanglements[-1]] * hold)
+    all_descs.extend([descriptions[-1]] * hold)
 
     fig = plt.figure(figsize=(16, 7))
 
@@ -295,10 +287,10 @@ def create_entanglement_visualization(circuit_result):
         b_q0 = Bloch(fig=fig, axes=ax_left)
         b_q1 = Bloch(fig=fig, axes=ax_right)
 
-        q0_vec = all_q0[idx]
-        q1_vec = all_q1[idx]
-        ent = all_ent[idx]
-        desc = all_desc[idx]
+        q0_vec = all_q0_frames[idx]
+        q1_vec = all_q1_frames[idx]
+        ent = all_ent_frames[idx]
+        desc = all_descs[idx]
 
         b_q0.add_vectors([q0_vec])
         b_q1.add_vectors([q1_vec])
@@ -317,24 +309,22 @@ def create_entanglement_visualization(circuit_result):
 
         if ent > 0.1:
             fig.text(0.5, 0.95, f'⚡ Entanglement: {ent:.2f}',
-                    ha='center', fontsize=16, fontweight='bold',
-                    color='red',
-                    bbox=dict(boxstyle='round', facecolor='yellow', alpha=0.8))
+                     ha='center', fontsize=16, fontweight='bold',
+                     color='red',
+                     bbox=dict(boxstyle='round', facecolor='yellow', alpha=0.8))
 
         fig.text(0.5, 0.05, desc, ha='center', fontsize=13, fontweight='bold')
 
         step_num = idx // frames_per
         fig.text(0.02, 0.95, f'Step {step_num}/{len(descriptions)-1}',
-                fontsize=12, va='top',
-                bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
+                 fontsize=12, va='top',
+                 bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.8))
 
         return fig,
 
-    total_frames = len(all_q0)
-
-    print(f"  Creating entanglement animation: {total_frames} frames, {total_frames/fps:.1f}s")
-    anim = FuncAnimation(fig, animate, frames=total_frames,
-                        interval=1000/fps, blit=False)
+    print(f"  Creating entanglement animation: {len(all_q0_frames)} frames, {len(all_q0_frames)/fps:.1f}s")
+    anim = FuncAnimation(fig, animate, frames=len(all_q0_frames),
+                         interval=1000/fps, blit=False)
     writer = PillowWriter(fps=fps)
     anim.save('output/entanglement_evolution.gif', writer=writer)
     plt.close()
@@ -357,15 +347,15 @@ def create_html_viewer(circuit_name, num_qubits):
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 20px;
+            padding: 40px 20px;
         }}
         .container {{
             max-width: 1400px;
             margin: 0 auto;
             background: white;
             border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }}
         h1 {{
             text-align: center;
@@ -505,14 +495,79 @@ def create_html_viewer(circuit_name, num_qubits):
     return html_path
 
 def open_visualization_in_browser(html_path):
+    """
+    브라우저에서 시각화를 엽니다.
+
+    제어 옵션:
+    1. 환경 변수 QUANTUM_AUTO_OPEN=false -> 완전 비활성화
+    2. 환경 변수 QUANTUM_AUTO_OPEN=true -> 자동 실행
+    3. 환경 변수 QUANTUM_AUTO_OPEN=ask -> 강제로 물어봄 (권장하지 않음)
+    4. 환경 변수 없음 (기본값) -> 스마트 감지
+    """
+    auto_open = os.getenv('QUANTUM_AUTO_OPEN', '').lower()
+
     abs_path = os.path.abspath(html_path)
     file_url = f'file://{abs_path}'
 
-    print(f"\n🌐 웹 브라우저에서 시각화를 여시겠습니까?")
+    # 완전 비활성화
+    if auto_open == 'false':
+        print(f"\n📊 시각화가 생성되었습니다:")
+        print(f"   {html_path}")
+        print(f"   (브라우저 자동 실행 비활성화: QUANTUM_AUTO_OPEN=false)")
+        return
+
+    # 자동 실행 (확인 없이)
+    if auto_open == 'true':
+        webbrowser.open(file_url)
+        print(f"\n🌐 브라우저에서 시각화를 엽니다...")
+        print(f"   {html_path}")
+        print(f"  ✅ 브라우저에서 열림! (자동 실행: QUANTUM_AUTO_OPEN=true)")
+        return
+
+    # CI 환경 감지
+    is_ci = any([
+        os.getenv('CI'),
+        os.getenv('GITHUB_ACTIONS'),
+        os.getenv('JENKINS_HOME'),
+        os.getenv('GITLAB_CI')
+    ])
+
+    if is_ci:
+        print(f"\n📊 시각화가 생성되었습니다:")
+        print(f"   {html_path}")
+        print(f"   (CI 환경 감지 - 브라우저 자동 실행 건너뛰기)")
+        return
+
+    # Gradle 환경 감지 (GRADLE_USER_HOME, org.gradle.* 등)
+    is_gradle = any([
+        os.getenv('GRADLE_USER_HOME'),
+        'gradle' in sys.argv[0].lower(),
+        not sys.stdin or not hasattr(sys.stdin, 'isatty') or not sys.stdin.isatty()
+    ])
+
+    # 'ask'가 명시적으로 설정되지 않았고, Gradle 환경이면 건너뛰기
+    if auto_open != 'ask' and is_gradle:
+        print(f"\n📊 시각화가 생성되었습니다:")
+        print(f"   {html_path}")
+        print(f"   💡 브라우저로 보기: open {html_path}")
+        return
+
+    # 'ask'가 명시적으로 설정되었거나, Python 직접 실행
+    print(f"\n🌐 웹 브라우저에서 시각화를 여시겠습니까? (y/n)")
     print(f"   {html_path}")
 
-    webbrowser.open(file_url)
-    print(f"  ✅ 브라우저에서 열림!")
+    try:
+        # Gradle에서는 stdin이 제대로 안 될 수 있음
+        response = input("   선택: ").strip().lower()
+        if response in ['y', 'yes', '']:
+            webbrowser.open(file_url)
+            print(f"  ✅ 브라우저에서 열림!")
+        else:
+            print(f"  ⏭️  건너뛰기")
+    except (EOFError, KeyboardInterrupt, OSError):
+        # stdin 문제 발생 시
+        print(f"\n  ℹ️  입력을 받을 수 없습니다.")
+        print(f"  💡 브라우저로 보기: open {html_path}")
 
 def main():
     if len(sys.argv) < 2:
